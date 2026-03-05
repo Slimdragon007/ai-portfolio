@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Competitor Scan | FlowstateAI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #FAFAF8; --card: #FFFFFF; --text-primary: #1a1a1a; --text-secondary: #6b6b6b;
+    --text-muted: #999999; --border: rgba(0,0,0,0.06); --indigo: #818cf8;
+    --indigo-bg: rgba(129,140,248,0.08); --teal: #2dd4bf; --teal-bg: rgba(45,212,191,0.1);
+    --gold: #d4a853; --green: #22c55e; --green-bg: rgba(34,197,94,0.1);
+    --red: #ef4444; --red-bg: rgba(239,68,68,0.1); --yellow: #eab308; --yellow-bg: rgba(234,179,8,0.1);
+    --shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); letter-spacing: -0.011em; line-height: 1.6; }
+  body::before { content: ''; position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, transparent, transparent 49px, #e5e5e3 49px, #e5e5e3 50px), repeating-linear-gradient(90deg, transparent, transparent 49px, #e5e5e3 49px, #e5e5e3 50px); opacity: 0.45; z-index: -1; }
+  .header { background: rgba(250,250,248,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; }
+  .back-link { color: var(--text-secondary); text-decoration: none; font-size: 14px; }
+  .back-link:hover { color: var(--indigo); }
+  .header h1 { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; }
+  .header h1 span { color: var(--gold); }
+  .container { max-width: 1000px; margin: 0 auto; padding: 32px 24px; }
+  .section-label { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--indigo); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-bottom: 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; }
+  input, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; background: var(--bg); margin-bottom: 12px; }
+  input:focus, textarea:focus { outline: none; border-color: var(--indigo); }
+  textarea { resize: vertical; min-height: 60px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+  .btn { display: inline-block; padding: 10px 24px; background: var(--gold); color: #fff; border: none; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn:hover { filter: brightness(1.1); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .empty { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; margin-right: 4px; margin-bottom: 4px; }
+  .tag.strength { background: var(--green-bg); color: #16a34a; }
+  .tag.weakness { background: var(--red-bg); color: #dc2626; }
+  .tag.opportunity { background: var(--indigo-bg); color: #6366f1; }
+  .tag.threat { background: var(--yellow-bg); color: #a16207; }
+
+  /* Competitor cards */
+  .comp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .comp-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+  .comp-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .comp-card .comp-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
+  .comp-card .comp-section { margin-bottom: 10px; }
+  .comp-card .comp-section h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 4px; }
+  .comp-card .comp-section ul { list-style: none; }
+  .comp-card .comp-section li { font-size: 13px; color: var(--text-secondary); padding: 2px 0; padding-left: 14px; position: relative; }
+  .comp-card .comp-section li::before { content: '\2022'; position: absolute; left: 0; color: var(--indigo); }
+
+  .comp-card .threat-level { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; display: inline-block; }
+  .comp-card .threat-level.high { background: var(--red-bg); color: #dc2626; }
+  .comp-card .threat-level.medium { background: var(--yellow-bg); color: #a16207; }
+  .comp-card .threat-level.low { background: var(--green-bg); color: #16a34a; }
+
+  /* Strategy section */
+  .strategy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .strategy-grid { grid-template-columns: 1fr; } }
+  .strategy-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+  .strategy-card h4 { font-size: 13px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .strategy-card ul { list-style: none; }
+  .strategy-card li { font-size: 13px; color: var(--text-secondary); padding: 4px 0; padding-left: 14px; position: relative; }
+  .strategy-card li::before { content: '\2192'; position: absolute; left: 0; color: var(--indigo); }
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="../../index.html" class="back-link">&larr; Portfolio</a>
+  <h1><span>FlowstateAI</span> Competitor Scan</h1>
+</div>
+
+<div class="container">
+  <div class="section-label">Your Business</div>
+  <div class="card">
+    <div class="row">
+      <div><label>Company Name</label><input id="companyName" value="Coastal Kitchen" /></div>
+      <div><label>Industry</label><input id="industry" value="Farm-to-table restaurant, Phoenix AZ" /></div>
+    </div>
+    <label>What makes you different?</label>
+    <textarea id="differentiator" style="min-height:50px;">Locally-sourced ingredients from Arizona farms, chef-driven seasonal menus, multi-location with consistent quality</textarea>
+    <label>Competitors (comma-separated)</label>
+    <textarea id="competitors" style="min-height:50px;">The Farmhouse, Desert Root Kitchen, Harvest Table, True Food Kitchen</textarea>
+    <button class="btn" id="scanBtn" onclick="scan()">Run Competitor Scan</button>
+  </div>
+
+  <div id="output">
+    <div class="empty">Enter your business details and competitors to generate a competitive analysis.</div>
+  </div>
+</div>
+
+<script>
+const DEMO_RESULT = {
+  competitors: [
+    {
+      name: "The Farmhouse",
+      desc: "Upscale farm-to-table, single location, prix fixe focus",
+      threat: "high",
+      strengths: ["Strong brand recognition in Phoenix", "Michelin-adjacent press coverage", "Exclusive supplier relationships"],
+      weaknesses: ["Single location limits reach", "Prix fixe only reduces accessibility", "No delivery or takeout options"],
+      positioning: "Luxury positioning. Targets special occasions, not weeknight dining."
+    },
+    {
+      name: "Desert Root Kitchen",
+      desc: "Fast-casual, locally-inspired bowls and wraps",
+      threat: "medium",
+      strengths: ["Lower price point captures budget-conscious diners", "Fast service model fits lunch crowd", "Strong Instagram presence"],
+      weaknesses: ["Limited menu depth", "Quality perception lower than sit-down", "No alcohol service"],
+      positioning: "Competing for the 'local food' narrative at a lower price point."
+    },
+    {
+      name: "Harvest Table",
+      desc: "Mid-range farm-to-table, similar positioning",
+      threat: "high",
+      strengths: ["Direct overlap in positioning and price", "Newer build-out and modern interior", "Strong Google reviews (4.7 stars)"],
+      weaknesses: ["Less established supplier network", "Menu changes infrequently", "Weaker cocktail program"],
+      positioning: "Most direct competitor. Targeting the same diner with a similar promise."
+    },
+    {
+      name: "True Food Kitchen",
+      desc: "National chain, health-focused, multiple locations",
+      threat: "medium",
+      strengths: ["National brand awareness and marketing budget", "Consistent experience across locations", "Health/wellness angle appeals to broad market"],
+      weaknesses: ["Chain perception undermines 'local' credibility", "Generic menu not regionally adapted", "Corporate decision-making slows innovation"],
+      positioning: "Size advantage but lacks authenticity. Competes on convenience, not quality."
+    }
+  ],
+  swot: {
+    strengths: ["True local sourcing with named farm partnerships", "Multi-location scale with independent brand feel", "Chef-driven menu innovation (seasonal rotation)", "Strong community relationships"],
+    weaknesses: ["Parking issues at flagship location", "Online ordering system has UX bugs", "Price increases noticed by regulars", "No dedicated marketing hire"],
+    opportunities: ["Farm sourcing transparency on menus (none of your competitors do this)", "Brunch market is underserved in your area", "Corporate catering partnerships with local companies", "Loyalty program to retain price-sensitive regulars"],
+    threats: ["Harvest Table is gaining ground with similar positioning", "Rising ingredient costs compressing margins", "Desert Root capturing the casual 'local food' market", "National chains outspending on digital marketing"]
+  },
+  moves: [
+    "Differentiate on transparency: list farm names per ingredient on menus. No competitor does this.",
+    "Fix the online ordering UX before competitors capture your digital customers.",
+    "Launch a weeknight prix fixe ($35) to compete with The Farmhouse's accessibility gap.",
+    "Start a 'Farm Friday' social series showing supplier visits. Builds brand that chains can't copy.",
+    "Test corporate lunch catering. Desert Root owns this by default, but your quality wins.",
+    "Consider a loyalty program to retain regulars through the price increase adjustment period."
+  ]
+};
+
+function scan() {
+  const btn = document.getElementById("scanBtn");
+  const output = document.getElementById("output");
+  btn.disabled = true;
+  btn.textContent = "Scanning...";
+  output.textContent = "";
+
+  const loading = document.createElement("div");
+  loading.className = "empty";
+  loading.textContent = "AI is analyzing competitors and generating strategic insights...";
+  output.appendChild(loading);
+
+  setTimeout(() => {
+    output.textContent = "";
+    const d = DEMO_RESULT;
+
+    // Competitor Cards
+    const compLabel = document.createElement("div");
+    compLabel.className = "section-label";
+    compLabel.textContent = "Competitor Profiles";
+    output.appendChild(compLabel);
+
+    const compGrid = document.createElement("div");
+    compGrid.className = "comp-grid";
+    d.competitors.forEach(c => {
+      const card = document.createElement("div");
+      card.className = "comp-card";
+
+      const headerDiv = document.createElement("div");
+      headerDiv.style.cssText = "display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;";
+      const h3 = document.createElement("h3");
+      h3.textContent = c.name;
+      const threat = document.createElement("span");
+      threat.className = "threat-level " + c.threat;
+      threat.textContent = c.threat.toUpperCase() + " THREAT";
+      headerDiv.append(h3, threat);
+      card.appendChild(headerDiv);
+
+      const desc = document.createElement("div");
+      desc.className = "comp-desc";
+      desc.textContent = c.desc;
+      card.appendChild(desc);
+
+      function addSection(title, items) {
+        const sec = document.createElement("div");
+        sec.className = "comp-section";
+        const h4 = document.createElement("h4");
+        h4.textContent = title;
+        sec.appendChild(h4);
+        const ul = document.createElement("ul");
+        items.forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = item;
+          ul.appendChild(li);
+        });
+        sec.appendChild(ul);
+        card.appendChild(sec);
+      }
+
+      addSection("Strengths", c.strengths);
+      addSection("Weaknesses", c.weaknesses);
+
+      const pos = document.createElement("div");
+      pos.style.cssText = "font-size:12px;color:var(--text-muted);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);";
+      pos.textContent = c.positioning;
+      card.appendChild(pos);
+
+      compGrid.appendChild(card);
+    });
+    output.appendChild(compGrid);
+
+    // SWOT
+    const swotLabel = document.createElement("div");
+    swotLabel.className = "section-label";
+    swotLabel.textContent = "Your SWOT Analysis";
+    output.appendChild(swotLabel);
+
+    const swotGrid = document.createElement("div");
+    swotGrid.className = "strategy-grid";
+    const swotItems = [
+      { key: "strengths", label: "Strengths", icon: "\u2713" },
+      { key: "weaknesses", label: "Weaknesses", icon: "\u2717" },
+      { key: "opportunities", label: "Opportunities", icon: "\u2191" },
+      { key: "threats", label: "Threats", icon: "\u26A0" }
+    ];
+    swotItems.forEach(s => {
+      const card = document.createElement("div");
+      card.className = "strategy-card";
+      const h4 = document.createElement("h4");
+      const tagSpan = document.createElement("span");
+      tagSpan.className = "tag " + (s.key === "strengths" ? "strength" : s.key === "weaknesses" ? "weakness" : s.key === "opportunities" ? "opportunity" : "threat");
+      tagSpan.textContent = s.label;
+      h4.appendChild(tagSpan);
+      card.appendChild(h4);
+      const ul = document.createElement("ul");
+      d.swot[s.key].forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        ul.appendChild(li);
+      });
+      card.appendChild(ul);
+      swotGrid.appendChild(card);
+    });
+    output.appendChild(swotGrid);
+
+    // Strategic Moves
+    const movesLabel = document.createElement("div");
+    movesLabel.className = "section-label";
+    movesLabel.style.marginTop = "24px";
+    movesLabel.textContent = "Recommended Strategic Moves";
+    output.appendChild(movesLabel);
+
+    const movesCard = document.createElement("div");
+    movesCard.className = "card";
+    const movesList = document.createElement("ul");
+    movesList.style.listStyle = "none";
+    d.moves.forEach((m, i) => {
+      const li = document.createElement("li");
+      li.style.cssText = "padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text-secondary);display:flex;gap:10px;";
+      const num = document.createElement("span");
+      num.style.cssText = "font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:var(--indigo);flex-shrink:0;";
+      num.textContent = String(i + 1).padStart(2, "0");
+      const text = document.createElement("span");
+      text.textContent = m;
+      li.append(num, text);
+      movesList.appendChild(li);
+    });
+    movesCard.appendChild(movesList);
+    output.appendChild(movesCard);
+
+    btn.disabled = false;
+    btn.textContent = "Run Competitor Scan";
+  }, 2500);
+}
+</script>
+</body>
+</html>
