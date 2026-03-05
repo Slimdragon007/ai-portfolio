@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photo Workflow OS | FlowstateAI</title>
+<meta name="description" content="End-to-end photography business operating system. Inquiry to delivery in one app. Built by Michael Haslim / FlowstateAI.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #d97757;
+    --accent-glow: rgba(217, 119, 87, 0.15);
+    --accent-soft: rgba(217, 119, 87, 0.08);
+    --bg-primary: #0a0a0c;
+    --bg-card: #111115;
+    --bg-card-hover: #16161c;
+    --bg-input: #0e0e12;
+    --text-primary: #e8e6e3;
+    --text-secondary: #8a8a8e;
+    --text-muted: #5a5a5e;
+    --border: rgba(255, 255, 255, 0.06);
+    --border-accent: rgba(217, 119, 87, 0.3);
+    --success: #4ade80;
+    --font-display: 'Space Mono', monospace;
+    --font-body: 'Outfit', sans-serif;
+
+    --stage-inquiry: #818cf8;
+    --stage-quote: #d97757;
+    --stage-contract: #facc15;
+    --stage-prep: #4ade80;
+    --stage-deliver: #38bdf8;
+    --stage-complete: #a78bfa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center;
+    backdrop-filter: blur(20px); background: rgba(10, 10, 12, 0.8); border-bottom: 1px solid var(--border);
+  }
+  nav .logo { font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; color: var(--accent); text-decoration: none; }
+  nav .nav-links { display: flex; gap: 2rem; list-style: none; }
+  nav .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; transition: color 0.3s ease; }
+  nav .nav-links a:hover { color: var(--accent); }
+
+  .app-container { padding-top: 4rem; min-height: 100vh; display: flex; flex-direction: column; }
+
+  .app-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+  }
+  .app-header h1 { font-size: 1.25rem; font-weight: 700; }
+  .app-header-meta { display: flex; gap: 1.5rem; align-items: center; }
+  .client-count { font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 0.1em; color: var(--text-muted); }
+
+  .btn-primary {
+    font-family: var(--font-display); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.6rem 1.2rem; background: var(--accent); color: var(--bg-primary); border: none; border-radius: 4px;
+    cursor: pointer; transition: all 0.3s ease;
+  }
+  .btn-primary:hover { background: #e08a6a; }
+
+  .btn-secondary {
+    font-family: var(--font-display); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.4rem 0.8rem; background: transparent; color: var(--text-secondary); border: 1px solid var(--border);
+    border-radius: 3px; cursor: pointer; transition: all 0.3s ease;
+  }
+  .btn-secondary:hover { border-color: var(--border-accent); color: var(--accent); }
+
+  .btn-sm {
+    font-family: var(--font-display); font-size: 0.55rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.3rem 0.6rem; background: transparent; color: var(--text-muted); border: 1px solid var(--border);
+    border-radius: 3px; cursor: pointer; transition: all 0.2s ease;
+  }
+  .btn-sm:hover { border-color: var(--border-accent); color: var(--accent); }
+
+  /* ── PIPELINE ── */
+  .pipeline {
+    flex: 1; display: flex; gap: 1px; background: var(--border); overflow-x: auto; padding: 0;
+  }
+
+  .stage {
+    flex: 1; min-width: 200px; background: var(--bg-primary); display: flex; flex-direction: column;
+  }
+
+  .stage-header {
+    padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .stage-name {
+    font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;
+  }
+  .stage-count {
+    font-family: var(--font-display); font-size: 0.6rem; color: var(--text-muted);
+    background: rgba(255,255,255,0.04); padding: 0.15rem 0.4rem; border-radius: 3px;
+  }
+
+  .stage-body {
+    flex: 1; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem;
+    min-height: 200px;
+  }
+  .stage-body.drag-over { background: rgba(217, 119, 87, 0.04); }
+
+  .client-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px;
+    padding: 1rem 1.25rem; cursor: grab; transition: all 0.2s ease; position: relative;
+  }
+  .client-card:hover { border-color: var(--border-accent); }
+  .client-card.dragging { opacity: 0.5; }
+
+  .client-card-name { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.25rem; }
+  .client-card-type {
+    font-family: var(--font-display); font-size: 0.55rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 0.5rem;
+  }
+  .client-card-date { font-size: 0.75rem; color: var(--text-muted); }
+  .client-card-actions { display: flex; gap: 0.25rem; margin-top: 0.5rem; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);
+    z-index: 200; align-items: flex-start; justify-content: center; padding: 5rem 2rem 2rem; overflow-y: auto;
+  }
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+    width: 100%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column;
+  }
+  .modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.5rem 2rem; border-bottom: 1px solid var(--border);
+  }
+  .modal-header h3 { font-size: 1rem; font-weight: 600; }
+  .modal-close { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; line-height: 1; }
+  .modal-close:hover { color: var(--text-primary); }
+  .modal-body { padding: 1.5rem 2rem; overflow-y: auto; flex: 1; }
+  .modal-footer { padding: 1.25rem 2rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.5rem; }
+
+  .form-group { margin-bottom: 1.25rem; }
+  .form-group label {
+    display: block; font-family: var(--font-display); font-size: 0.6rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.4rem;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: 4px;
+    padding: 0.65rem 0.85rem; font-family: var(--font-body); font-size: 0.9rem; color: var(--text-primary);
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--border-accent); }
+  .form-group select { cursor: pointer; }
+  .form-group textarea { min-height: 80px; resize: vertical; line-height: 1.6; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  /* ── DETAIL PANEL ── */
+  .detail-panel {
+    display: none; position: fixed; top: 4rem; right: 0; bottom: 0; width: 480px; max-width: 100%;
+    background: var(--bg-card); border-left: 1px solid var(--border); z-index: 150;
+    flex-direction: column; overflow-y: auto;
+  }
+  .detail-panel.active { display: flex; }
+
+  .detail-header {
+    padding: 1.5rem 2rem; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .detail-header h3 { font-size: 1.1rem; font-weight: 700; }
+
+  .detail-body { padding: 1.5rem 2rem; flex: 1; overflow-y: auto; }
+  .detail-section { margin-bottom: 2rem; }
+  .detail-section h4 {
+    font-family: var(--font-display); font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 0.75rem;
+  }
+  .detail-field { margin-bottom: 0.75rem; }
+  .detail-field-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.15rem; }
+  .detail-field-value { font-size: 0.9rem; color: var(--text-primary); }
+
+  .ai-output {
+    background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px;
+    padding: 1.25rem; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.7; white-space: pre-wrap;
+  }
+
+  .detail-footer { padding: 1.25rem 2rem; border-top: 1px solid var(--border); display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+  .stage-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 0.5rem; vertical-align: middle;
+  }
+
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px;
+    padding: 1rem 1.5rem; font-size: 0.85rem; color: var(--text-primary); z-index: 300;
+    transform: translateY(100px); opacity: 0; transition: all 0.3s ease;
+  }
+  .toast.visible { transform: translateY(0); opacity: 1; }
+
+  .empty-state {
+    display: flex; align-items: center; justify-content: center; height: 100%;
+    font-family: var(--font-display); font-size: 0.65rem; color: var(--text-muted);
+    letter-spacing: 0.1em; text-transform: uppercase; text-align: center; padding: 2rem;
+  }
+
+  .api-bar {
+    padding: 0.75rem 2rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  }
+  .api-bar label { font-family: var(--font-display); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); white-space: nowrap; }
+  .api-bar input {
+    flex: 1; min-width: 180px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 4px;
+    padding: 0.4rem 0.65rem; font-family: var(--font-display); font-size: 0.75rem; color: var(--text-primary);
+  }
+  .api-bar input:focus { outline: none; border-color: var(--border-accent); }
+  .api-badge {
+    font-family: var(--font-display); font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent); padding: 0.2rem 0.5rem; border: 1px solid var(--border-accent); border-radius: 3px;
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 0.75rem 1.25rem; }
+    .pipeline { flex-direction: column; }
+    .stage { min-width: 100%; }
+    .detail-panel { width: 100%; }
+    .form-row { grid-template-columns: 1fr; }
+    .api-bar { flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="../../index.html" class="logo">SLIM.SYSTEMS</a>
+  <ul class="nav-links">
+    <li><a href="../../index.html#work">Work</a></li>
+    <li><a href="../../index.html#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<div class="app-container">
+  <div class="api-bar">
+    <label>Anthropic API Key</label>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-... (optional)">
+    <span class="api-badge" id="modeBadge">Demo Mode</span>
+  </div>
+
+  <div class="app-header">
+    <h1>Photo Workflow OS</h1>
+    <div class="app-header-meta">
+      <span class="client-count" id="clientCount">0 clients</span>
+      <button class="btn-primary" id="addClientBtn">+ New Client</button>
+    </div>
+  </div>
+
+  <div class="pipeline" id="pipeline"></div>
+</div>
+
+<!-- NEW CLIENT MODAL -->
+<div class="modal-overlay" id="newClientModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>New Client</h3>
+      <button class="modal-close" id="newClientClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Client Name</label>
+          <input type="text" id="ncName" placeholder="Jane Smith">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="ncEmail" placeholder="jane@email.com">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Event Type</label>
+          <select id="ncType">
+            <option value="wedding">Wedding</option>
+            <option value="portrait">Portrait</option>
+            <option value="corporate">Corporate</option>
+            <option value="event">Event</option>
+            <option value="commercial">Commercial</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Event Date</label>
+          <input type="date" id="ncDate">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Venue / Location</label>
+        <input type="text" id="ncVenue" placeholder="Desert Botanical Garden, Phoenix">
+      </div>
+      <div class="form-group">
+        <label>How They Found You</label>
+        <select id="ncSource">
+          <option value="instagram">Instagram</option>
+          <option value="referral">Referral</option>
+          <option value="google">Google Search</option>
+          <option value="website">Website</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea id="ncNotes" placeholder="Any details about what they're looking for..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" id="ncCancel">Cancel</button>
+      <button class="btn-primary" id="ncSave">Add Client</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-panel" id="detailPanel">
+  <div class="detail-header">
+    <div>
+      <h3 id="dpName"></h3>
+      <div class="client-card-type" id="dpType"></div>
+    </div>
+    <button class="modal-close" id="dpClose">&times;</button>
+  </div>
+  <div class="detail-body" id="dpBody"></div>
+  <div class="detail-footer" id="dpFooter"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  var STAGES = [
+    { id: 'inquiry', name: 'Inquiry', color: 'var(--stage-inquiry)' },
+    { id: 'quote', name: 'Quote', color: 'var(--stage-quote)' },
+    { id: 'contract', name: 'Contract', color: 'var(--stage-contract)' },
+    { id: 'prep', name: 'Shoot Prep', color: 'var(--stage-prep)' },
+    { id: 'deliver', name: 'Delivery', color: 'var(--stage-deliver)' },
+    { id: 'complete', name: 'Complete', color: 'var(--stage-complete)' }
+  ];
+
+  var clients = [];
+  var nextId = 1;
+  var dragClientId = null;
+
+  // Load from localStorage
+  try {
+    var saved = localStorage.getItem('photo-workflow-clients');
+    if (saved) {
+      clients = JSON.parse(saved);
+      nextId = clients.reduce(function(max, c) { return Math.max(max, c.id + 1); }, 1);
+    }
+  } catch(e) {}
+
+  var pipeline = document.getElementById('pipeline');
+  var newClientModal = document.getElementById('newClientModal');
+  var detailPanel = document.getElementById('detailPanel');
+  var toastEl = document.getElementById('toast');
+  var apiKeyInput = document.getElementById('apiKeyInput');
+  var modeBadge = document.getElementById('modeBadge');
+
+  apiKeyInput.addEventListener('input', function() {
+    var hasKey = apiKeyInput.value.trim().startsWith('sk-');
+    modeBadge.textContent = hasKey ? 'Live Mode' : 'Demo Mode';
+    modeBadge.style.color = hasKey ? 'var(--success)' : '';
+  });
+
+  // Build pipeline columns
+  STAGES.forEach(function(stage) {
+    var col = document.createElement('div');
+    col.className = 'stage';
+    col.dataset.stage = stage.id;
+
+    var header = document.createElement('div');
+    header.className = 'stage-header';
+
+    var nameEl = document.createElement('span');
+    nameEl.className = 'stage-name';
+    nameEl.style.color = stage.color;
+    nameEl.textContent = stage.name;
+
+    var countEl = document.createElement('span');
+    countEl.className = 'stage-count';
+    countEl.id = 'count-' + stage.id;
+    countEl.textContent = '0';
+
+    header.appendChild(nameEl);
+    header.appendChild(countEl);
+
+    var body = document.createElement('div');
+    body.className = 'stage-body';
+    body.id = 'body-' + stage.id;
+
+    body.addEventListener('dragover', function(e) { e.preventDefault(); body.classList.add('drag-over'); });
+    body.addEventListener('dragleave', function() { body.classList.remove('drag-over'); });
+    body.addEventListener('drop', function(e) {
+      e.preventDefault();
+      body.classList.remove('drag-over');
+      if (dragClientId !== null) {
+        moveClient(dragClientId, stage.id);
+        dragClientId = null;
+      }
+    });
+
+    col.appendChild(header);
+    col.appendChild(body);
+    pipeline.appendChild(col);
+  });
+
+  // Event listeners
+  document.getElementById('addClientBtn').addEventListener('click', function() { newClientModal.classList.add('active'); });
+  document.getElementById('newClientClose').addEventListener('click', function() { newClientModal.classList.remove('active'); });
+  document.getElementById('ncCancel').addEventListener('click', function() { newClientModal.classList.remove('active'); });
+  newClientModal.addEventListener('click', function(e) { if (e.target === newClientModal) newClientModal.classList.remove('active'); });
+
+  document.getElementById('ncSave').addEventListener('click', function() {
+    var name = document.getElementById('ncName').value.trim();
+    if (!name) { showToast('Client name is required'); return; }
+
+    var client = {
+      id: nextId++,
+      name: name,
+      email: document.getElementById('ncEmail').value.trim(),
+      type: document.getElementById('ncType').value,
+      date: document.getElementById('ncDate').value,
+      venue: document.getElementById('ncVenue').value.trim(),
+      source: document.getElementById('ncSource').value,
+      notes: document.getElementById('ncNotes').value.trim(),
+      stage: 'inquiry',
+      createdAt: new Date().toISOString(),
+      aiQuote: '',
+      aiShotList: '',
+      aiDeliveryEmail: '',
+      aiContract: '',
+      aiFollowUp: ''
+    };
+
+    clients.push(client);
+    save();
+    renderPipeline();
+    newClientModal.classList.remove('active');
+    clearNewClientForm();
+    showToast('Client added: ' + name);
+  });
+
+  document.getElementById('dpClose').addEventListener('click', function() { detailPanel.classList.remove('active'); });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      newClientModal.classList.remove('active');
+      detailPanel.classList.remove('active');
+    }
+  });
+
+  function clearNewClientForm() {
+    document.getElementById('ncName').value = '';
+    document.getElementById('ncEmail').value = '';
+    document.getElementById('ncDate').value = '';
+    document.getElementById('ncVenue').value = '';
+    document.getElementById('ncNotes').value = '';
+  }
+
+  function save() {
+    try { localStorage.setItem('photo-workflow-clients', JSON.stringify(clients)); } catch(e) {}
+  }
+
+  function moveClient(clientId, newStage) {
+    var client = clients.find(function(c) { return c.id === clientId; });
+    if (client && client.stage !== newStage) {
+      client.stage = newStage;
+      save();
+      renderPipeline();
+      showToast(client.name + ' moved to ' + newStage);
+    }
+  }
+
+  function deleteClient(clientId) {
+    clients = clients.filter(function(c) { return c.id !== clientId; });
+    save();
+    renderPipeline();
+    detailPanel.classList.remove('active');
+    showToast('Client removed');
+  }
+
+  function renderPipeline() {
+    document.getElementById('clientCount').textContent = clients.length + ' client' + (clients.length !== 1 ? 's' : '');
+
+    STAGES.forEach(function(stage) {
+      var body = document.getElementById('body-' + stage.id);
+      while (body.firstChild) body.removeChild(body.firstChild);
+
+      var stageClients = clients.filter(function(c) { return c.stage === stage.id; });
+      document.getElementById('count-' + stage.id).textContent = stageClients.length;
+
+      if (stageClients.length === 0) {
+        var empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.textContent = 'No clients';
+        body.appendChild(empty);
+        return;
+      }
+
+      stageClients.forEach(function(client) {
+        var card = document.createElement('div');
+        card.className = 'client-card';
+        card.draggable = true;
+
+        card.addEventListener('dragstart', function() {
+          dragClientId = client.id;
+          card.classList.add('dragging');
+        });
+        card.addEventListener('dragend', function() {
+          card.classList.remove('dragging');
+          dragClientId = null;
+        });
+
+        var nameEl = document.createElement('div');
+        nameEl.className = 'client-card-name';
+        nameEl.textContent = client.name;
+
+        var typeEl = document.createElement('div');
+        typeEl.className = 'client-card-type';
+        typeEl.textContent = client.type + (client.venue ? ' | ' + client.venue : '');
+
+        var dateEl = document.createElement('div');
+        dateEl.className = 'client-card-date';
+        dateEl.textContent = client.date ? formatDate(client.date) : 'No date set';
+
+        var actions = document.createElement('div');
+        actions.className = 'client-card-actions';
+
+        var viewBtn = document.createElement('button');
+        viewBtn.className = 'btn-sm';
+        viewBtn.textContent = 'Open';
+        viewBtn.addEventListener('click', function(e) { e.stopPropagation(); openDetail(client.id); });
+
+        var nextBtn = document.createElement('button');
+        nextBtn.className = 'btn-sm';
+        nextBtn.textContent = 'Next Stage ->';
+        nextBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var idx = STAGES.findIndex(function(s) { return s.id === client.stage; });
+          if (idx < STAGES.length - 1) moveClient(client.id, STAGES[idx + 1].id);
+        });
+
+        actions.appendChild(viewBtn);
+        if (stage.id !== 'complete') actions.appendChild(nextBtn);
+
+        card.appendChild(nameEl);
+        card.appendChild(typeEl);
+        card.appendChild(dateEl);
+        card.appendChild(actions);
+
+        card.addEventListener('click', function() { openDetail(client.id); });
+
+        body.appendChild(card);
+      });
+    });
+  }
+
+  function openDetail(clientId) {
+    var client = clients.find(function(c) { return c.id === clientId; });
+    if (!client) return;
+
+    document.getElementById('dpName').textContent = client.name;
+    document.getElementById('dpType').textContent = client.type + ' | ' + client.stage;
+
+    var body = document.getElementById('dpBody');
+    while (body.firstChild) body.removeChild(body.firstChild);
+
+    // Client info section
+    var infoSection = createDetailSection('Client Info');
+    addField(infoSection, 'Email', client.email || 'Not provided');
+    addField(infoSection, 'Event Type', client.type);
+    addField(infoSection, 'Date', client.date ? formatDate(client.date) : 'TBD');
+    addField(infoSection, 'Venue', client.venue || 'TBD');
+    addField(infoSection, 'Source', client.source);
+    if (client.notes) addField(infoSection, 'Notes', client.notes);
+    body.appendChild(infoSection);
+
+    // Stage-specific AI section
+    var stageConfig = {
+      inquiry: { title: 'Inquiry Notes', field: 'notes', aiAction: null },
+      quote: { title: 'AI-Generated Quote', field: 'aiQuote', aiAction: 'quote' },
+      contract: { title: 'AI-Generated Contract', field: 'aiContract', aiAction: 'contract' },
+      prep: { title: 'AI-Generated Shot List', field: 'aiShotList', aiAction: 'shotlist' },
+      deliver: { title: 'AI-Generated Delivery Email', field: 'aiDeliveryEmail', aiAction: 'delivery' },
+      complete: { title: 'AI-Generated Follow-Up Plan', field: 'aiFollowUp', aiAction: 'followup' }
+    };
+
+    var config = stageConfig[client.stage];
+    if (config && config.aiAction) {
+      var aiSection = createDetailSection(config.title);
+
+      if (client[config.field]) {
+        var output = document.createElement('div');
+        output.className = 'ai-output';
+        output.textContent = client[config.field];
+        aiSection.appendChild(output);
+
+        var copyBtn = document.createElement('button');
+        copyBtn.className = 'btn-sm';
+        copyBtn.textContent = 'Copy';
+        copyBtn.style.marginTop = '0.75rem';
+        copyBtn.addEventListener('click', function() {
+          navigator.clipboard.writeText(client[config.field]);
+          showToast('Copied to clipboard');
+        });
+        aiSection.appendChild(copyBtn);
+      }
+
+      var genBtn = document.createElement('button');
+      genBtn.className = 'btn-primary';
+      genBtn.textContent = client[config.field] ? 'Regenerate' : 'Generate with AI';
+      genBtn.style.marginTop = '1rem';
+      genBtn.style.display = 'block';
+      genBtn.addEventListener('click', function() {
+        generateAIContent(client, config.aiAction, config.field);
+      });
+      aiSection.appendChild(genBtn);
+
+      body.appendChild(aiSection);
+    }
+
+    // Footer
+    var footer = document.getElementById('dpFooter');
+    while (footer.firstChild) footer.removeChild(footer.firstChild);
+
+    var stageIdx = STAGES.findIndex(function(s) { return s.id === client.stage; });
+    if (stageIdx > 0) {
+      var prevBtn = document.createElement('button');
+      prevBtn.className = 'btn-secondary';
+      prevBtn.textContent = '<- ' + STAGES[stageIdx - 1].name;
+      prevBtn.addEventListener('click', function() {
+        moveClient(client.id, STAGES[stageIdx - 1].id);
+        openDetail(client.id);
+      });
+      footer.appendChild(prevBtn);
+    }
+    if (stageIdx < STAGES.length - 1) {
+      var nextStageBtn = document.createElement('button');
+      nextStageBtn.className = 'btn-primary';
+      nextStageBtn.textContent = STAGES[stageIdx + 1].name + ' ->';
+      nextStageBtn.addEventListener('click', function() {
+        moveClient(client.id, STAGES[stageIdx + 1].id);
+        openDetail(client.id);
+      });
+      footer.appendChild(nextStageBtn);
+    }
+
+    var delBtn = document.createElement('button');
+    delBtn.className = 'btn-secondary';
+    delBtn.textContent = 'Delete';
+    delBtn.style.marginLeft = 'auto';
+    delBtn.addEventListener('click', function() { deleteClient(client.id); });
+    footer.appendChild(delBtn);
+
+    detailPanel.classList.add('active');
+  }
+
+  async function generateAIContent(client, type, field) {
+    var apiKey = apiKeyInput.value.trim();
+    var content;
+
+    if (apiKey && apiKey.startsWith('sk-')) {
+      content = await callAPI(client, type, apiKey);
+    } else {
+      content = generateDemoContent(client, type);
+    }
+
+    client[field] = content;
+    save();
+    openDetail(client.id);
+    showToast('AI content generated');
+  }
+
+  async function callAPI(client, type, apiKey) {
+    var prompts = {
+      quote: 'Generate a professional photography quote for:\nClient: ' + client.name + '\nEvent: ' + client.type + '\nDate: ' + client.date + '\nVenue: ' + client.venue + '\n\nInclude line items for: session fee, editing, travel, prints/digital delivery. Format as a clean text quote.',
+      contract: 'Generate a photography contract summary for:\nClient: ' + client.name + '\nEvent: ' + client.type + '\nDate: ' + client.date + '\nVenue: ' + client.venue + '\n\nInclude: scope, deliverables, timeline, payment terms, cancellation policy, usage rights.',
+      shotlist: 'Generate a detailed shot list for:\nEvent: ' + client.type + '\nVenue: ' + client.venue + '\nDate: ' + client.date + '\n\nOrganize by timing (before, during, after). Include must-have shots and creative suggestions.',
+      delivery: 'Write a warm, professional gallery delivery email for:\nClient: ' + client.name + '\nEvent: ' + client.type + '\n\nInclude: excitement about the photos, what to expect, how to download, and a gentle review request.',
+      followup: 'Generate a follow-up plan for:\nClient: ' + client.name + '\nEvent: ' + client.type + '\n\nInclude timing and draft messages for: thank you (1 week), review request (2 weeks), referral ask (1 month).'
+    };
+
+    var response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2048,
+        messages: [{ role: 'user', content: prompts[type] }]
+      })
+    });
+
+    var data = await response.json();
+    return data.content[0].text;
+  }
+
+  function generateDemoContent(client, type) {
+    var name = client.name || 'Client';
+    var venue = client.venue || 'the venue';
+    var date = client.date ? formatDate(client.date) : 'the scheduled date';
+
+    var content = {
+      quote: 'PHOTOGRAPHY QUOTE\n' + '='.repeat(40) + '\n\nPrepared for: ' + name + '\nEvent: ' + cap(client.type) + '\nDate: ' + date + '\nVenue: ' + venue + '\n\n' +
+        'LINE ITEMS\n' + '-'.repeat(30) + '\n' +
+        'Session Fee (4 hours)............$1,200\n' +
+        'Professional Editing..............$  400\n' +
+        'Travel & Setup...................$  150\n' +
+        'Digital Gallery Delivery.........$  200\n' +
+        'Second Photographer..............$  500\n' +
+        '-'.repeat(30) + '\n' +
+        'TOTAL...........................$2,450\n\n' +
+        'NOTES:\n' +
+        '- 50% deposit required to secure the date\n' +
+        '- Balance due 7 days before the event\n' +
+        '- Additional hours available at $250/hr\n' +
+        '- Includes online gallery with full-resolution downloads\n' +
+        '- Print packages available upon request',
+
+      contract: 'PHOTOGRAPHY SERVICE AGREEMENT\n' + '='.repeat(40) + '\n\n' +
+        'Client: ' + name + '\nPhotographer: Michael Haslim Photography\nEvent: ' + cap(client.type) + '\nDate: ' + date + '\nVenue: ' + venue + '\n\n' +
+        'SCOPE OF WORK\n- Up to 4 hours of continuous coverage\n- Professional editing of 200-300 final images\n- Online gallery delivery within 4 weeks\n\n' +
+        'DELIVERABLES\n- Full-resolution digital files via private gallery\n- Personal printing rights included\n- Minimum 200 edited images\n\n' +
+        'PAYMENT TERMS\n- 50% retainer due upon signing ($1,225)\n- Remaining balance due 7 days before event\n- Accepted: credit card, bank transfer, check\n\n' +
+        'CANCELLATION\n- 30+ days notice: full refund minus $200 booking fee\n- 14-30 days: 50% refund\n- Less than 14 days: no refund\n\n' +
+        'USAGE RIGHTS\n- Client receives personal use license\n- Photographer retains copyright and portfolio rights\n- Commercial use requires separate licensing agreement',
+
+      shotlist: 'SHOT LIST: ' + cap(client.type).toUpperCase() + '\n' + '='.repeat(40) + '\n\n' +
+        'VENUE: ' + venue + '\nDATE: ' + date + '\n\n' +
+        'PRE-EVENT (30 min before)\n' +
+        '[ ] Venue wide shot (empty)\n[ ] Detail shots: signage, decor, setup\n[ ] Lighting test shots\n[ ] Equipment check and backup verify\n\n' +
+        'MAIN EVENT\n' +
+        '[ ] Candid arrivals and greetings\n[ ] Group photos (full group, then subgroups)\n[ ] Individual portraits (key people)\n[ ] Action/activity shots\n[ ] Environmental/atmosphere wide shots\n[ ] Detail close-ups (hands, accessories, textures)\n[ ] Reactions and emotions (candid)\n[ ] Behind-the-scenes moments\n\n' +
+        'CREATIVE SHOTS\n' +
+        '[ ] Silhouette against window/backlight\n[ ] Reflection shot (mirror, glass, water)\n[ ] Framing through doorway or architecture\n[ ] Motion blur with slow shutter\n[ ] Low angle perspective\n\n' +
+        'WRAP-UP\n' +
+        '[ ] Final group shot\n[ ] Venue sunset/golden hour if timing allows\n[ ] Behind-the-scenes of photographer packing up',
+
+      delivery: 'Subject: Your ' + cap(client.type) + ' Photos Are Ready!\n\n' +
+        'Hi ' + name + ',\n\n' +
+        'I am so excited to share your gallery. These photos turned out beautifully, and I had such a great time capturing your ' + client.type + ' at ' + venue + '.\n\n' +
+        'YOUR GALLERY\n' +
+        'View and download here: [gallery link]\n' +
+        'Password: [password]\n\n' +
+        'WHAT TO EXPECT\n' +
+        '- 250+ professionally edited images\n' +
+        '- Full-resolution downloads included\n' +
+        '- Gallery active for 60 days\n' +
+        '- Personal printing rights included\n\n' +
+        'PRINTING\n' +
+        'If you would like professional prints, I offer museum-quality options on fine art paper, canvas, and metal. Just reply to this email and I will send you the print catalog.\n\n' +
+        'ONE SMALL FAVOR\n' +
+        'If you love your photos (and I think you will), a quick Google or Yelp review would mean the world to me. It helps other people find photographers they can trust.\n\n' +
+        'Thank you for trusting me with these memories. It was truly a pleasure.\n\n' +
+        'Best,\nMichael Haslim\nMichael Haslim Photography',
+
+      followup: 'FOLLOW-UP PLAN: ' + name + '\n' + '='.repeat(40) + '\n\n' +
+        'WEEK 1: Thank You\n' +
+        '-'.repeat(30) + '\n' +
+        'Subject: Thank you, ' + name + '!\n\n' +
+        'Hi ' + name + ', just wanted to say thank you again for an amazing ' + client.type + '. I hope you are enjoying your photos! If you have any questions about printing or sharing, I am always here to help.\n\n' +
+        'WEEK 2: Review Request\n' +
+        '-'.repeat(30) + '\n' +
+        'Subject: Quick favor?\n\n' +
+        'Hi ' + name + ', I hope the photos are getting lots of love! If you have a moment, a quick review on Google would be incredibly helpful. Here is the link: [review link]. Even a sentence or two makes a huge difference.\n\n' +
+        'MONTH 1: Referral Ask\n' +
+        '-'.repeat(30) + '\n' +
+        'Subject: Know anyone who needs a photographer?\n\n' +
+        'Hi ' + name + ', I hope life has been great since your ' + client.type + '! If you know anyone looking for a photographer, I would love an introduction. Referred clients get $100 off their booking, and you get a free 8x10 print as a thank you.\n\n' +
+        'MONTH 6: Check-in\n' +
+        '-'.repeat(30) + '\n' +
+        'Subject: Happy 6-month anniversary!\n\n' +
+        'Time flies! Just wanted to check in and see if you need any reprints or additional edits. Also, if you are planning any events this year, I would love to be your photographer again.'
+    };
+
+    return content[type] || 'Content generation not available for this stage.';
+  }
+
+  function createDetailSection(title) {
+    var section = document.createElement('div');
+    section.className = 'detail-section';
+    var h4 = document.createElement('h4');
+    h4.textContent = title;
+    section.appendChild(h4);
+    return section;
+  }
+
+  function addField(parent, label, value) {
+    var field = document.createElement('div');
+    field.className = 'detail-field';
+    var lbl = document.createElement('div');
+    lbl.className = 'detail-field-label';
+    lbl.textContent = label;
+    var val = document.createElement('div');
+    val.className = 'detail-field-value';
+    val.textContent = value;
+    field.appendChild(lbl);
+    field.appendChild(val);
+    parent.appendChild(field);
+  }
+
+  function formatDate(dateStr) {
+    try {
+      var parts = dateStr.split('-');
+      return new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch(e) { return dateStr; }
+  }
+
+  function cap(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
+
+  function showToast(message) {
+    toastEl.textContent = message;
+    toastEl.classList.add('visible');
+    setTimeout(function() { toastEl.classList.remove('visible'); }, 2500);
+  }
+
+  renderPipeline();
+})();
+</script>
+</body>
+</html>

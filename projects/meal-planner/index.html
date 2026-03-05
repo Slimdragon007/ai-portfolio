@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meal Planner | FlowstateAI</title>
+<meta name="description" content="Type what's in your fridge, get 3 dinner ideas with recipes. Big Green Egg mode included. Built by Michael Haslim / FlowstateAI.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #d97757;
+    --accent-glow: rgba(217, 119, 87, 0.15);
+    --accent-soft: rgba(217, 119, 87, 0.08);
+    --bg-primary: #0a0a0c;
+    --bg-card: #111115;
+    --bg-card-hover: #16161c;
+    --bg-input: #0e0e12;
+    --text-primary: #e8e6e3;
+    --text-secondary: #8a8a8e;
+    --text-muted: #5a5a5e;
+    --border: rgba(255, 255, 255, 0.06);
+    --border-accent: rgba(217, 119, 87, 0.3);
+    --success: #4ade80;
+    --bge-green: #22c55e;
+    --bge-bg: rgba(34, 197, 94, 0.08);
+    --bge-border: rgba(34, 197, 94, 0.3);
+    --font-display: 'Space Mono', monospace;
+    --font-body: 'Outfit', sans-serif;
+    --easy: #4ade80;
+    --medium: #facc15;
+    --hard: #f87171;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1.25rem 2rem; display: flex; justify-content: space-between; align-items: center;
+    backdrop-filter: blur(20px); background: rgba(10, 10, 12, 0.8); border-bottom: 1px solid var(--border);
+  }
+  nav .logo { font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; color: var(--accent); text-decoration: none; }
+  nav .nav-links { display: flex; gap: 2rem; list-style: none; }
+  nav .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; transition: color 0.3s ease; }
+  nav .nav-links a:hover { color: var(--accent); }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 7rem 2rem 4rem; }
+
+  .page-label { font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.75rem; }
+  .page-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.75rem; }
+  .page-subtitle { font-size: 1.05rem; color: var(--text-secondary); max-width: 600px; margin-bottom: 3rem; }
+
+  .input-section {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 2.5rem; margin-bottom: 2rem;
+  }
+
+  .input-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: flex-end; }
+
+  .input-group { flex: 1; min-width: 200px; }
+  .input-group label {
+    display: block; font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;
+  }
+
+  input[type="text"], select {
+    width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: 4px;
+    padding: 0.75rem 1rem; font-family: var(--font-body); font-size: 0.95rem; color: var(--text-primary); transition: border-color 0.3s ease;
+  }
+  input[type="text"]:focus, select:focus { outline: none; border-color: var(--border-accent); }
+  input[type="text"]::placeholder { color: var(--text-muted); }
+  select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238a8a8e' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem; }
+
+  .bge-toggle {
+    display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.25rem;
+    background: transparent; border: 1px solid var(--border); border-radius: 4px;
+    cursor: pointer; transition: all 0.3s ease; white-space: nowrap;
+  }
+  .bge-toggle:hover { border-color: var(--bge-border); }
+  .bge-toggle.active { border-color: var(--bge-green); background: var(--bge-bg); }
+  .bge-toggle .bge-icon { font-size: 1.2rem; }
+  .bge-toggle .bge-label { font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); transition: color 0.3s ease; }
+  .bge-toggle.active .bge-label { color: var(--bge-green); }
+
+  .generate-row { display: flex; justify-content: flex-end; gap: 1rem; }
+  .btn-primary {
+    font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.9rem 2rem; background: var(--accent); color: var(--bg-primary); border: none; border-radius: 4px;
+    cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem;
+  }
+  .btn-primary:hover { background: #e08a6a; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .loading-state { display: none; text-align: center; padding: 4rem 2rem; }
+  .loading-state.active { display: block; }
+  .spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1.5rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-family: var(--font-display); font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .results { display: none; }
+  .results.active { display: block; }
+  .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+  .results-header h3 { font-size: 1.1rem; font-weight: 600; }
+  .btn-secondary {
+    font-family: var(--font-display); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.6rem 1.2rem; background: transparent; color: var(--text-secondary); border: 1px solid var(--border);
+    border-radius: 3px; cursor: pointer; transition: all 0.3s ease;
+  }
+  .btn-secondary:hover { border-color: var(--border-accent); color: var(--accent); }
+
+  .meal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+
+  .meal-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: border-color 0.3s ease;
+  }
+  .meal-card:hover { border-color: var(--border-accent); }
+
+  .meal-card-header { padding: 2rem 2rem 1.5rem; }
+  .meal-meta { display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
+  .meal-time { font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 0.08em; color: var(--text-muted); }
+  .meal-difficulty {
+    font-family: var(--font-display); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.2rem 0.5rem; border-radius: 3px; border: 1px solid;
+  }
+  .meal-difficulty.easy { color: var(--easy); border-color: var(--easy); }
+  .meal-difficulty.medium { color: var(--medium); border-color: var(--medium); }
+  .meal-difficulty.hard { color: var(--hard); border-color: var(--hard); }
+
+  .meal-name { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .meal-desc { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+
+  .meal-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 1rem; }
+  .meal-tag {
+    font-family: var(--font-display); font-size: 0.55rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.2rem 0.5rem; border: 1px solid var(--border); border-radius: 3px; color: var(--text-muted);
+  }
+
+  .meal-expand-btn {
+    width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.02); border: none; border-top: 1px solid var(--border);
+    color: var(--text-muted); font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s ease;
+  }
+  .meal-expand-btn:hover { background: rgba(255,255,255,0.04); color: var(--accent); }
+
+  .meal-details { display: none; border-top: 1px solid var(--border); padding: 2rem; }
+  .meal-card.expanded .meal-details { display: block; }
+  .meal-card.expanded .meal-expand-btn { display: none; }
+
+  .detail-section { margin-bottom: 1.5rem; }
+  .detail-section:last-child { margin-bottom: 0; }
+  .detail-section h4 {
+    font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 0.75rem;
+  }
+  .detail-section p, .detail-section li { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.7; }
+  .detail-section ol, .detail-section ul { padding-left: 1.25rem; }
+  .detail-section li { margin-bottom: 0.4rem; }
+
+  .bge-info {
+    background: var(--bge-bg); border: 1px solid var(--bge-border); border-radius: 6px; padding: 1.25rem; margin-top: 1.5rem;
+  }
+  .bge-info h4 { color: var(--bge-green); }
+  .bge-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.75rem; }
+  .bge-info-item label {
+    display: block; font-family: var(--font-display); font-size: 0.55rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: rgba(34, 197, 94, 0.6); margin-bottom: 0.25rem;
+  }
+  .bge-info-item span { font-size: 0.88rem; color: var(--text-primary); }
+
+  .meal-collapse-btn {
+    width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.02); border: none; border-top: 1px solid var(--border);
+    color: var(--text-muted); font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s ease; margin-top: 1rem;
+  }
+  .meal-collapse-btn:hover { color: var(--accent); }
+
+  .api-key-section {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 1.5rem 2rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  }
+  .api-key-section label { font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); white-space: nowrap; }
+  .api-key-input {
+    flex: 1; min-width: 200px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 4px;
+    padding: 0.5rem 0.75rem; font-family: var(--font-display); font-size: 0.8rem; color: var(--text-primary);
+  }
+  .api-key-input:focus { outline: none; border-color: var(--border-accent); }
+  .demo-badge {
+    font-family: var(--font-display); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent); padding: 0.3rem 0.6rem; border: 1px solid var(--border-accent); border-radius: 3px;
+  }
+
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px;
+    padding: 1rem 1.5rem; font-size: 0.85rem; color: var(--text-primary); z-index: 300;
+    transform: translateY(100px); opacity: 0; transition: all 0.3s ease;
+  }
+  .toast.visible { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.25rem; }
+    .container { padding: 5.5rem 1.25rem 3rem; }
+    .input-section { padding: 1.5rem; }
+    .meal-grid { grid-template-columns: 1fr; }
+    .bge-info-grid { grid-template-columns: 1fr; }
+    .api-key-section { flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="../../index.html" class="logo">SLIM.SYSTEMS</a>
+  <ul class="nav-links">
+    <li><a href="../../index.html#work">Work</a></li>
+    <li><a href="../../index.html#philosophy">Philosophy</a></li>
+    <li><a href="../../index.html#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<div class="container">
+  <div class="page-label">FlowstateAI Tool #6</div>
+  <h1 class="page-title">Meal Planner</h1>
+  <p class="page-subtitle">Type what's in your fridge. Get 3 dinner ideas with full recipes. Toggle Big Green Egg mode for grill temps and wood pairings.</p>
+
+  <div class="api-key-section">
+    <label>Anthropic API Key</label>
+    <input type="password" class="api-key-input" id="apiKeyInput" placeholder="sk-ant-... (optional, demo mode works without)">
+    <span class="demo-badge" id="modeBadge">Demo Mode</span>
+  </div>
+
+  <div class="input-section">
+    <div class="input-row">
+      <div class="input-group" style="flex:2;">
+        <label>What's in your fridge?</label>
+        <input type="text" id="ingredientInput" placeholder="chicken thighs, bell peppers, onion, rice, soy sauce...">
+      </div>
+      <div class="input-group" style="flex:0.7; min-width:140px;">
+        <label>Dietary</label>
+        <select id="dietarySelect">
+          <option value="none">No preference</option>
+          <option value="keto">Keto</option>
+          <option value="vegetarian">Vegetarian</option>
+          <option value="dairy-free">Dairy-free</option>
+          <option value="gluten-free">Gluten-free</option>
+        </select>
+      </div>
+      <div class="input-group" style="flex:0; min-width:auto;">
+        <label>&nbsp;</label>
+        <button class="bge-toggle" id="bgeToggle">
+          <span class="bge-icon">&#x1F525;</span>
+          <span class="bge-label">BGE Mode</span>
+        </button>
+      </div>
+    </div>
+    <div class="generate-row">
+      <button class="btn-primary" id="generateBtn">What Can I Make? <span>-></span></button>
+    </div>
+  </div>
+
+  <div class="loading-state" id="loadingState">
+    <div class="spinner"></div>
+    <div class="loading-text">Finding meals from your ingredients...</div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="results-header">
+      <h3>Your Meals</h3>
+      <button class="btn-secondary" id="tryAgainBtn">Try Again</button>
+    </div>
+    <div class="meal-grid" id="mealGrid"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  var meals = [];
+  var bgeMode = false;
+
+  var ingredientInput = document.getElementById('ingredientInput');
+  var dietarySelect = document.getElementById('dietarySelect');
+  var bgeToggle = document.getElementById('bgeToggle');
+  var generateBtn = document.getElementById('generateBtn');
+  var loadingState = document.getElementById('loadingState');
+  var resultsEl = document.getElementById('results');
+  var mealGrid = document.getElementById('mealGrid');
+  var apiKeyInput = document.getElementById('apiKeyInput');
+  var modeBadge = document.getElementById('modeBadge');
+  var toastEl = document.getElementById('toast');
+
+  bgeToggle.addEventListener('click', function() {
+    bgeMode = !bgeMode;
+    bgeToggle.classList.toggle('active', bgeMode);
+  });
+
+  apiKeyInput.addEventListener('input', function() {
+    var hasKey = apiKeyInput.value.trim().startsWith('sk-');
+    modeBadge.textContent = hasKey ? 'Live Mode' : 'Demo Mode';
+    modeBadge.style.color = hasKey ? 'var(--success)' : 'var(--accent)';
+    modeBadge.style.borderColor = hasKey ? 'var(--success)' : 'var(--border-accent)';
+  });
+
+  generateBtn.addEventListener('click', generateMeals);
+  document.getElementById('tryAgainBtn').addEventListener('click', generateMeals);
+
+  ingredientInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') generateMeals();
+  });
+
+  async function generateMeals() {
+    var input = ingredientInput.value.trim();
+    if (!input) { showToast('Type some ingredients first'); return; }
+
+    generateBtn.disabled = true;
+    loadingState.classList.add('active');
+    resultsEl.classList.remove('active');
+
+    var apiKey = apiKeyInput.value.trim();
+
+    try {
+      if (apiKey && apiKey.startsWith('sk-')) {
+        meals = await generateWithAPI(input, apiKey);
+      } else {
+        meals = await generateDemo(input);
+      }
+      renderMeals();
+      resultsEl.classList.add('active');
+    } catch (err) {
+      showToast('Generation failed: ' + err.message);
+    } finally {
+      loadingState.classList.remove('active');
+      generateBtn.disabled = false;
+    }
+  }
+
+  async function generateWithAPI(input, apiKey) {
+    var dietary = dietarySelect.value;
+    var bgePrompt = bgeMode ? '\n\nAlso include Big Green Egg grilling info for each meal: suggested grill temp, wood type (hickory, cherry, mesquite, etc.), direct vs indirect heat, and cook method notes.' : '';
+
+    var response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        messages: [{
+          role: 'user',
+          content: 'You are a meal planning assistant. Given these ingredients, suggest exactly 3 meals.\n\nIngredients: ' + input + '\nDietary preference: ' + dietary + bgePrompt + '\n\nReturn ONLY a JSON array with 3 objects. Each object must have: "name" (string), "description" (1 sentence), "cookTime" (string like "25 min"), "difficulty" ("easy"/"medium"/"hard"), "ingredients" (array of strings used from their list), "optional" (array of 1-2 items that would elevate it), "steps" (array of strings), "tags" (array like ["high-protein","one-pan"])' + (bgeMode ? ', "bge" (object with "temp" string, "wood" string, "heat" "direct"/"indirect", "notes" string)' : '') + '. No markdown, just the JSON array.'
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      var error = await response.json();
+      throw new Error(error.error?.message || 'API request failed');
+    }
+
+    var data = await response.json();
+    return JSON.parse(data.content[0].text);
+  }
+
+  async function generateDemo(input) {
+    await new Promise(function(r) { setTimeout(r, 1200 + Math.random() * 800); });
+
+    var ingredients = input.toLowerCase();
+    var hasChicken = /chicken/i.test(ingredients);
+    var hasBeef = /beef|steak|ground/i.test(ingredients);
+    var hasFish = /salmon|fish|shrimp|tuna/i.test(ingredients);
+    var hasPasta = /pasta|noodle|spaghetti/i.test(ingredients);
+    var hasRice = /rice/i.test(ingredients);
+
+    var mealSets;
+
+    if (hasChicken) {
+      mealSets = [
+        {
+          name: "Honey Garlic Chicken Stir-Fry",
+          description: "Quick weeknight stir-fry with a sticky honey garlic sauce over rice.",
+          cookTime: "25 min",
+          difficulty: "easy",
+          ingredients: ["chicken", "garlic", "soy sauce", "vegetables"],
+          optional: ["sesame seeds", "green onions"],
+          steps: ["Cut chicken into bite-size pieces and season with salt and pepper.", "Heat oil in a large skillet or wok over high heat.", "Sear chicken until golden, about 4-5 minutes. Remove and set aside.", "Add vegetables to the pan and stir-fry for 2-3 minutes.", "Mix soy sauce, honey, and minced garlic. Pour over vegetables.", "Return chicken to the pan and toss until coated and sauce thickens.", "Serve over rice and garnish with sesame seeds."],
+          tags: ["high-protein", "quick", "one-pan"],
+          bge: { temp: "400F direct", wood: "Cherry", heat: "direct", notes: "Grill chicken pieces on skewers over direct heat for char marks. 3-4 min per side." }
+        },
+        {
+          name: "Crispy Chicken Thigh Sheet Pan",
+          description: "Crispy-skin chicken thighs roasted with whatever vegetables you have on hand.",
+          cookTime: "40 min",
+          difficulty: "easy",
+          ingredients: ["chicken thighs", "vegetables", "olive oil"],
+          optional: ["lemon", "fresh herbs"],
+          steps: ["Preheat oven to 425F.", "Pat chicken thighs dry and season generously with salt and pepper.", "Toss chopped vegetables with olive oil, salt, and pepper.", "Spread vegetables on a sheet pan. Place chicken thighs on top, skin-side up.", "Roast for 35-40 minutes until skin is crispy and internal temp hits 165F.", "Rest for 5 minutes before serving."],
+          tags: ["meal-prep", "hands-off", "sheet-pan"],
+          bge: { temp: "375F indirect", wood: "Hickory", heat: "indirect", notes: "Set up for indirect cooking. Place chicken skin-side up. Smoke for 45 min until 165F internal. Finish skin-side down over direct heat for 2 min to crisp." }
+        },
+        {
+          name: "Chicken Lettuce Wraps",
+          description: "Light, crunchy lettuce cups filled with savory ground chicken and fresh toppings.",
+          cookTime: "15 min",
+          difficulty: "easy",
+          ingredients: ["chicken", "lettuce", "soy sauce", "onion"],
+          optional: ["water chestnuts", "sriracha"],
+          steps: ["Brown ground or diced chicken in a skillet over medium-high heat.", "Add diced onion and cook until softened, about 3 minutes.", "Add soy sauce, a splash of rice vinegar, and a pinch of sugar.", "Cook until sauce reduces and coats the chicken.", "Spoon filling into lettuce cups.", "Top with any fresh vegetables you have."],
+          tags: ["low-carb", "quick", "light"],
+          bge: { temp: "350F direct", wood: "Apple", heat: "direct", notes: "Cook the chicken filling in a cast iron skillet directly on the grate. The smoke adds depth to the lettuce wrap filling." }
+        }
+      ];
+    } else if (hasBeef) {
+      mealSets = [
+        {
+          name: "Smash Burgers",
+          description: "Thin, crispy-edged burgers with maximum crust and minimal fuss.",
+          cookTime: "15 min",
+          difficulty: "easy",
+          ingredients: ["ground beef", "salt", "pepper"],
+          optional: ["cheese", "brioche buns"],
+          steps: ["Divide beef into 3-4 oz balls. Do not season yet.", "Heat a cast iron skillet until smoking hot.", "Place a ball on the skillet and smash flat with a spatula.", "Season the top with salt and pepper.", "Cook 2-3 minutes until edges are deeply browned.", "Flip, add cheese if using, cook 1 more minute.", "Serve on buns with your toppings."],
+          tags: ["quick", "crowd-pleaser", "classic"],
+          bge: { temp: "500F+ direct", wood: "Mesquite", heat: "direct", notes: "Get the BGE screaming hot with the cast iron inside. The combo of mesquite smoke and high-heat sear is unbeatable for smash burgers." }
+        },
+        {
+          name: "Beef and Vegetable Stir-Fry",
+          description: "Tender sliced beef with crisp vegetables in a savory brown sauce.",
+          cookTime: "20 min",
+          difficulty: "medium",
+          ingredients: ["beef", "vegetables", "soy sauce"],
+          optional: ["ginger", "cornstarch for slurry"],
+          steps: ["Slice beef thin against the grain.", "Marinate in soy sauce for 10 minutes.", "Heat oil in a wok or large skillet over high heat.", "Sear beef in batches, 1-2 minutes per batch. Remove.", "Stir-fry vegetables for 2-3 minutes until crisp-tender.", "Return beef, add sauce, toss until combined.", "Serve over rice or noodles."],
+          tags: ["high-protein", "quick", "one-pan"],
+          bge: { temp: "450F direct", wood: "Oak", heat: "direct", notes: "Use a wok directly on the BGE grate at high temp. The wok hei (breath of the wok) is incredible with live fire." }
+        },
+        {
+          name: "One-Pot Beef Chili",
+          description: "Hearty, warming chili loaded with beef, beans, and spice.",
+          cookTime: "45 min",
+          difficulty: "easy",
+          ingredients: ["ground beef", "onion", "tomatoes"],
+          optional: ["beans", "sour cream"],
+          steps: ["Brown ground beef in a large pot over medium-high heat. Drain excess fat.", "Add diced onion and cook until soft.", "Add chili powder, cumin, garlic powder, salt, and pepper.", "Pour in crushed tomatoes and beans if using.", "Bring to a simmer and cook for 30 minutes, stirring occasionally.", "Taste and adjust seasoning.", "Serve with your preferred toppings."],
+          tags: ["comfort-food", "meal-prep", "one-pot"],
+          bge: { temp: "275F indirect", wood: "Hickory", heat: "indirect", notes: "Low and slow in a Dutch oven on the BGE. Let it go for 2 hours instead of 30 minutes. The smoke transforms basic chili into competition-level." }
+        }
+      ];
+    } else if (hasFish) {
+      mealSets = [
+        {
+          name: "Pan-Seared Salmon",
+          description: "Crispy-skin salmon with a simple lemon butter finish.",
+          cookTime: "15 min", difficulty: "medium",
+          ingredients: ["salmon", "butter", "lemon"],
+          optional: ["capers", "fresh dill"],
+          steps: ["Pat salmon dry and season with salt and pepper.", "Heat oil in a skillet over medium-high heat.", "Place salmon skin-side down. Press gently for 30 seconds.", "Cook 4-5 minutes until skin is crispy.", "Flip and cook 2-3 more minutes.", "Add butter and lemon juice to the pan. Baste salmon.", "Serve immediately."],
+          tags: ["high-protein", "quick", "elegant"],
+          bge: { temp: "350F indirect", wood: "Cedar plank or Alder", heat: "indirect", notes: "Cedar plank method: soak plank 1 hour, place salmon on plank, cook indirect at 350F for 15-20 min. The cedar smoke is a perfect match." }
+        },
+        {
+          name: "Garlic Shrimp Pasta",
+          description: "Quick garlic butter shrimp tossed with pasta and a squeeze of lemon.",
+          cookTime: "20 min", difficulty: "easy",
+          ingredients: ["shrimp", "pasta", "garlic", "butter"],
+          optional: ["white wine", "parsley"],
+          steps: ["Cook pasta according to package directions. Reserve 1 cup pasta water.", "Season shrimp with salt, pepper, and a pinch of red pepper flakes.", "Melt butter in a large skillet. Add minced garlic and cook 30 seconds.", "Add shrimp and cook 2-3 minutes per side until pink.", "Add pasta and a splash of pasta water. Toss to combine.", "Finish with lemon juice and serve."],
+          tags: ["quick", "comfort-food", "one-pan"],
+          bge: { temp: "400F direct", wood: "Pecan", heat: "direct", notes: "Grill shrimp on skewers over direct heat, 2 min per side. Toss with the pasta off-grill. The pecan smoke on shrimp is next level." }
+        },
+        {
+          name: "Fish Tacos",
+          description: "Flaky white fish with crunchy slaw and creamy sauce in warm tortillas.",
+          cookTime: "20 min", difficulty: "easy",
+          ingredients: ["fish", "tortillas", "cabbage"],
+          optional: ["lime crema", "cilantro"],
+          steps: ["Season fish with cumin, chili powder, salt, and pepper.", "Cook fish in a hot skillet with oil, 3-4 minutes per side.", "Shred cabbage and toss with lime juice and salt.", "Warm tortillas in a dry pan.", "Break fish into chunks and place in tortillas.", "Top with slaw and any sauce you have."],
+          tags: ["quick", "light", "crowd-pleaser"],
+          bge: { temp: "400F direct", wood: "Mesquite", heat: "direct", notes: "Grill fish directly on oiled grate, 3-4 min per side. Char the tortillas on the grate for 20 seconds each. Mesquite gives that authentic taqueria flavor." }
+        }
+      ];
+    } else {
+      mealSets = [
+        {
+          name: "Veggie Fried Rice",
+          description: "Crispy, savory fried rice loaded with whatever vegetables you have.",
+          cookTime: "15 min", difficulty: "easy",
+          ingredients: ["rice", "vegetables", "soy sauce", "eggs"],
+          optional: ["sesame oil", "green onions"],
+          steps: ["Use day-old rice if possible (or spread fresh rice on a sheet pan to cool).", "Heat oil in a large skillet or wok over high heat.", "Scramble eggs and set aside.", "Add vegetables and stir-fry for 2-3 minutes.", "Add rice and press flat against the pan. Let it crisp for 1 minute before stirring.", "Add soy sauce and toss everything together.", "Return eggs, toss once more, and serve."],
+          tags: ["quick", "vegetarian", "one-pan"],
+          bge: { temp: "450F direct", wood: "Oak", heat: "direct", notes: "Wok on the BGE grate at max heat. The live fire wok hei makes fried rice taste like a professional kitchen." }
+        },
+        {
+          name: "Pantry Pasta Aglio e Olio",
+          description: "Classic Italian pasta with garlic, olive oil, and red pepper flakes. Five ingredients, ten minutes.",
+          cookTime: "12 min", difficulty: "easy",
+          ingredients: ["pasta", "garlic", "olive oil"],
+          optional: ["parmesan", "fresh parsley"],
+          steps: ["Cook pasta in salted water until al dente. Reserve 1 cup pasta water.", "Slice garlic thin. Heat olive oil in a large pan over medium heat.", "Add garlic and a pinch of red pepper flakes. Cook until garlic is golden (not brown).", "Add pasta and a splash of pasta water. Toss vigorously.", "The starch and oil will create a silky sauce.", "Serve with parmesan if you have it."],
+          tags: ["quick", "pantry-staple", "vegetarian"],
+          bge: { temp: "N/A", wood: "N/A", heat: "N/A", notes: "This one is better on the stovetop. Save the BGE for proteins." }
+        },
+        {
+          name: "Sheet Pan Roasted Vegetables",
+          description: "Caramelized roasted vegetables that work as a main or a side for anything.",
+          cookTime: "35 min", difficulty: "easy",
+          ingredients: ["mixed vegetables", "olive oil", "salt", "pepper"],
+          optional: ["feta cheese", "balsamic glaze"],
+          steps: ["Preheat oven to 425F.", "Cut all vegetables to similar size for even cooking.", "Toss with olive oil, salt, pepper, and any dried herbs you have.", "Spread in a single layer on a sheet pan. Do not crowd.", "Roast for 30-35 minutes, flipping halfway.", "Finish with balsamic glaze or crumbled feta if available."],
+          tags: ["vegetarian", "hands-off", "meal-prep"],
+          bge: { temp: "400F indirect", wood: "Cherry", heat: "indirect", notes: "Roast vegetables on the BGE with cherry wood for a subtle sweetness. Use a grill basket or perforated pan to prevent small pieces from falling through." }
+        }
+      ];
+    }
+
+    if (!bgeMode) {
+      mealSets.forEach(function(m) { delete m.bge; });
+    }
+
+    return mealSets;
+  }
+
+  function renderMeals() {
+    while (mealGrid.firstChild) mealGrid.removeChild(mealGrid.firstChild);
+
+    meals.forEach(function(meal, index) {
+      var card = document.createElement('div');
+      card.className = 'meal-card';
+
+      // Header
+      var header = document.createElement('div');
+      header.className = 'meal-card-header';
+
+      var meta = document.createElement('div');
+      meta.className = 'meal-meta';
+
+      var time = document.createElement('span');
+      time.className = 'meal-time';
+      time.textContent = meal.cookTime;
+      meta.appendChild(time);
+
+      var diff = document.createElement('span');
+      diff.className = 'meal-difficulty ' + meal.difficulty;
+      diff.textContent = meal.difficulty;
+      meta.appendChild(diff);
+
+      header.appendChild(meta);
+
+      var name = document.createElement('h3');
+      name.className = 'meal-name';
+      name.textContent = meal.name;
+      header.appendChild(name);
+
+      var desc = document.createElement('p');
+      desc.className = 'meal-desc';
+      desc.textContent = meal.description;
+      header.appendChild(desc);
+
+      if (meal.tags && meal.tags.length) {
+        var tags = document.createElement('div');
+        tags.className = 'meal-tags';
+        meal.tags.forEach(function(tag) {
+          var tagEl = document.createElement('span');
+          tagEl.className = 'meal-tag';
+          tagEl.textContent = tag;
+          tags.appendChild(tagEl);
+        });
+        header.appendChild(tags);
+      }
+
+      card.appendChild(header);
+
+      // Expand button
+      var expandBtn = document.createElement('button');
+      expandBtn.className = 'meal-expand-btn';
+      expandBtn.textContent = 'View Full Recipe';
+      expandBtn.addEventListener('click', function() { card.classList.add('expanded'); });
+      card.appendChild(expandBtn);
+
+      // Details
+      var details = document.createElement('div');
+      details.className = 'meal-details';
+
+      // Ingredients
+      var ingSection = document.createElement('div');
+      ingSection.className = 'detail-section';
+      var ingTitle = document.createElement('h4');
+      ingTitle.textContent = 'Ingredients';
+      ingSection.appendChild(ingTitle);
+      var ingList = document.createElement('ul');
+      meal.ingredients.forEach(function(ing) {
+        var li = document.createElement('li');
+        li.textContent = ing;
+        ingList.appendChild(li);
+      });
+      ingSection.appendChild(ingList);
+
+      if (meal.optional && meal.optional.length) {
+        var optP = document.createElement('p');
+        optP.style.marginTop = '0.5rem';
+        optP.style.color = 'var(--accent)';
+        optP.style.fontSize = '0.85rem';
+        optP.textContent = 'Would elevate it: ' + meal.optional.join(', ');
+        ingSection.appendChild(optP);
+      }
+      details.appendChild(ingSection);
+
+      // Steps
+      var stepsSection = document.createElement('div');
+      stepsSection.className = 'detail-section';
+      var stepsTitle = document.createElement('h4');
+      stepsTitle.textContent = 'Steps';
+      stepsSection.appendChild(stepsTitle);
+      var stepsList = document.createElement('ol');
+      meal.steps.forEach(function(step) {
+        var li = document.createElement('li');
+        li.textContent = step;
+        stepsList.appendChild(li);
+      });
+      stepsSection.appendChild(stepsList);
+      details.appendChild(stepsSection);
+
+      // BGE Info
+      if (meal.bge) {
+        var bge = document.createElement('div');
+        bge.className = 'bge-info';
+
+        var bgeTitle = document.createElement('h4');
+        bgeTitle.style.fontFamily = 'var(--font-display)';
+        bgeTitle.style.fontSize = '0.65rem';
+        bgeTitle.style.letterSpacing = '0.15em';
+        bgeTitle.style.textTransform = 'uppercase';
+        bgeTitle.style.color = 'var(--bge-green)';
+        bgeTitle.style.marginBottom = '0.75rem';
+        bgeTitle.textContent = 'Big Green Egg';
+        bge.appendChild(bgeTitle);
+
+        var bgeGrid = document.createElement('div');
+        bgeGrid.className = 'bge-info-grid';
+
+        [
+          { label: 'Temperature', value: meal.bge.temp },
+          { label: 'Wood', value: meal.bge.wood },
+          { label: 'Heat', value: meal.bge.heat },
+          { label: 'Notes', value: meal.bge.notes }
+        ].forEach(function(item) {
+          var div = document.createElement('div');
+          div.className = 'bge-info-item';
+          var lbl = document.createElement('label');
+          lbl.textContent = item.label;
+          var val = document.createElement('span');
+          val.textContent = item.value;
+          div.appendChild(lbl);
+          div.appendChild(val);
+          bgeGrid.appendChild(div);
+        });
+
+        bge.appendChild(bgeGrid);
+        details.appendChild(bge);
+      }
+
+      // Collapse button
+      var collapseBtn = document.createElement('button');
+      collapseBtn.className = 'meal-collapse-btn';
+      collapseBtn.textContent = 'Collapse';
+      collapseBtn.addEventListener('click', function() { card.classList.remove('expanded'); });
+      details.appendChild(collapseBtn);
+
+      card.appendChild(details);
+      mealGrid.appendChild(card);
+    });
+  }
+
+  function showToast(message) {
+    toastEl.textContent = message;
+    toastEl.classList.add('visible');
+    setTimeout(function() { toastEl.classList.remove('visible'); }, 2500);
+  }
+
+})();
+</script>
+</body>
+</html>

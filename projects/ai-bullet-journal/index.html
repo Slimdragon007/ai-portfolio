@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Bullet Journal | FlowstateAI</title>
+<meta name="description" content="Chat-based planner with visual card rendering. Talk naturally, get a beautiful journal. Built by Michael Haslim / FlowstateAI.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #d97757;
+    --accent-glow: rgba(217, 119, 87, 0.15);
+    --accent-soft: rgba(217, 119, 87, 0.08);
+    --bg-primary: #0a0a0c;
+    --bg-card: #111115;
+    --bg-card-hover: #16161c;
+    --bg-input: #0e0e12;
+    --text-primary: #e8e6e3;
+    --text-secondary: #8a8a8e;
+    --text-muted: #5a5a5e;
+    --border: rgba(255, 255, 255, 0.06);
+    --border-accent: rgba(217, 119, 87, 0.3);
+    --font-display: 'Space Mono', monospace;
+    --font-body: 'Outfit', sans-serif;
+    --font-hand: 'Caveat', cursive;
+
+    --task-color: #818cf8;
+    --task-bg: rgba(129, 140, 248, 0.08);
+    --event-color: #38bdf8;
+    --event-bg: rgba(56, 189, 248, 0.08);
+    --note-color: #facc15;
+    --note-bg: rgba(250, 204, 21, 0.08);
+    --reflection-color: #a78bfa;
+    --reflection-bg: rgba(167, 139, 250, 0.08);
+    --goal-color: #4ade80;
+    --goal-bg: rgba(74, 222, 128, 0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .app { display: flex; height: 100vh; flex-direction: column; }
+
+  /* ── TOP BAR ── */
+  .top-bar {
+    padding: 0.75rem 1.5rem; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+    background: rgba(10, 10, 12, 0.95);
+  }
+  .top-bar .logo { font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .top-bar-center { display: flex; align-items: center; gap: 1rem; }
+  .date-nav { display: flex; align-items: center; gap: 0.5rem; }
+  .date-nav button {
+    background: none; border: 1px solid var(--border); border-radius: 3px; color: var(--text-muted);
+    padding: 0.2rem 0.5rem; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;
+  }
+  .date-nav button:hover { border-color: var(--border-accent); color: var(--accent); }
+  .date-display { font-family: var(--font-display); font-size: 0.7rem; letter-spacing: 0.08em; color: var(--text-primary); min-width: 160px; text-align: center; }
+  .view-toggle { display: flex; gap: 0; }
+  .view-btn {
+    font-family: var(--font-display); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.35rem 0.75rem; background: transparent; color: var(--text-muted); border: 1px solid var(--border);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .view-btn:first-child { border-radius: 3px 0 0 3px; }
+  .view-btn:last-child { border-radius: 0 3px 3px 0; }
+  .view-btn.active { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+  .top-bar-right { display: flex; align-items: center; gap: 0.75rem; }
+  .api-mini { font-family: var(--font-display); font-size: 0.6rem; color: var(--text-muted); }
+  .api-mini input {
+    background: var(--bg-input); border: 1px solid var(--border); border-radius: 3px;
+    padding: 0.25rem 0.5rem; font-family: var(--font-display); font-size: 0.65rem; color: var(--text-primary); width: 140px;
+  }
+  .api-mini input:focus { outline: none; border-color: var(--border-accent); }
+
+  /* ── MAIN LAYOUT ── */
+  .main { display: flex; flex: 1; overflow: hidden; }
+
+  /* ── CHAT PANEL ── */
+  .chat-panel {
+    width: 380px; min-width: 300px; border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; background: var(--bg-primary);
+  }
+  .chat-header {
+    padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+    font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text-muted);
+  }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .chat-msg { max-width: 90%; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.88rem; line-height: 1.6; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .chat-msg.user { background: var(--accent-soft); border: 1px solid var(--border-accent); align-self: flex-end; color: var(--text-primary); }
+  .chat-msg.ai { background: var(--bg-card); border: 1px solid var(--border); align-self: flex-start; color: var(--text-secondary); }
+  .chat-msg .parsed-tag {
+    display: inline-block; font-family: var(--font-display); font-size: 0.55rem; letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 0.15rem 0.4rem; border-radius: 2px; margin-right: 0.25rem; margin-bottom: 0.25rem;
+  }
+  .tag-task { color: var(--task-color); background: var(--task-bg); }
+  .tag-event { color: var(--event-color); background: var(--event-bg); }
+  .tag-note { color: var(--note-color); background: var(--note-bg); }
+  .tag-reflection { color: var(--reflection-color); background: var(--reflection-bg); }
+  .tag-goal { color: var(--goal-color); background: var(--goal-bg); }
+
+  .chat-input-area { padding: 1rem; border-top: 1px solid var(--border); display: flex; gap: 0.5rem; }
+  .chat-input {
+    flex: 1; background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px;
+    padding: 0.65rem 1rem; font-family: var(--font-body); font-size: 0.9rem; color: var(--text-primary); resize: none;
+  }
+  .chat-input:focus { outline: none; border-color: var(--border-accent); }
+  .chat-input::placeholder { color: var(--text-muted); }
+  .chat-send {
+    background: var(--accent); border: none; border-radius: 6px; padding: 0.65rem 1rem;
+    color: var(--bg-primary); font-family: var(--font-display); font-size: 0.7rem; font-weight: 700;
+    cursor: pointer; transition: background 0.2s; white-space: nowrap;
+  }
+  .chat-send:hover { background: #e08a6a; }
+
+  /* ── JOURNAL PANEL ── */
+  .journal-panel { flex: 1; overflow-y: auto; padding: 2rem; }
+
+  .journal-date {
+    font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 1.5rem;
+  }
+  .journal-empty {
+    display: flex; align-items: center; justify-content: center; height: 60%;
+    font-family: var(--font-display); font-size: 0.7rem; color: var(--text-muted);
+    letter-spacing: 0.1em; text-align: center; line-height: 2;
+  }
+
+  .journal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+
+  /* ── CARDS ── */
+  .journal-card {
+    border-radius: 8px; padding: 1.25rem; position: relative; transition: transform 0.2s, box-shadow 0.2s;
+    animation: cardIn 0.4s ease;
+  }
+  @keyframes cardIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  .journal-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+
+  .card-task { background: var(--task-bg); border: 1px solid rgba(129, 140, 248, 0.15); }
+  .card-event { background: var(--event-bg); border: 1px solid rgba(56, 189, 248, 0.15); }
+  .card-note { background: var(--note-bg); border: 1px solid rgba(250, 204, 21, 0.15); }
+  .card-reflection { background: var(--reflection-bg); border: 1px solid rgba(167, 139, 250, 0.15); }
+  .card-goal { background: var(--goal-bg); border: 1px solid rgba(74, 222, 128, 0.15); }
+
+  .card-type-label {
+    font-family: var(--font-display); font-size: 0.55rem; letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;
+  }
+  .card-task .card-type-label { color: var(--task-color); }
+  .card-event .card-type-label { color: var(--event-color); }
+  .card-note .card-type-label { color: var(--note-color); }
+  .card-reflection .card-type-label { color: var(--reflection-color); }
+  .card-goal .card-type-label { color: var(--goal-color); }
+
+  .card-content { font-size: 0.92rem; color: var(--text-primary); line-height: 1.6; }
+  .card-reflection .card-content { font-family: var(--font-hand); font-size: 1.15rem; font-style: italic; color: var(--text-secondary); }
+  .card-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem; }
+
+  .card-checkbox {
+    width: 16px; height: 16px; border: 2px solid var(--task-color); border-radius: 3px;
+    background: transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+    margin-right: 0.5rem; vertical-align: middle; transition: all 0.2s; flex-shrink: 0;
+  }
+  .card-checkbox.checked { background: var(--task-color); }
+  .card-checkbox.checked::after { content: ''; display: block; width: 5px; height: 8px; border: solid var(--bg-primary); border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px, -1px); }
+  .task-text.completed { text-decoration: line-through; opacity: 0.5; }
+
+  .card-time { font-family: var(--font-display); font-size: 0.7rem; color: var(--event-color); margin-bottom: 0.4rem; }
+
+  .progress-bar { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; margin-top: 0.75rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--goal-color); border-radius: 2px; transition: width 0.5s ease; }
+
+  .card-delete {
+    position: absolute; top: 0.75rem; right: 0.75rem; background: none; border: none;
+    color: var(--text-muted); cursor: pointer; font-size: 0.8rem; opacity: 0; transition: opacity 0.2s;
+  }
+  .journal-card:hover .card-delete { opacity: 0.6; }
+  .card-delete:hover { opacity: 1; color: #f87171; }
+
+  /* ── WEEK VIEW ── */
+  .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .week-day { background: var(--bg-primary); min-height: 200px; }
+  .week-day-header {
+    padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border);
+    font-family: var(--font-display); font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted);
+  }
+  .week-day-header.today { color: var(--accent); }
+  .week-day-body { padding: 0.5rem; display: flex; flex-direction: column; gap: 0.35rem; }
+  .week-card {
+    padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.72rem; line-height: 1.4;
+    cursor: default; border-left: 2px solid;
+  }
+  .week-card.card-task { border-left-color: var(--task-color); }
+  .week-card.card-event { border-left-color: var(--event-color); }
+  .week-card.card-note { border-left-color: var(--note-color); }
+  .week-card.card-reflection { border-left-color: var(--reflection-color); }
+  .week-card.card-goal { border-left-color: var(--goal-color); }
+
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px;
+    padding: 1rem 1.5rem; font-size: 0.85rem; color: var(--text-primary); z-index: 300;
+    transform: translateY(100px); opacity: 0; transition: all 0.3s ease;
+  }
+  .toast.visible { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 768px) {
+    .main { flex-direction: column; }
+    .chat-panel { width: 100%; height: 50%; min-width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+    .journal-panel { padding: 1rem; }
+    .journal-grid { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: 1fr; }
+    .top-bar { flex-wrap: wrap; gap: 0.5rem; }
+    .top-bar-center { order: 3; width: 100%; justify-content: center; }
+    .api-mini { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="top-bar">
+    <a href="../../index.html" class="logo">SLIM.SYSTEMS</a>
+    <div class="top-bar-center">
+      <div class="date-nav">
+        <button id="prevDay">&lt;</button>
+        <span class="date-display" id="dateDisplay"></span>
+        <button id="nextDay">&gt;</button>
+        <button id="todayBtn" style="margin-left:0.5rem;">Today</button>
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" id="viewDay" data-view="day">Day</button>
+        <button class="view-btn" id="viewWeek" data-view="week">Week</button>
+      </div>
+    </div>
+    <div class="top-bar-right">
+      <div class="api-mini">
+        <input type="password" id="apiKeyInput" placeholder="API key (optional)">
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="chat-panel">
+      <div class="chat-header">Chat</div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input-area">
+        <input type="text" class="chat-input" id="chatInput" placeholder="I need to meal prep Sunday, Ellie has soccer at 3...">
+        <button class="chat-send" id="chatSend">Send</button>
+      </div>
+    </div>
+
+    <div class="journal-panel" id="journalPanel"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  var entries = [];
+  var currentDate = new Date();
+  var currentView = 'day';
+  var nextEntryId = 1;
+
+  try {
+    var saved = localStorage.getItem('ai-bujo-entries');
+    if (saved) {
+      entries = JSON.parse(saved);
+      nextEntryId = entries.reduce(function(max, e) { return Math.max(max, e.id + 1); }, 1);
+    }
+  } catch(e) {}
+
+  var chatMessages = document.getElementById('chatMessages');
+  var chatInput = document.getElementById('chatInput');
+  var journalPanel = document.getElementById('journalPanel');
+  var dateDisplay = document.getElementById('dateDisplay');
+  var toastEl = document.getElementById('toast');
+
+  // Init with welcome message
+  addAIMessage('Hey! Tell me about your day, tasks, events, or anything on your mind. I will turn it into visual journal cards.\n\nTry: "Meeting with Sarah at 2pm, pick up groceries, and I want to start running 3x per week"');
+
+  // Event listeners
+  document.getElementById('chatSend').addEventListener('click', handleSend);
+  chatInput.addEventListener('keydown', function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } });
+
+  document.getElementById('prevDay').addEventListener('click', function() { shiftDate(-1); });
+  document.getElementById('nextDay').addEventListener('click', function() { shiftDate(1); });
+  document.getElementById('todayBtn').addEventListener('click', function() { currentDate = new Date(); render(); });
+
+  document.querySelectorAll('.view-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.view-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      currentView = btn.dataset.view;
+      render();
+    });
+  });
+
+  function shiftDate(days) {
+    currentDate.setDate(currentDate.getDate() + days);
+    render();
+  }
+
+  function handleSend() {
+    var text = chatInput.value.trim();
+    if (!text) return;
+
+    addUserMessage(text);
+    chatInput.value = '';
+
+    var apiKey = document.getElementById('apiKeyInput').value.trim();
+    if (apiKey && apiKey.startsWith('sk-')) {
+      parseWithAPI(text, apiKey);
+    } else {
+      parseDemo(text);
+    }
+  }
+
+  function addUserMessage(text) {
+    var msg = document.createElement('div');
+    msg.className = 'chat-msg user';
+    msg.textContent = text;
+    chatMessages.appendChild(msg);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function addAIMessage(text, parsedEntries) {
+    var msg = document.createElement('div');
+    msg.className = 'chat-msg ai';
+
+    if (parsedEntries && parsedEntries.length) {
+      parsedEntries.forEach(function(entry) {
+        var tag = document.createElement('span');
+        tag.className = 'parsed-tag tag-' + entry.type;
+        tag.textContent = entry.type;
+        msg.appendChild(tag);
+      });
+      msg.appendChild(document.createElement('br'));
+    }
+
+    var textNode = document.createTextNode(text);
+    msg.appendChild(textNode);
+    chatMessages.appendChild(msg);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  async function parseWithAPI(text, apiKey) {
+    try {
+      var response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1024,
+          messages: [{
+            role: 'user',
+            content: 'Parse this into journal entries. Return ONLY a JSON array.\n\nInput: "' + text + '"\n\nEach entry: {"type":"task"|"event"|"note"|"reflection"|"goal","content":"text","time":"HH:MM or null","date":"YYYY-MM-DD","priority":"high"|"medium"|"low"}\n\nUse today: ' + formatDateISO(currentDate) + '. Only JSON, no markdown.'
+          }]
+        })
+      });
+      var data = await response.json();
+      var parsed = JSON.parse(data.content[0].text);
+      processEntries(parsed);
+    } catch(e) {
+      addAIMessage('Could not parse that. Try again?');
+    }
+  }
+
+  function parseDemo(text) {
+    var lower = text.toLowerCase();
+    var parsed = [];
+
+    // Time pattern: "at 2pm", "at 3:30", etc.
+    var timeRegex = /(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm)/gi;
+    var sentenceSplits = text.split(/[,.]|\band\b/i).map(function(s) { return s.trim(); }).filter(Boolean);
+
+    sentenceSplits.forEach(function(chunk) {
+      var chunkLower = chunk.toLowerCase();
+      var entry = { date: formatDateISO(currentDate), priority: 'medium', time: null };
+
+      // Check for time
+      var timeMatch = chunkLower.match(/(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+      if (timeMatch) {
+        var h = parseInt(timeMatch[1]);
+        var m = timeMatch[2] || '00';
+        if (timeMatch[3].toLowerCase() === 'pm' && h < 12) h += 12;
+        if (timeMatch[3].toLowerCase() === 'am' && h === 12) h = 0;
+        entry.time = (h < 10 ? '0' : '') + h + ':' + m;
+      }
+
+      // Classify
+      if (/\b(feel|feeling|grateful|thankful|reflect|thinking about|realize|appreciate)\b/i.test(chunkLower)) {
+        entry.type = 'reflection';
+        entry.content = chunk.replace(timeRegex, '').trim();
+      } else if (/\b(goal|want to start|aim to|plan to|commit to|per week|per month|by end of)\b/i.test(chunkLower)) {
+        entry.type = 'goal';
+        entry.content = chunk.replace(timeRegex, '').trim();
+        entry.progress = 0;
+      } else if (/\b(meeting|appointment|call|dinner|lunch|class|session|practice|game|soccer|baseball|recital)\b/i.test(chunkLower) || entry.time) {
+        entry.type = 'event';
+        entry.content = chunk.replace(timeRegex, '').trim();
+      } else if (/\b(remember|idea|note|thought|maybe|might)\b/i.test(chunkLower)) {
+        entry.type = 'note';
+        entry.content = chunk.replace(timeRegex, '').trim();
+      } else {
+        entry.type = 'task';
+        entry.content = chunk.replace(timeRegex, '').trim();
+        entry.completed = false;
+      }
+
+      if (entry.content && entry.content.length > 1) {
+        // Check for date references
+        if (/\b(tomorrow)\b/i.test(chunkLower)) {
+          var tom = new Date(currentDate);
+          tom.setDate(tom.getDate() + 1);
+          entry.date = formatDateISO(tom);
+        }
+        if (/\b(sunday)\b/i.test(chunkLower)) {
+          entry.date = getNextDayOfWeek(0);
+        } else if (/\b(monday)\b/i.test(chunkLower)) {
+          entry.date = getNextDayOfWeek(1);
+        } else if (/\b(tuesday)\b/i.test(chunkLower)) {
+          entry.date = getNextDayOfWeek(2);
+        } else if (/\b(wednesday)\b/i.test(chunkLower)) {
+          entry.date = getNextDayOfWeek(3);
+        } else if (/\b(thursday)\b/i.test(chunkLower)) {
+          entry.date = getNextDayOfWeek(4);
+        } else if (/\b(friday)\b/i.test(chunkLower)) {
+          entry.date = getNextDayOfWeek(5);
+        } else if (/\b(saturday)\b/i.test(chunkLower)) {
+          entry.date = getNextDayOfWeek(6);
+        }
+
+        parsed.push(entry);
+      }
+    });
+
+    if (parsed.length === 0) {
+      parsed.push({ type: 'note', content: text, date: formatDateISO(currentDate), time: null, priority: 'medium' });
+    }
+
+    processEntries(parsed);
+  }
+
+  function processEntries(parsed) {
+    var descriptions = [];
+    parsed.forEach(function(entry) {
+      entry.id = nextEntryId++;
+      if (entry.type === 'task' && entry.completed === undefined) entry.completed = false;
+      if (entry.type === 'goal' && entry.progress === undefined) entry.progress = 0;
+      entries.push(entry);
+
+      var desc = entry.type.charAt(0).toUpperCase() + entry.type.slice(1) + ': ' + entry.content;
+      if (entry.time) desc += ' at ' + formatTime(entry.time);
+      if (entry.date !== formatDateISO(currentDate)) desc += ' (' + formatDateShort(entry.date) + ')';
+      descriptions.push(desc);
+    });
+
+    save();
+    render();
+
+    var response = 'Added ' + parsed.length + ' entr' + (parsed.length === 1 ? 'y' : 'ies') + ':\n' + descriptions.join('\n');
+    addAIMessage(response, parsed);
+  }
+
+  function save() {
+    try { localStorage.setItem('ai-bujo-entries', JSON.stringify(entries)); } catch(e) {}
+  }
+
+  function render() {
+    updateDateDisplay();
+    if (currentView === 'day') renderDayView();
+    else renderWeekView();
+  }
+
+  function updateDateDisplay() {
+    var opts = { weekday: 'long', month: 'long', day: 'numeric' };
+    dateDisplay.textContent = currentDate.toLocaleDateString('en-US', opts);
+  }
+
+  function renderDayView() {
+    while (journalPanel.firstChild) journalPanel.removeChild(journalPanel.firstChild);
+
+    var dateLabel = document.createElement('div');
+    dateLabel.className = 'journal-date';
+    dateLabel.textContent = currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    journalPanel.appendChild(dateLabel);
+
+    var dateStr = formatDateISO(currentDate);
+    var dayEntries = entries.filter(function(e) { return e.date === dateStr; });
+
+    if (dayEntries.length === 0) {
+      var empty = document.createElement('div');
+      empty.className = 'journal-empty';
+      empty.textContent = 'No entries for this day.\nStart chatting to add some.';
+      journalPanel.appendChild(empty);
+      return;
+    }
+
+    // Sort: events with time first, then tasks, notes, reflections, goals
+    dayEntries.sort(function(a, b) {
+      if (a.time && b.time) return a.time.localeCompare(b.time);
+      if (a.time) return -1;
+      if (b.time) return 1;
+      var order = { event: 0, task: 1, goal: 2, note: 3, reflection: 4 };
+      return (order[a.type] || 5) - (order[b.type] || 5);
+    });
+
+    var grid = document.createElement('div');
+    grid.className = 'journal-grid';
+
+    dayEntries.forEach(function(entry) {
+      grid.appendChild(createCard(entry));
+    });
+
+    journalPanel.appendChild(grid);
+  }
+
+  function renderWeekView() {
+    while (journalPanel.firstChild) journalPanel.removeChild(journalPanel.firstChild);
+
+    var weekStart = new Date(currentDate);
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+
+    var grid = document.createElement('div');
+    grid.className = 'week-grid';
+
+    for (var i = 0; i < 7; i++) {
+      var day = new Date(weekStart);
+      day.setDate(day.getDate() + i);
+      var dateStr = formatDateISO(day);
+      var isToday = dateStr === formatDateISO(new Date());
+
+      var col = document.createElement('div');
+      col.className = 'week-day';
+
+      var header = document.createElement('div');
+      header.className = 'week-day-header' + (isToday ? ' today' : '');
+      header.textContent = day.toLocaleDateString('en-US', { weekday: 'short' }) + ' ' + day.getDate();
+      col.appendChild(header);
+
+      var body = document.createElement('div');
+      body.className = 'week-day-body';
+
+      var dayEntries = entries.filter(function(e) { return e.date === dateStr; });
+      dayEntries.forEach(function(entry) {
+        var card = document.createElement('div');
+        card.className = 'week-card card-' + entry.type;
+        card.textContent = (entry.time ? formatTime(entry.time) + ' ' : '') + entry.content;
+        body.appendChild(card);
+      });
+
+      col.appendChild(body);
+      grid.appendChild(col);
+    }
+
+    journalPanel.appendChild(grid);
+  }
+
+  function createCard(entry) {
+    var card = document.createElement('div');
+    card.className = 'journal-card card-' + entry.type;
+
+    // Type label
+    var typeLabel = document.createElement('div');
+    typeLabel.className = 'card-type-label';
+    var icons = { task: '\u2610', event: '\u25CB', note: '\u270E', reflection: '\u2727', goal: '\u2191' };
+    typeLabel.textContent = (icons[entry.type] || '') + ' ' + entry.type;
+    card.appendChild(typeLabel);
+
+    // Time for events
+    if (entry.type === 'event' && entry.time) {
+      var timeEl = document.createElement('div');
+      timeEl.className = 'card-time';
+      timeEl.textContent = formatTime(entry.time);
+      card.appendChild(timeEl);
+    }
+
+    // Content
+    if (entry.type === 'task') {
+      var taskRow = document.createElement('div');
+      taskRow.style.display = 'flex';
+      taskRow.style.alignItems = 'flex-start';
+      taskRow.style.gap = '0.5rem';
+
+      var checkbox = document.createElement('button');
+      checkbox.className = 'card-checkbox' + (entry.completed ? ' checked' : '');
+      checkbox.addEventListener('click', function() {
+        entry.completed = !entry.completed;
+        save();
+        render();
+      });
+
+      var taskText = document.createElement('span');
+      taskText.className = 'task-text' + (entry.completed ? ' completed' : '');
+      taskText.textContent = entry.content;
+
+      taskRow.appendChild(checkbox);
+      taskRow.appendChild(taskText);
+      card.appendChild(taskRow);
+    } else {
+      var content = document.createElement('div');
+      content.className = 'card-content';
+      content.textContent = entry.content;
+      card.appendChild(content);
+    }
+
+    // Goal progress
+    if (entry.type === 'goal') {
+      var progress = document.createElement('div');
+      progress.className = 'progress-bar';
+      var fill = document.createElement('div');
+      fill.className = 'progress-fill';
+      fill.style.width = (entry.progress || 0) + '%';
+      progress.appendChild(fill);
+      card.appendChild(progress);
+    }
+
+    // Delete button
+    var delBtn = document.createElement('button');
+    delBtn.className = 'card-delete';
+    delBtn.textContent = '\u00D7';
+    delBtn.addEventListener('click', function() {
+      entries = entries.filter(function(e) { return e.id !== entry.id; });
+      save();
+      render();
+    });
+    card.appendChild(delBtn);
+
+    return card;
+  }
+
+  // ── UTILITIES ──
+  function formatDateISO(d) {
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+
+  function formatDateShort(dateStr) {
+    var parts = dateStr.split('-');
+    var d = new Date(parts[0], parts[1] - 1, parts[2]);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function formatTime(timeStr) {
+    if (!timeStr) return '';
+    var parts = timeStr.split(':');
+    var h = parseInt(parts[0]);
+    var m = parts[1];
+    var ampm = h >= 12 ? 'pm' : 'am';
+    h = h % 12 || 12;
+    return h + ':' + m + ampm;
+  }
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function getNextDayOfWeek(dayIndex) {
+    var d = new Date(currentDate);
+    var diff = dayIndex - d.getDay();
+    if (diff <= 0) diff += 7;
+    d.setDate(d.getDate() + diff);
+    return formatDateISO(d);
+  }
+
+  function showToast(message) {
+    toastEl.textContent = message;
+    toastEl.classList.add('visible');
+    setTimeout(function() { toastEl.classList.remove('visible'); }, 2500);
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
