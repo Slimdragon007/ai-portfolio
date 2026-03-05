@@ -7,30 +7,30 @@
 <meta name="description" content="Type what's in your fridge, get 3 dinner ideas with recipes. Big Green Egg mode included. Built by Michael Haslim / FlowstateAI.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --accent: #d97757;
-    --accent-glow: rgba(217, 119, 87, 0.15);
-    --accent-soft: rgba(217, 119, 87, 0.08);
-    --bg-primary: #0a0a0c;
-    --bg-card: #111115;
-    --bg-card-hover: #16161c;
-    --bg-input: #0e0e12;
-    --text-primary: #e8e6e3;
-    --text-secondary: #8a8a8e;
-    --text-muted: #5a5a5e;
-    --border: rgba(255, 255, 255, 0.06);
-    --border-accent: rgba(217, 119, 87, 0.3);
-    --success: #4ade80;
-    --bge-green: #22c55e;
-    --bge-bg: rgba(34, 197, 94, 0.08);
-    --bge-border: rgba(34, 197, 94, 0.3);
+    --accent: #818cf8;
+    --accent-glow: rgba(129, 140, 248, 0.08);
+    --accent-soft: rgba(129, 140, 248, 0.04);
+    --bg-primary: #FAFAF8;
+    --bg-card: #FFFFFF;
+    --bg-card-hover: #FFFFFF;
+    --bg-input: #f5f5f3;
+    --text-primary: #1a1a1a;
+    --text-secondary: #6b6b6b;
+    --text-muted: #999999;
+    --border: rgba(0, 0, 0, 0.06);
+    --border-accent: rgba(129, 140, 248, 0.25);
+    --success: #0d9488;
+    --bge-green: #16a34a;
+    --bge-bg: rgba(22, 163, 74, 0.06);
+    --bge-border: rgba(22, 163, 74, 0.25);
     --font-display: 'Space Mono', monospace;
-    --font-body: 'Outfit', sans-serif;
-    --easy: #4ade80;
-    --medium: #facc15;
-    --hard: #f87171;
+    --font-body: 'Inter', sans-serif;
+    --easy: #0d9488;
+    --medium: #ca8a04;
+    --hard: #ef4444;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -45,14 +45,7 @@
     min-height: 100vh;
   }
 
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 9999;
-  }
+  body::before { display: none; }
 
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;

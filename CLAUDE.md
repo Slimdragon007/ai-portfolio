@@ -131,16 +131,18 @@ Notes: [text]
 ## Design System
 
 - **Fonts**: Space Mono (display/mono), Inter (body, letter-spacing -0.011em)
-- **Accent (Indigo)**: #818cf8 (section labels, nav hover, case tags, accent lines)
-- **Accent Secondary (Teal)**: #2dd4bf (tech tags, status badges, secondary interactive)
-- **Accent Gold**: #d4a853 (Launch Demo buttons, Contact CTA, FlowstateAI brand name ONLY)
-- **Background**: #0c1220 (navy)
-- **Cards**: #141a2e (dark navy card)
-- **Text Primary**: #e2e4e8
-- **Text Secondary**: #7b8ba4
-- **Border**: rgba(129, 140, 248, 0.12)
-- **Grain overlay**: SVG noise texture at 2% opacity
-- **Motion**: scroll-reveal animations, expand/collapse case studies
+- **Theme**: Light (Anthropic-inspired)
+- **Background**: #FAFAF8 (warm white) with CSS grid pattern (#e5e5e3, 50px, 0.45 opacity)
+- **Cards**: #FFFFFF with 1px border and subtle shadow, shadow increase on hover
+- **Accent (Indigo)**: #818cf8 (section labels, nav hover, links, buttons)
+- **Accent Secondary (Teal)**: #2dd4bf (tags, badges)
+- **Accent Gold**: #d4a853 (Launch Demo buttons, Contact CTA, FlowstateAI name ONLY)
+- **Text Primary**: #1a1a1a
+- **Text Secondary**: #6b6b6b
+- **Text Muted**: #999999
+- **Border**: rgba(0, 0, 0, 0.06)
+- **Accent lines**: 80px wide, indigo at 0.25 opacity
+- **Motion**: subtle scroll-reveal (12px translateY, 0.6s ease)
 
 ---
 

@@ -13,16 +13,17 @@
     --accent: #818cf8;
     --accent-secondary: #2dd4bf;
     --accent-gold: #d4a853;
-    --accent-glow: rgba(129, 140, 248, 0.15);
-    --accent-soft: rgba(129, 140, 248, 0.06);
-    --bg-primary: #0c1220;
-    --bg-card: #141a2e;
-    --bg-card-hover: #1a2240;
-    --text-primary: #e2e4e8;
-    --text-secondary: #7b8ba4;
-    --text-muted: #4a5568;
-    --border: rgba(129, 140, 248, 0.12);
-    --border-accent: rgba(129, 140, 248, 0.3);
+    --accent-glow: rgba(129, 140, 248, 0.08);
+    --accent-soft: rgba(129, 140, 248, 0.04);
+    --bg-primary: #FAFAF8;
+    --bg-card: #FFFFFF;
+    --text-primary: #1a1a1a;
+    --text-secondary: #6b6b6b;
+    --text-muted: #999999;
+    --border: rgba(0, 0, 0, 0.06);
+    --border-accent: rgba(129, 140, 248, 0.25);
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+    --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
     --font-display: 'Space Mono', monospace;
     --font-body: 'Inter', sans-serif;
   }
@@ -45,14 +46,17 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ── GRAIN OVERLAY ── */
+  /* ── GRID PATTERN ── */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 49px, #e5e5e3 49px, #e5e5e3 50px),
+      repeating-linear-gradient(90deg, transparent, transparent 49px, #e5e5e3 49px, #e5e5e3 50px);
+    opacity: 0.45;
     pointer-events: none;
-    z-index: 9999;
+    z-index: 0;
   }
 
   /* ── NAV ── */
@@ -67,7 +71,7 @@
     justify-content: space-between;
     align-items: center;
     backdrop-filter: blur(20px);
-    background: rgba(12, 18, 32, 0.85);
+    background: rgba(250, 250, 248, 0.85);
     border-bottom: 1px solid var(--border);
   }
 
@@ -107,6 +111,7 @@
     max-width: 1100px;
     margin: 0 auto;
     position: relative;
+    z-index: 1;
   }
 
   .hero-greeting {
@@ -171,54 +176,37 @@
     font-weight: 500;
   }
 
-  .hero-cta-line {
+  .hero-tagline {
     max-width: 640px;
-    font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+    font-size: clamp(1.4rem, 2.8vw, 1.8rem);
     font-weight: 600;
     line-height: 1.4;
     margin-top: 1.5rem;
+    color: var(--accent);
     opacity: 0;
     animation: fadeUp 0.7s ease forwards 1.8s;
   }
 
-  .hero-cta-line .accent { color: var(--accent); }
-
-  .hero-meta {
-    display: flex;
-    gap: 3rem;
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border);
-    opacity: 0;
-    animation: fadeUp 0.8s ease forwards 2.2s;
-  }
-
-  .hero-meta-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .hero-meta-label {
+  .hero-meta-line {
     font-family: var(--font-display);
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--text-muted);
+    margin-top: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 2.2s;
   }
 
-  .hero-meta-value {
-    font-size: 0.95rem;
-    color: var(--text-primary);
-    font-weight: 500;
-  }
+  .hero-meta-line .gold { color: var(--accent-gold); }
 
   /* ── ACCENT LINE ── */
   .accent-line {
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity: 0.3;
+    width: 80px;
+    height: 2px;
+    background: var(--accent);
+    opacity: 0.25;
+    margin: 0 auto;
   }
 
   /* ── SECTIONS ── */
@@ -226,6 +214,8 @@
     padding: 6rem 2rem;
     max-width: 1100px;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
   }
 
   .section-label {
@@ -251,14 +241,50 @@
     margin-bottom: 3rem;
   }
 
+  /* ── HOW I WORK ── */
+  .approach-intro {
+    max-width: 640px;
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    margin-bottom: 3rem;
+  }
+
+  .principles-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .principle {
+    padding-left: 1.25rem;
+    border-left: 3px solid rgba(129, 140, 248, 0.2);
+  }
+
+  .principle h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+  }
+
+  .principle p {
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  .approach-closing {
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
   /* ── CASE STUDY CARDS ── */
   .case-studies-grid {
     display: grid;
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
+    gap: 1rem;
   }
 
   .case-card {
@@ -269,12 +295,15 @@
     gap: 2rem;
     align-items: start;
     cursor: pointer;
-    transition: background 0.4s ease;
+    transition: box-shadow 0.3s ease;
     position: relative;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow-card);
   }
 
   .case-card:hover {
-    background: var(--bg-card-hover);
+    box-shadow: var(--shadow-card-hover);
   }
 
   .case-card:hover .case-arrow {
@@ -315,9 +344,9 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     padding: 0.3rem 0.6rem;
-    border: 1px solid rgba(45, 212, 191, 0.25);
+    background: rgba(45, 212, 191, 0.08);
     border-radius: 3px;
-    color: var(--accent-secondary);
+    color: #0d9488;
   }
 
   .case-arrow {
@@ -350,7 +379,7 @@
     padding-top: 2rem;
     border-top: 1px solid var(--border);
     margin-top: 1.5rem;
-    animation: slideDown 0.4s ease;
+    animation: slideDown 0.3s ease;
   }
 
   .case-detail.active { display: block; }
@@ -400,7 +429,7 @@
     font-family: var(--font-display);
     font-size: 0.8rem;
     color: var(--text-secondary);
-    background: rgba(255,255,255,0.02);
+    background: var(--bg-primary);
     padding: 1.25rem;
     border-radius: 4px;
     border: 1px solid var(--border);
@@ -429,45 +458,25 @@
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
-    transition: all 0.4s ease;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
     position: relative;
     overflow: hidden;
-  }
-
-  .try-it-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, var(--accent-glow), transparent 60%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
+    box-shadow: var(--shadow-card);
   }
 
   .try-it-card:hover {
-    border-color: var(--border-accent);
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(217, 119, 87, 0.1);
-  }
-
-  .try-it-card:hover::before {
-    opacity: 1;
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-3px);
   }
 
   .try-it-card:hover .try-it-btn {
     background: var(--accent-gold);
-    color: #0c1220;
+    color: #fff;
     border-color: var(--accent-gold);
   }
 
   .try-it-icon {
     font-size: 2rem;
-    position: relative;
-    z-index: 1;
-  }
-
-  .try-it-content {
-    position: relative;
-    z-index: 1;
   }
 
   .try-it-content h3 {
@@ -495,8 +504,6 @@
     color: var(--accent-gold);
     transition: all 0.3s ease;
     text-align: center;
-    position: relative;
-    z-index: 1;
     margin-top: auto;
   }
 
@@ -504,16 +511,15 @@
   .philosophy-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
+    gap: 1.5rem;
   }
 
   .philosophy-card {
     background: var(--bg-card);
     padding: 2.5rem 2rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow-card);
   }
 
   .philosophy-card h3 {
@@ -595,7 +601,7 @@
   }
 
   .contact-link:hover {
-    background: rgba(212, 168, 83, 0.1);
+    background: rgba(212, 168, 83, 0.08);
     border-color: var(--accent-gold);
   }
 
@@ -610,19 +616,19 @@
 
   /* ── ANIMATIONS ── */
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
+    from { opacity: 0; transform: translateY(-6px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
   .reveal {
     opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
+    transform: translateY(16px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
   }
 
   .reveal.visible {
@@ -639,16 +645,16 @@
     }
     nav .nav-links { gap: 0.75rem; order: 3; width: 100%; justify-content: center; padding-top: 0.5rem; border-top: 1px solid var(--border); }
     nav .nav-links a { font-size: 0.65rem; }
-    .theme-toggle { order: 2; }
 
     .hero { padding: 7rem 1.25rem 3rem; }
     .hero-greeting { font-size: 3rem; }
     .hero-name { font-size: 1.4rem; }
     .hero-story { font-size: 1rem; }
-    .hero-cta-line { font-size: 1.2rem; }
-    .hero-meta { flex-direction: column; gap: 1.5rem; }
+    .hero-tagline { font-size: 1.2rem; }
 
     section { padding: 4rem 1.25rem; }
+
+    .principles-grid { grid-template-columns: 1fr; gap: 1.5rem; }
 
     .try-it-grid { grid-template-columns: 1fr; }
     .case-card {
@@ -673,53 +679,6 @@
     }
   }
 
-  /* ── LIGHT MODE ── */
-  @media (prefers-color-scheme: light) {
-    :root:not([data-theme="dark"]) {
-      --bg-primary: #f5f6fa;
-      --bg-card: #ffffff;
-      --bg-card-hover: #eef0f7;
-      --bg-input: #e8eaf3;
-      --text-primary: #1a1c2e;
-      --text-secondary: #4a5068;
-      --text-muted: #7b8ba4;
-      --border: rgba(12, 18, 32, 0.08);
-      --border-accent: rgba(99, 102, 241, 0.35);
-      --accent: #6366f1;
-      --accent-secondary: #14b8a6;
-      --accent-gold: #b8932e;
-      --accent-glow: rgba(99, 102, 241, 0.12);
-      --accent-soft: rgba(99, 102, 241, 0.06);
-    }
-    body::before { display: none; }
-    nav, .top-bar { background: rgba(245, 246, 250, 0.85) !important; }
-  }
-  :root[data-theme="light"] {
-    --bg-primary: #f5f6fa;
-    --bg-card: #ffffff;
-    --bg-card-hover: #eef0f7;
-    --bg-input: #e8eaf3;
-    --text-primary: #1a1c2e;
-    --text-secondary: #4a5068;
-    --text-muted: #7b8ba4;
-    --border: rgba(12, 18, 32, 0.08);
-    --border-accent: rgba(99, 102, 241, 0.35);
-    --accent: #6366f1;
-    --accent-secondary: #14b8a6;
-    --accent-gold: #b8932e;
-    --accent-glow: rgba(99, 102, 241, 0.12);
-    --accent-soft: rgba(99, 102, 241, 0.06);
-  }
-  [data-theme="light"] body::before { display: none; }
-  [data-theme="light"] nav, [data-theme="light"] .top-bar { background: rgba(245, 246, 250, 0.85) !important; }
-
-  .theme-toggle {
-    background: none; border: 1px solid var(--border); border-radius: 4px;
-    color: var(--text-muted); cursor: pointer; padding: 0.3rem 0.5rem;
-    font-size: 0.9rem; line-height: 1; transition: all 0.2s;
-  }
-  .theme-toggle:hover { border-color: var(--border-accent); color: var(--accent); }
-
 </style>
 </head>
 <body>
@@ -730,11 +689,10 @@
   <ul class="nav-links">
     <li><a href="#work">Work</a></li>
     <li><a href="#demos">Demos</a></li>
-    <li><a href="#philosophy">Philosophy</a></li>
+    <li><a href="#approach">Approach</a></li>
     <li><a href="#skills">Skills</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
-  <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode" aria-label="Toggle theme">&#9788;</button>
 </nav>
 
 <!-- HERO -->
@@ -750,23 +708,44 @@
   <p class="hero-story" style="animation-delay: 1.6s;">
     Now I build a different kind of system. AI workflows that run your business operations, so you can focus on the work that actually matters.
   </p>
-  <div class="hero-cta-line">
-    <span class="accent">You describe it.</span> I build it. It flows.
+  <div class="hero-tagline">
+    You describe it. I build it. It flows.
   </div>
-  <div class="hero-meta">
-    <div class="hero-meta-item">
-      <span class="hero-meta-label">Company</span>
-      <span class="hero-meta-value"><span style="color: var(--accent-gold)">FlowstateAI</span></span>
+  <div class="hero-meta-line">
+    <span class="gold">FlowstateAI</span> / Phoenix, AZ
+  </div>
+</section>
+
+<div class="accent-line"></div>
+
+<!-- HOW I WORK -->
+<section id="approach">
+  <div class="reveal">
+    <div class="section-label">Approach</div>
+    <h2 class="section-title">Built with intention. Every time.</h2>
+  </div>
+  <p class="approach-intro reveal">
+    My dad didn't cut corners. If a part wasn't right, he replaced it. If a fix was going to fail in six months, he found the one that would last. He worked with integrity because the person driving that car was trusting him with their life. I build AI systems the same way.
+  </p>
+  <div class="principles-grid reveal">
+    <div class="principle">
+      <h3>Understand before you build</h3>
+      <p>I don't start with tools. I start with your problem. What's actually costing you time? What's falling through the cracks? The system gets designed around your reality, not around what's trendy in AI.</p>
     </div>
-    <div class="hero-meta-item">
-      <span class="hero-meta-label">Focus</span>
-      <span class="hero-meta-value">AI Workflow Automation</span>
+    <div class="principle">
+      <h3>Human judgment stays in the loop</h3>
+      <p>AI should make you faster, not replace your thinking. Every system I build has confirmation gates, review steps, and approval flows. You stay in control of the decisions that matter.</p>
     </div>
-    <div class="hero-meta-item">
-      <span class="hero-meta-label">Base</span>
-      <span class="hero-meta-value">Phoenix, AZ</span>
+    <div class="principle">
+      <h3>If it doesn't have a job, it doesn't ship</h3>
+      <p>Zero-based thinking. Every component earns its place or gets cut. No feature bloat, no "nice to have" without a measurable purpose. Simple systems that work beat complex systems that impress.</p>
+    </div>
+    <div class="principle">
+      <h3>The work should speak for itself</h3>
+      <p>I don't pitch decks. I build working demos. Every project in this portfolio is live, functional, and testable. You can try it yourself before we ever have a conversation.</p>
     </div>
   </div>
+  <p class="approach-closing reveal">You describe it. I build it. It flows.</p>
 </section>
 
 <div class="accent-line"></div>
@@ -1159,39 +1138,17 @@ Prospects <span class="arrow">-></span> FlowstateAI Pipeline</div>
   function toggleCase(card) {
     const detail = card.querySelector('.case-detail');
     const wasActive = detail.classList.contains('active');
-
-    // Close all
     document.querySelectorAll('.case-detail').forEach(d => d.classList.remove('active'));
-
-    // Toggle clicked
-    if (!wasActive) {
-      detail.classList.add('active');
-    }
+    if (!wasActive) detail.classList.add('active');
   }
 
   // Scroll reveal
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-      }
+      if (entry.isIntersecting) entry.target.classList.add('visible');
     });
   }, { threshold: 0.1 });
-
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-  // Theme toggle
-  var themeToggle = document.getElementById('themeToggle');
-  var savedTheme = localStorage.getItem('portfolio-theme');
-  if (savedTheme) {
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    themeToggle.textContent = savedTheme === 'dark' ? '\u2600' : '\u263E';
-  }
-  themeToggle.addEventListener('click', function() {
-    var current = document.documentElement.getAttribute('data-theme');
-    var next = current === 'dark' ? 'light' : (current === 'light' ? 'dark' : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'dark' : 'light'));
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('portfolio-theme', next);
-    themeToggle.textContent = next === 'dark' ? '\u2600' : '\u263E';
-  });
 </script>
+</body>
+</html>
