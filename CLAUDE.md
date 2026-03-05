@@ -130,14 +130,16 @@ Notes: [text]
 
 ## Design System
 
-- **Fonts**: Space Mono (display/mono), Outfit (body)
-- **Accent**: #d97757 (warm orange)
-- **Background**: #0a0a0c (near-black)
-- **Cards**: #111115 (dark card)
-- **Text Primary**: #e8e6e3
-- **Text Secondary**: #8a8a8e
-- **Border**: rgba(255, 255, 255, 0.06)
-- **Grain overlay**: SVG noise texture at 3% opacity
+- **Fonts**: Space Mono (display/mono), Inter (body, letter-spacing -0.011em)
+- **Accent (Indigo)**: #818cf8 (section labels, nav hover, case tags, accent lines)
+- **Accent Secondary (Teal)**: #2dd4bf (tech tags, status badges, secondary interactive)
+- **Accent Gold**: #d4a853 (Launch Demo buttons, Contact CTA, FlowstateAI brand name ONLY)
+- **Background**: #0c1220 (navy)
+- **Cards**: #141a2e (dark navy card)
+- **Text Primary**: #e2e4e8
+- **Text Secondary**: #7b8ba4
+- **Border**: rgba(129, 140, 248, 0.12)
+- **Grain overlay**: SVG noise texture at 2% opacity
 - **Motion**: scroll-reveal animations, expand/collapse case studies
 
 ---

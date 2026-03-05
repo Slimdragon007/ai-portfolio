@@ -7,21 +7,24 @@
 <meta name="description" content="AI Systems Portfolio by Michael Haslim. Production AI orchestration, multi-agent systems, and MCP integration.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --accent: #d97757;
-    --accent-glow: rgba(217, 119, 87, 0.15);
-    --bg-primary: #0a0a0c;
-    --bg-card: #111115;
-    --bg-card-hover: #16161c;
-    --text-primary: #e8e6e3;
-    --text-secondary: #8a8a8e;
-    --text-muted: #5a5a5e;
-    --border: rgba(255, 255, 255, 0.06);
-    --border-accent: rgba(217, 119, 87, 0.3);
+    --accent: #818cf8;
+    --accent-secondary: #2dd4bf;
+    --accent-gold: #d4a853;
+    --accent-glow: rgba(129, 140, 248, 0.15);
+    --accent-soft: rgba(129, 140, 248, 0.06);
+    --bg-primary: #0c1220;
+    --bg-card: #141a2e;
+    --bg-card-hover: #1a2240;
+    --text-primary: #e2e4e8;
+    --text-secondary: #7b8ba4;
+    --text-muted: #4a5568;
+    --border: rgba(129, 140, 248, 0.12);
+    --border-accent: rgba(129, 140, 248, 0.3);
     --font-display: 'Space Mono', monospace;
-    --font-body: 'Outfit', sans-serif;
+    --font-body: 'Inter', sans-serif;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -37,6 +40,7 @@
     background: var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.7;
+    letter-spacing: -0.011em;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
   }
@@ -46,7 +50,7 @@
     content: '';
     position: fixed;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 9999;
   }
@@ -63,7 +67,7 @@
     justify-content: space-between;
     align-items: center;
     backdrop-filter: blur(20px);
-    background: rgba(10, 10, 12, 0.8);
+    background: rgba(12, 18, 32, 0.85);
     border-bottom: 1px solid var(--border);
   }
 
@@ -179,7 +183,7 @@
     width: 100%;
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity: 0.4;
+    opacity: 0.3;
   }
 
   /* ── SECTIONS ── */
@@ -276,9 +280,9 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     padding: 0.3rem 0.6rem;
-    border: 1px solid var(--border);
+    border: 1px solid rgba(45, 212, 191, 0.25);
     border-radius: 3px;
-    color: var(--text-muted);
+    color: var(--accent-secondary);
   }
 
   .case-arrow {
@@ -415,9 +419,9 @@
   }
 
   .try-it-card:hover .try-it-btn {
-    background: var(--accent);
-    color: #fff;
-    border-color: var(--accent);
+    background: var(--accent-gold);
+    color: #0c1220;
+    border-color: var(--accent-gold);
   }
 
   .try-it-icon {
@@ -451,9 +455,9 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     padding: 0.75rem 1.5rem;
-    border: 1px solid var(--border-accent);
+    border: 1px solid rgba(212, 168, 83, 0.4);
     border-radius: 6px;
-    color: var(--accent);
+    color: var(--accent-gold);
     transition: all 0.3s ease;
     text-align: center;
     position: relative;
@@ -546,18 +550,18 @@
     font-family: var(--font-display);
     font-size: 0.85rem;
     letter-spacing: 0.1em;
-    color: var(--accent);
+    color: var(--accent-gold);
     text-decoration: none;
     padding: 1rem 2.5rem;
-    border: 1px solid var(--border-accent);
+    border: 1px solid rgba(212, 168, 83, 0.4);
     border-radius: 4px;
     transition: all 0.3s ease;
     display: inline-block;
   }
 
   .contact-link:hover {
-    background: var(--accent-glow);
-    border-color: var(--accent);
+    background: rgba(212, 168, 83, 0.1);
+    border-color: var(--accent-gold);
   }
 
   .footer-line {
@@ -634,38 +638,42 @@
   /* ── LIGHT MODE ── */
   @media (prefers-color-scheme: light) {
     :root:not([data-theme="dark"]) {
-      --bg-primary: #faf9f7;
+      --bg-primary: #f5f6fa;
       --bg-card: #ffffff;
-      --bg-card-hover: #f5f4f2;
-      --bg-input: #f0efed;
-      --text-primary: #1a1a1c;
-      --text-secondary: #555558;
-      --text-muted: #8a8a8e;
-      --border: rgba(0, 0, 0, 0.08);
-      --border-accent: rgba(201, 103, 71, 0.35);
-      --accent: #c96747;
-      --accent-glow: rgba(201, 103, 71, 0.12);
-      --accent-soft: rgba(201, 103, 71, 0.06);
+      --bg-card-hover: #eef0f7;
+      --bg-input: #e8eaf3;
+      --text-primary: #1a1c2e;
+      --text-secondary: #4a5068;
+      --text-muted: #7b8ba4;
+      --border: rgba(12, 18, 32, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.35);
+      --accent: #6366f1;
+      --accent-secondary: #14b8a6;
+      --accent-gold: #b8932e;
+      --accent-glow: rgba(99, 102, 241, 0.12);
+      --accent-soft: rgba(99, 102, 241, 0.06);
     }
     body::before { display: none; }
-    nav, .top-bar { background: rgba(250, 249, 247, 0.85) !important; }
+    nav, .top-bar { background: rgba(245, 246, 250, 0.85) !important; }
   }
   :root[data-theme="light"] {
-    --bg-primary: #faf9f7;
+    --bg-primary: #f5f6fa;
     --bg-card: #ffffff;
-    --bg-card-hover: #f5f4f2;
-    --bg-input: #f0efed;
-    --text-primary: #1a1a1c;
-    --text-secondary: #555558;
-    --text-muted: #8a8a8e;
-    --border: rgba(0, 0, 0, 0.08);
-    --border-accent: rgba(201, 103, 71, 0.35);
-    --accent: #c96747;
-    --accent-glow: rgba(201, 103, 71, 0.12);
-    --accent-soft: rgba(201, 103, 71, 0.06);
+    --bg-card-hover: #eef0f7;
+    --bg-input: #e8eaf3;
+    --text-primary: #1a1c2e;
+    --text-secondary: #4a5068;
+    --text-muted: #7b8ba4;
+    --border: rgba(12, 18, 32, 0.08);
+    --border-accent: rgba(99, 102, 241, 0.35);
+    --accent: #6366f1;
+    --accent-secondary: #14b8a6;
+    --accent-gold: #b8932e;
+    --accent-glow: rgba(99, 102, 241, 0.12);
+    --accent-soft: rgba(99, 102, 241, 0.06);
   }
   [data-theme="light"] body::before { display: none; }
-  [data-theme="light"] nav, [data-theme="light"] .top-bar { background: rgba(250, 249, 247, 0.85) !important; }
+  [data-theme="light"] nav, [data-theme="light"] .top-bar { background: rgba(245, 246, 250, 0.85) !important; }
 
   .theme-toggle {
     background: none; border: 1px solid var(--border); border-radius: 4px;
@@ -704,7 +712,7 @@
   <div class="hero-meta">
     <div class="hero-meta-item">
       <span class="hero-meta-label">Role</span>
-      <span class="hero-meta-value">Founder, FlowstateAI</span>
+      <span class="hero-meta-value">Founder, <span style="color: var(--accent-gold)">FlowstateAI</span></span>
     </div>
     <div class="hero-meta-item">
       <span class="hero-meta-label">Focus</span>
