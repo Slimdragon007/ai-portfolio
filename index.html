@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Michael Haslim | AI Systems Portfolio</title>
+<meta name="description" content="AI Systems Portfolio by Michael Haslim. Production AI orchestration, multi-agent systems, and MCP integration.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #d97757;
+    --accent-glow: rgba(217, 119, 87, 0.15);
+    --bg-primary: #0a0a0c;
+    --bg-card: #111115;
+    --bg-card-hover: #16161c;
+    --text-primary: #e8e6e3;
+    --text-secondary: #8a8a8e;
+    --text-muted: #5a5a5e;
+    --border: rgba(255, 255, 255, 0.06);
+    --border-accent: rgba(217, 119, 87, 0.3);
+    --font-display: 'Space Mono', monospace;
+    --font-body: 'Outfit', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) var(--bg-primary);
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.7;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── GRAIN OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 1.25rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(20px);
+    background: rgba(10, 10, 12, 0.8);
+    border-bottom: 1px solid var(--border);
+  }
+
+  nav .logo {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+  }
+
+  nav .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  nav .nav-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+  }
+
+  nav .nav-links a:hover { color: var(--accent); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 8rem 2rem 4rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .hero-label {
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+
+  .hero h1 {
+    font-family: var(--font-body);
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.4s;
+  }
+
+  .hero h1 span {
+    display: block;
+    color: var(--text-muted);
+    font-weight: 300;
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    margin-top: 0.5rem;
+  }
+
+  .hero-body {
+    max-width: 620px;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.6s;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 3rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.8s;
+  }
+
+  .hero-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .hero-meta-label {
+    font-family: var(--font-display);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .hero-meta-value {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  /* ── ACCENT LINE ── */
+  .accent-line {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.4;
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    padding: 6rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: var(--font-display);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-subtitle {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin-bottom: 3rem;
+  }
+
+  /* ── CASE STUDY CARDS ── */
+  .case-studies-grid {
+    display: grid;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .case-card {
+    background: var(--bg-card);
+    padding: 2.5rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 2rem;
+    align-items: start;
+    cursor: pointer;
+    transition: background 0.4s ease;
+    position: relative;
+  }
+
+  .case-card:hover {
+    background: var(--bg-card-hover);
+  }
+
+  .case-card:hover .case-arrow {
+    transform: translateX(4px);
+    color: var(--accent);
+  }
+
+  .case-number {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    padding-top: 0.35rem;
+  }
+
+  .case-content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.01em;
+  }
+
+  .case-content p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .case-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .case-tag {
+    font-family: var(--font-display);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text-muted);
+  }
+
+  .case-arrow {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    transition: all 0.3s ease;
+    padding-top: 0.25rem;
+  }
+
+  /* ── EXPANDED CASE STUDY ── */
+  .case-detail {
+    display: none;
+    grid-column: 1 / -1;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    margin-top: 1.5rem;
+    animation: slideDown 0.4s ease;
+  }
+
+  .case-detail.active { display: block; }
+
+  .case-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .detail-block h4 {
+    font-family: var(--font-display);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .detail-block p, .detail-block li {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  .detail-block ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .detail-block ul li {
+    padding-left: 1rem;
+    position: relative;
+    margin-bottom: 0.4rem;
+  }
+
+  .detail-block ul li::before {
+    content: '>';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+  }
+
+  .architecture-flow {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    background: rgba(255,255,255,0.02);
+    padding: 1.25rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    white-space: pre-line;
+    line-height: 2;
+  }
+
+  .architecture-flow .arrow {
+    color: var(--accent);
+  }
+
+  /* ── PHILOSOPHY ── */
+  .philosophy-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .philosophy-card {
+    background: var(--bg-card);
+    padding: 2.5rem 2rem;
+  }
+
+  .philosophy-card h3 {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--accent);
+  }
+
+  .philosophy-card p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  /* ── COMPETENCIES ── */
+  .competency-list {
+    display: grid;
+    gap: 0;
+  }
+
+  .competency-item {
+    padding: 1.75rem 0;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 2rem;
+    align-items: baseline;
+  }
+
+  .competency-item:first-child {
+    border-top: 1px solid var(--border);
+  }
+
+  .competency-name {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+  }
+
+  .competency-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  /* ── CONTACT ── */
+  .contact-section {
+    text-align: center;
+    padding: 8rem 2rem;
+  }
+
+  .contact-section h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+
+  .contact-section p {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .contact-link {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 1rem 2.5rem;
+    border: 1px solid var(--border-accent);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    display: inline-block;
+  }
+
+  .contact-link:hover {
+    background: var(--accent-glow);
+    border-color: var(--accent);
+  }
+
+  .footer-line {
+    font-family: var(--font-display);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 4rem;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.25rem; }
+    nav .nav-links { gap: 1rem; }
+    nav .nav-links a { font-size: 0.7rem; }
+
+    .hero { padding: 6rem 1.25rem 3rem; }
+    .hero-meta { flex-direction: column; gap: 1.5rem; }
+
+    section { padding: 4rem 1.25rem; }
+
+    .case-card {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+      padding: 1.75rem;
+    }
+    .case-number { font-size: 0.65rem; }
+    .case-arrow { display: none; }
+
+    .case-detail-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .philosophy-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .competency-item {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">SLIM.SYSTEMS</div>
+  <ul class="nav-links">
+    <li><a href="#work">Work</a></li>
+    <li><a href="#philosophy">Philosophy</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-label">AI Systems Architect</div>
+  <h1>
+    I build the layer<br>between human<br>judgment and AI.
+    <span>Not prompts. Systems.</span>
+  </h1>
+  <p class="hero-body">
+    Production AI orchestration across multi-agent architectures, persistent memory, MCP tool integration, and context routing. Every build in this portfolio is live and in daily use.
+  </p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Role</span>
+      <span class="hero-meta-value">Co-founder, FlowstateAI</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Focus</span>
+      <span class="hero-meta-value">AI Workflow Automation</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Base</span>
+      <span class="hero-meta-value">Phoenix, AZ</span>
+    </div>
+  </div>
+</section>
+
+<div class="accent-line"></div>
+
+<!-- CASE STUDIES -->
+<section id="work">
+  <div class="reveal">
+    <div class="section-label">Case Studies</div>
+    <h2 class="section-title">The Work</h2>
+    <p class="section-subtitle">Six production builds. Each one solves a real problem, runs in production, and proves a different dimension of AI systems thinking.</p>
+  </div>
+
+  <div class="case-studies-grid reveal">
+
+    <!-- CS 01 -->
+    <div class="case-card" onclick="toggleCase(this)">
+      <span class="case-number">01</span>
+      <div class="case-content">
+        <h3>Claude OS</h3>
+        <p>A personal AI operating system with context routing, multi-mode orchestration, and self-healing error correction across three professional domains.</p>
+        <div class="case-tags">
+          <span class="case-tag">Context Routing</span>
+          <span class="case-tag">Prompt OS</span>
+          <span class="case-tag">MCP</span>
+          <span class="case-tag">Notion</span>
+        </div>
+        <div class="case-detail">
+          <div class="case-detail-grid">
+            <div class="detail-block">
+              <h4>Architecture</h4>
+              <div class="architecture-flow">CLAUDE.md master context
+<span class="arrow">-></span> Mode prompts (Yelp / FlowstateAI / Personal)
+<span class="arrow">-></span> Trigger phrase routing
+<span class="arrow">-></span> Notion-hosted prompt database
+<span class="arrow">-></span> Session startup checklist</div>
+            </div>
+            <div class="detail-block">
+              <h4>What Makes It Different</h4>
+              <ul>
+                <li>Three-mode architecture with isolated context per domain</li>
+                <li>ENFP-calibrated communication style</li>
+                <li>Self-healing via persistent mistakes log</li>
+                <li>Session resumability with Build Vault integration</li>
+              </ul>
+            </div>
+            <div class="detail-block">
+              <h4>Result</h4>
+              <p>Zero cold-start sessions. Consistent output quality. A living system that improves with every correction. Foundation for every other build in this portfolio.</p>
+            </div>
+            <div class="detail-block">
+              <h4>Stack</h4>
+              <p>Claude (Anthropic), Notion MCP, structured markdown, CLAUDE.md methodology</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span class="case-arrow">&rarr;</span>
+    </div>
+
+    <!-- CS 02 -->
+    <div class="case-card" onclick="toggleCase(this)">
+      <span class="case-number">02</span>
+      <div class="case-content">
+        <h3>Build Vault</h3>
+        <p>Session persistence and artifact tracking that eliminates cold-start problems. Resume Cards enable any future session to pick up exactly where the last one stopped.</p>
+        <div class="case-tags">
+          <span class="case-tag">Session Persistence</span>
+          <span class="case-tag">Artifact Tracking</span>
+          <span class="case-tag">Notion DB</span>
+        </div>
+        <div class="case-detail">
+          <div class="case-detail-grid">
+            <div class="detail-block">
+              <h4>Architecture</h4>
+              <div class="architecture-flow">Claude session
+<span class="arrow">-></span> artifact created
+<span class="arrow">-></span> Build Vault entry logged
+<span class="arrow">-></span> Resume Card generated
+<span class="arrow">-></span> future session loads card
+<span class="arrow">-></span> instant context restoration</div>
+            </div>
+            <div class="detail-block">
+              <h4>What Makes It Different</h4>
+              <ul>
+                <li>Resume Cards: portable session state in a code block</li>
+                <li>Full audit trail: artifact + chat URL + context</li>
+                <li>Mode tagging for cross-domain organization</li>
+                <li>Status workflow: Active -> Resume -> Complete -> Archived</li>
+              </ul>
+            </div>
+            <div class="detail-block">
+              <h4>Result</h4>
+              <p>Session handoffs in seconds. Searchable archive of all AI collaboration. The system that tracks the builds that prove the skills.</p>
+            </div>
+            <div class="detail-block">
+              <h4>Stack</h4>
+              <p>Notion (database + MCP), Claude, structured Resume Card protocol</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span class="case-arrow">&rarr;</span>
+    </div>
+
+    <!-- CS 03 -->
+    <div class="case-card" onclick="toggleCase(this)">
+      <span class="case-number">03</span>
+      <div class="case-content">
+        <h3>MCP Multi-Tool Orchestration</h3>
+        <p>Production integration across Notion, Google Calendar, Gmail, Google Drive, and Apollo.io. One conversational layer, five tools, confirmation-gated actions.</p>
+        <div class="case-tags">
+          <span class="case-tag">MCP</span>
+          <span class="case-tag">5+ Integrations</span>
+          <span class="case-tag">Intent Routing</span>
+          <span class="case-tag">Apollo.io</span>
+        </div>
+        <div class="case-detail">
+          <div class="case-detail-grid">
+            <div class="detail-block">
+              <h4>Routing Logic</h4>
+              <div class="architecture-flow">Recipes, golf, music <span class="arrow">-></span> Notion
+Reminders <span class="arrow">-></span> Apple Reminders
+Meetings <span class="arrow">-></span> Google Calendar
+Client comms <span class="arrow">-></span> Gmail (confirm first)
+Prospects <span class="arrow">-></span> FlowstateAI Pipeline</div>
+            </div>
+            <div class="detail-block">
+              <h4>What Makes It Different</h4>
+              <ul>
+                <li>Intent-based routing, not explicit commands</li>
+                <li>Confirmation gates prevent AI overreach</li>
+                <li>Cross-tool workflows in a single conversation</li>
+                <li>Custom slash commands for rapid logging</li>
+              </ul>
+            </div>
+            <div class="detail-block">
+              <h4>Result</h4>
+              <p>Single interface for 5+ tools. Eliminated tab-switching. Structured logging with zero missing fields. Production-safe with human-in-the-loop gates.</p>
+            </div>
+            <div class="detail-block">
+              <h4>Stack</h4>
+              <p>Claude, Notion MCP, Google Calendar MCP, Gmail MCP, Google Drive, Apollo.io Pro</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span class="case-arrow">&rarr;</span>
+    </div>
+
+    <!-- CS 04 -->
+    <div class="case-card" onclick="toggleCase(this)">
+      <span class="case-number">04</span>
+      <div class="case-content">
+        <h3>Production HTML Artifacts</h3>
+        <p>A Prezi-style portfolio site built entirely through AI collaboration. Zero hand-coding. Full responsive design, touch gestures, custom design system.</p>
+        <div class="case-tags">
+          <span class="case-tag">HTML/CSS/JS</span>
+          <span class="case-tag">Responsive</span>
+          <span class="case-tag">Zero Hand-Coding</span>
+        </div>
+        <div class="case-detail">
+          <div class="case-detail-grid">
+            <div class="detail-block">
+              <h4>Architecture</h4>
+              <div class="architecture-flow">Design brief
+<span class="arrow">-></span> Claude architecture session
+<span class="arrow">-></span> iterative HTML/CSS/JS build
+<span class="arrow">-></span> responsive testing
+<span class="arrow">-></span> Build Vault logging</div>
+            </div>
+            <div class="detail-block">
+              <h4>What Makes It Different</h4>
+              <ul>
+                <li>5-slide Prezi camera-pan navigation</li>
+                <li>Auto dark/light mode, swipe + keyboard input</li>
+                <li>Custom typography system (Poppins + Lora)</li>
+                <li>Multi-session build using Resume Cards</li>
+              </ul>
+            </div>
+            <div class="detail-block">
+              <h4>Result</h4>
+              <p>Production-ready SPA rivaling hand-coded work. Proof that AI collaboration can match traditional development quality.</p>
+            </div>
+            <div class="detail-block">
+              <h4>Stack</h4>
+              <p>HTML5, CSS3, vanilla JavaScript, Claude (Anthropic)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span class="case-arrow">&rarr;</span>
+    </div>
+
+    <!-- CS 05 -->
+    <div class="case-card" onclick="toggleCase(this)">
+      <span class="case-number">05</span>
+      <div class="case-content">
+        <h3>ChatBench Dashboards</h3>
+        <p>Chart.js sales analytics for a 7-state enterprise territory. Conversational dashboard creation with context-aware benchmarks and iterative refinement.</p>
+        <div class="case-tags">
+          <span class="case-tag">Chart.js</span>
+          <span class="case-tag">Analytics</span>
+          <span class="case-tag">Enterprise Sales</span>
+        </div>
+        <div class="case-detail">
+          <div class="case-detail-grid">
+            <div class="detail-block">
+              <h4>Architecture</h4>
+              <div class="architecture-flow">Yelp performance data
+<span class="arrow">-></span> Claude analysis layer
+<span class="arrow">-></span> Chart.js visualization
+<span class="arrow">-></span> ChatBench integration
+<span class="arrow">-></span> interactive dashboard</div>
+            </div>
+            <div class="detail-block">
+              <h4>What Makes It Different</h4>
+              <ul>
+                <li>Natural language drives chart changes</li>
+                <li>Pre-configured with territory benchmarks</li>
+                <li>No BI tools or data engineering required</li>
+                <li>Integrated into the AI workflow layer</li>
+              </ul>
+            </div>
+            <div class="detail-block">
+              <h4>Result</h4>
+              <p>Custom dashboards in minutes. Visual tracking aligned to $25-30K/month billing targets. Analytics embedded in the sales workflow.</p>
+            </div>
+            <div class="detail-block">
+              <h4>Stack</h4>
+              <p>Chart.js, Claude (Anthropic), ChatBench</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span class="case-arrow">&rarr;</span>
+    </div>
+
+    <!-- CS 06 -->
+    <div class="case-card" onclick="toggleCase(this)">
+      <span class="case-number">06</span>
+      <div class="case-content">
+        <h3>The 4D Framework</h3>
+        <p>An AI agent orchestration methodology: Define, Delegate, Discern, Diligence. The operating system behind every build in this portfolio.</p>
+        <div class="case-tags">
+          <span class="case-tag">Methodology</span>
+          <span class="case-tag">Agent Orchestration</span>
+          <span class="case-tag">FlowstateAI</span>
+        </div>
+        <div class="case-detail">
+          <div class="case-detail-grid">
+            <div class="detail-block">
+              <h4>The Framework</h4>
+              <div class="architecture-flow"><span class="arrow">D1</span> DEFINE: why it exists + measurable outcome
+<span class="arrow">D2</span> DELEGATE: map tasks to agents and tools
+<span class="arrow">D3</span> DISCERN: surface trade-offs, make decisions
+<span class="arrow">D4</span> DILIGENCE: build, test, log, improve</div>
+            </div>
+            <div class="detail-block">
+              <h4>Why It Matters</h4>
+              <ul>
+                <li>Prompt engineering is a skill</li>
+                <li>AI orchestration is a discipline</li>
+                <li>Every build has a why, every component has a job</li>
+                <li>Every output has an audit trail</li>
+              </ul>
+            </div>
+            <div class="detail-block">
+              <h4>Applied To This Portfolio</h4>
+              <p>Define: prove AI capability. Delegate: Claude builds, Notion hosts, Slim reviews. Discern: case study deck over interactive site. Diligence: build, log, deploy to GitHub.</p>
+            </div>
+            <div class="detail-block">
+              <h4>Proof</h4>
+              <p>Every case study was built using this framework. The 4D methodology is documented in the FlowstateAI prompt and applied to every client engagement.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span class="case-arrow">&rarr;</span>
+    </div>
+
+  </div>
+</section>
+
+<div class="accent-line"></div>
+
+<!-- PHILOSOPHY -->
+<section id="philosophy">
+  <div class="reveal">
+    <div class="section-label">Philosophy</div>
+    <h2 class="section-title">How I Think About AI</h2>
+  </div>
+  <div class="philosophy-grid reveal">
+    <div class="philosophy-card">
+      <h3>Zero-Based Thinking</h3>
+      <p>Every component in a system needs a specific job. If it doesn't earn its place, it gets cut. No feature bloat, no "nice to have" without a measurable purpose.</p>
+    </div>
+    <div class="philosophy-card">
+      <h3>Systems Over Prompts</h3>
+      <p>A single prompt is a tool. A system of context routing, persistent state, tool integration, and error correction is an operating layer. I build the layer.</p>
+    </div>
+    <div class="philosophy-card">
+      <h3>Human-in-the-Loop</h3>
+      <p>AI should amplify judgment, not replace it. Confirmation gates, review steps, and structured approval workflows keep humans in control of high-stakes decisions.</p>
+    </div>
+  </div>
+</section>
+
+<div class="accent-line"></div>
+
+<!-- COMPETENCIES -->
+<section id="skills">
+  <div class="reveal">
+    <div class="section-label">Competencies</div>
+    <h2 class="section-title">What I Build</h2>
+  </div>
+  <div class="competency-list reveal">
+    <div class="competency-item">
+      <span class="competency-name">AI Architecture</span>
+      <span class="competency-desc">Multi-agent systems with context routing, persistent memory, and session resumability</span>
+    </div>
+    <div class="competency-item">
+      <span class="competency-name">MCP Integration</span>
+      <span class="competency-desc">Production orchestration across Notion, Google Calendar, Gmail, Google Drive, and Apollo.io</span>
+    </div>
+    <div class="competency-item">
+      <span class="competency-name">Prompt Engineering</span>
+      <span class="competency-desc">Structured prompt OS with mode-switching, error correction loops, and personality calibration</span>
+    </div>
+    <div class="competency-item">
+      <span class="competency-name">Production Artifacts</span>
+      <span class="competency-desc">HTML/CSS/JS applications, Chart.js dashboards, interactive presentations via AI collaboration</span>
+    </div>
+    <div class="competency-item">
+      <span class="competency-name">Business Application</span>
+      <span class="competency-desc">Every build ties to ROI: sales velocity, time savings, or decision quality</span>
+    </div>
+  </div>
+</section>
+
+<div class="accent-line"></div>
+
+<!-- CONTACT -->
+<section id="contact" class="contact-section">
+  <div class="reveal">
+    <div class="section-label">Let's Build</div>
+    <h2>Ready to talk systems?</h2>
+    <p>AI automation architecture for mid-market companies.</p>
+    <a href="/cdn-cgi/l/email-protection#8de0e4eee5ece8e1cdebe1e2fafef9ecf9e8ece4a3eee2e0" class="contact-link"><span class="__cf_email__" data-cfemail="2944404a41484c45694f45465e5a5d485d4c4840074a4644">[email&#160;protected]</span></a>
+    <p class="footer-line">Michael Haslim / FlowstateAI / Phoenix, AZ</p>
+  </div>
+</section>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // Case study toggle
+  function toggleCase(card) {
+    const detail = card.querySelector('.case-detail');
+    const wasActive = detail.classList.contains('active');
+
+    // Close all
+    document.querySelectorAll('.case-detail').forEach(d => d.classList.remove('active'));
+
+    // Toggle clicked
+    if (!wasActive) {
+      detail.classList.add('active');
+    }
+  }
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    ent

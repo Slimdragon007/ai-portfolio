@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOW Generator | FlowstateAI Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0a0a0c;
+      --card:         #111115;
+      --card-raised:  #16161c;
+      --accent:       #d97757;
+      --accent-dim:   rgba(217,119,87,0.12);
+      --accent-glow:  rgba(217,119,87,0.06);
+      --accent-border:rgba(217,119,87,0.28);
+      --text-primary: #e8e6e3;
+      --text-secondary:#8a8a8e;
+      --text-muted:   #55555a;
+      --border:       rgba(255,255,255,0.06);
+      --border-mid:   rgba(255,255,255,0.09);
+      --border-strong:rgba(255,255,255,0.13);
+      --green:        #4ade80;
+      --green-dim:    rgba(74,222,128,0.1);
+      --green-border: rgba(74,222,128,0.28);
+      --mono: 'Space Mono', monospace;
+      --body: 'Outfit', sans-serif;
+      --header-h: 62px;
+    }
+
+    html { height: 100%; }
+    body { min-height: 100%; background: var(--bg); color: var(--text-primary); font-family: var(--body); font-size: 14.5px; line-height: 1.65; }
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.028; pointer-events: none; z-index: 9998;
+    }
+
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 3px; }
+
+    /* ─── Header ─────────────────────────────────────── */
+    .header {
+      height: var(--header-h);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px;
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(10,10,12,0.93);
+      backdrop-filter: blur(12px);
+    }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .h-chip { font-family: var(--mono); font-size: 9.5px; color: var(--accent); background: var(--accent-dim); border: 1px solid var(--accent-border); padding: 3px 10px; border-radius: 100px; letter-spacing: 0.1em; text-transform: uppercase; }
+    .h-title { font-family: var(--mono); font-size: 13px; font-weight: 700; }
+    .h-sub { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .api-label { font-family: var(--mono); font-size: 10px; color: var(--text-muted); }
+    .demo-chip { font-family: var(--mono); font-size: 9.5px; color: var(--accent); background: var(--accent-dim); border: 1px solid var(--accent-border); padding: 3px 10px; border-radius: 100px; letter-spacing: 0.1em; text-transform: uppercase; }
+    .demo-chip.live { display: none; }
+    .api-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); transition: background 0.3s; }
+    .api-dot.on { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .api-input { font-family: var(--mono); font-size: 11px; background: var(--card); border: 1px solid var(--border-mid); color: var(--text-primary); padding: 7px 12px; border-radius: 7px; width: 230px; outline: none; transition: border-color 0.2s; }
+    .api-input::placeholder { color: var(--text-muted); }
+    .api-input:focus { border-color: var(--accent-border); }
+    .api-input.valid { border-color: var(--green-border); color: var(--green); }
+
+    /* ─── Layout ──────────────────────────────────────── */
+    .layout { display: grid; grid-template-columns: 320px 1fr; min-height: calc(100vh - var(--header-h)); }
+
+    /* ─── Left panel ──────────────────────────────────── */
+    .panel-left {
+      border-right: 1px solid var(--border);
+      padding: 24px 22px 32px;
+      overflow-y: auto;
+      height: calc(100vh - var(--header-h));
+      position: sticky; top: var(--header-h);
+      display: flex; flex-direction: column; gap: 0;
+    }
+
+    /* ─── Right panel ─────────────────────────────────── */
+    .panel-right { padding: 24px 28px 64px; overflow-y: auto; }
+
+    /* ─── Shared form styles ──────────────────────────── */
+    .slabel { font-family: var(--mono); font-size: 9.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.14em; display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .slabel::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .fg { margin-bottom: 14px; }
+    .flabel { display: block; font-family: var(--mono); font-size: 9.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 5px; }
+    .finput, .ftextarea, .fselect { width: 100%; background: var(--card); border: 1px solid var(--border-mid); color: var(--text-primary); font-family: var(--body); font-size: 13.5px; padding: 9px 11px; border-radius: 8px; outline: none; transition: border-color 0.18s; }
+    .finput::placeholder, .ftextarea::placeholder { color: var(--text-muted); }
+    .finput:focus, .ftextarea:focus, .fselect:focus { border-color: var(--accent-border); }
+    .ftextarea { resize: none; line-height: 1.55; }
+    .fselect { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6' fill='%238a8a8e'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; padding-right: 30px; }
+
+    /* Presets */
+    .presets { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+    .preset-btn { font-family: var(--mono); font-size: 10px; background: var(--card); border: 1px solid var(--border-mid); color: var(--text-secondary); padding: 5px 11px; border-radius: 6px; cursor: pointer; transition: all 0.18s; }
+    .preset-btn:hover { border-color: var(--accent-border); color: var(--accent); background: var(--accent-glow); }
+    .preset-btn.active { border-color: var(--accent-border); color: var(--accent); background: var(--accent-dim); }
+
+    /* Two-col inputs */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+
+    /* Generate button */
+    .gen-btn { width: 100%; background: var(--accent); color: #fff; border: none; font-family: var(--mono); font-size: 12.5px; font-weight: 700; letter-spacing: 0.05em; padding: 14px; border-radius: 10px; cursor: pointer; transition: background 0.18s, transform 0.12s, box-shadow 0.18s; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 9px; }
+    .gen-btn:hover:not(:disabled) { background: #c96843; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(217,119,87,0.25); }
+    .gen-btn:active:not(:disabled) { transform: translateY(0); }
+    .gen-btn:disabled { background: var(--card-raised); color: var(--text-muted); cursor: not-allowed; }
+    .spin { width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.25); border-top-color: #fff; border-radius: 50%; animation: rotate 0.65s linear infinite; }
+    @keyframes rotate { to { transform: rotate(360deg); } }
+
+    /* ─── Placeholder ─────────────────────────────────── */
+    .placeholder { border: 1.5px dashed var(--border-mid); border-radius: 12px; padding: 64px 24px; text-align: center; max-width: 560px; margin: 0 auto; }
+    .placeholder-icon { font-family: var(--mono); font-size: 28px; color: var(--text-muted); opacity: 0.3; margin-bottom: 14px; }
+    .placeholder h3 { font-family: var(--mono); font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 700; }
+    .placeholder p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ─── Document ────────────────────────────────────── */
+    .sow-wrap { max-width: 720px; }
+
+    .sow-doc {
+      background: var(--card);
+      border: 1px solid var(--border-mid);
+      border-radius: 14px;
+      overflow: hidden;
+      animation: up 0.3s ease;
+    }
+    @keyframes up { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    /* Doc header */
+    .doc-header {
+      padding: 32px 36px 28px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.015);
+    }
+    .doc-watermark {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-bottom: 10px;
+    }
+    .doc-title {
+      font-family: var(--mono);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.25;
+      margin-bottom: 20px;
+      outline: none;
+      border-bottom: 1px dashed transparent;
+      transition: border-color 0.2s;
+    }
+    .doc-title:focus { border-bottom-color: var(--accent-border); }
+
+    .doc-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
+    .meta-row { display: flex; align-items: baseline; gap: 8px; }
+    .meta-lbl { font-family: var(--mono); font-size: 9.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+    .meta-val { font-size: 13.5px; color: var(--text-primary); outline: none; border-bottom: 1px dashed transparent; transition: border-color 0.2s; min-width: 20px; }
+    .meta-val:focus { border-bottom-color: var(--accent-border); }
+    .meta-fixed { font-size: 13.5px; color: var(--text-secondary); }
+
+    /* Sections */
+    .sow-section { border-top: 1px solid var(--border); }
+
+    .sow-section-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 36px 14px;
+    }
+    .sow-num {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .sow-section-title {
+      font-family: var(--mono);
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .sow-body {
+      padding: 0 36px 22px;
+      font-size: 14px;
+      color: var(--text-primary);
+      line-height: 1.7;
+      outline: none;
+      min-height: 40px;
+    }
+    [contenteditable="true"]:focus { outline: none; }
+    .sow-body:focus { box-shadow: inset 2px 0 0 var(--accent-border); }
+
+    /* List items */
+    .list-item { position: relative; padding-left: 16px; margin-bottom: 4px; }
+    .list-item::before { content: '·'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+
+    /* Tables */
+    .sow-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    .sow-table th { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border-mid); background: rgba(255,255,255,0.02); }
+    .sow-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-primary); vertical-align: top; outline: none; transition: background 0.15s; }
+    .sow-table td:focus { background: rgba(217,119,87,0.05); }
+    .sow-table tr:last-child td { border-bottom: none; }
+    .sow-table .col-milestone { width: 24%; font-family: var(--mono); font-size: 12px; color: var(--text-primary); }
+    .sow-table .col-duration  { width: 18%; font-family: var(--mono); font-size: 12px; color: var(--accent); }
+    .sow-table .col-amount    { width: 22%; font-family: var(--mono); font-size: 12px; color: var(--green); }
+    .sow-table .col-trigger   { width: 36%; }
+
+    /* Payment total */
+    .payment-total {
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 36px 14px;
+    }
+    .total-lbl { font-family: var(--mono); font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .total-val { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--accent); outline: none; border-bottom: 1px dashed transparent; transition: border-color 0.2s; min-width: 20px; }
+    .total-val:focus { border-bottom-color: var(--accent-border); }
+
+    /* ─── Actions bar ─────────────────────────────────── */
+    .actions-bar {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      max-width: 720px;
+    }
+    .btn-pdf {
+      flex: 2;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-family: var(--mono);
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 12px 18px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.18s;
+      letter-spacing: 0.04em;
+    }
+    .btn-pdf:hover { background: #c96843; transform: translateY(-1px); }
+    .btn-md {
+      flex: 2;
+      background: transparent;
+      border: 1px solid var(--border-strong);
+      color: var(--text-secondary);
+      font-family: var(--mono);
+      font-size: 11.5px;
+      padding: 12px 18px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-md:hover { border-color: var(--border-strong); color: var(--text-primary); background: rgba(255,255,255,0.03); }
+    .btn-md.copied { border-color: var(--green-border); color: var(--green); background: var(--green-dim); }
+    .btn-clear {
+      flex: 1;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 12px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-clear:hover { color: var(--text-secondary); border-color: var(--border-mid); }
+
+    /* Sim badge */
+    .sim-badge { font-family: var(--mono); font-size: 9px; color: var(--text-muted); background: rgba(255,255,255,0.04); border: 1px solid var(--border-mid); padding: 2px 9px; border-radius: 100px; margin-left: auto; }
+
+    /* ─── Toast ───────────────────────────────────────── */
+    .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(4px); background: var(--card-raised); border: 1px solid var(--border-strong); color: var(--text-primary); font-family: var(--mono); font-size: 11.5px; padding: 9px 20px; border-radius: 100px; z-index: 1000; opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ─── Footer ──────────────────────────────────────── */
+    .footer { border-top: 1px solid var(--border); padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; }
+    .footer-mono { font-family: var(--mono); font-size: 10px; color: var(--text-muted); }
+
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; }
+      .panel-left { height: auto; position: static; border-right: none; border-bottom: 1px solid var(--border); }
+      .header-right { display: none; }
+      .doc-meta { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── Header ────────────────────────────────────────── -->
+<header class="header">
+  <div class="header-left">
+    <span class="h-chip">Portfolio #02</span>
+    <div>
+      <div class="h-title">SOW Generator</div>
+      <div class="h-sub">Describe a project, get a professional Statement of Work</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="demo-chip" id="demoChip">Demo Mode</span>
+    <span class="api-label">API Key</span>
+    <div id="apiDot" class="api-dot"></div>
+    <input id="apiKey" type="password" class="api-input" placeholder="sk-ant-api03-... (optional)" autocomplete="off" spellcheck="false">
+  </div>
+</header>
+
+<!-- ─── Layout ───────────────────────────────────────── -->
+<div class="layout">
+
+  <!-- Left: Input form -->
+  <aside class="panel-left">
+    <div class="slabel">Project Presets</div>
+    <div class="presets">
+      <button class="preset-btn" data-preset="website">Website Redesign</button>
+      <button class="preset-btn" data-preset="ai">AI Automation</button>
+      <button class="preset-btn" data-preset="photo">Photography</button>
+    </div>
+
+    <div class="slabel">Project Details</div>
+
+    <div class="fg">
+      <label class="flabel">Describe the project</label>
+      <textarea id="projDesc" class="ftextarea" style="height:130px;" placeholder="e.g. Redesign a restaurant website with online reservations, a photo gallery, and mobile optimization. 8-week project for a client in San Francisco."></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="fg" style="margin-bottom:0">
+        <label class="flabel">Client Name</label>
+        <input id="clientName" type="text" class="finput" placeholder="e.g. Coastal Kitchen">
+      </div>
+      <div class="fg" style="margin-bottom:0">
+        <label class="flabel">Budget Range</label>
+        <input id="budget" type="text" class="finput" placeholder="e.g. $10k-$15k">
+      </div>
+    </div>
+
+    <div class="fg" style="margin-top:14px">
+      <label class="flabel">Timeline Preference</label>
+      <input id="timeline" type="text" class="finput" placeholder="e.g. 8 weeks, end of Q2, ASAP">
+    </div>
+
+    <div class="fg">
+      <label class="flabel">Document Tone</label>
+      <select id="tone" class="fselect">
+        <option value="professional">Professional (standard business)</option>
+        <option value="friendly">Friendly (agency / creative)</option>
+        <option value="formal">Formal (enterprise / legal)</option>
+      </select>
+    </div>
+
+    <button class="gen-btn" id="genBtn">
+      <span id="genLabel">Generate SOW</span>
+      <span id="genIcon">&#x2192;</span>
+    </button>
+  </aside>
+
+  <!-- Right: SOW document -->
+  <section class="panel-right">
+    <div id="placeholderArea">
+      <div class="placeholder">
+        <div class="placeholder-icon">&#x2756;</div>
+        <h3>No SOW generated yet</h3>
+        <p>Describe your project on the left and click Generate SOW. All sections are editable inline after generation.</p>
+      </div>
+    </div>
+
+    <div id="docArea" style="display:none;">
+      <div class="sow-wrap">
+        <div class="sow-doc" id="sowDoc"></div>
+        <div class="actions-bar" id="actionsBar">
+          <button class="btn-pdf" id="btnPdf">Export PDF</button>
+          <button class="btn-md" id="btnMd">Copy Markdown</button>
+          <button class="btn-clear" id="btnClear">Clear</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer class="footer">
+  <span class="footer-mono">FlowstateAI &middot; SOW Generator &middot; Portfolio Demo</span>
+  <span class="footer-mono">All sections are editable inline after generation.</span>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── Mock SOW data ─────────────────────────────────────────
+var MOCK_SOWS = {
+  website: {
+    project_title: 'Website Redesign',
+    client: 'The Coastal Kitchen',
+    overview: 'A complete redesign of The Coastal Kitchen\'s public website with the goals of strengthening visual identity, driving online reservations, and delivering a polished mobile experience. The project includes a new design system, an integrated photo gallery, and a streamlined reservation booking flow powered by OpenTable.',
+    scope: [
+      'Discovery session, competitive audit, and revised sitemap',
+      'UX wireframes for homepage, menu, reservations, and about pages',
+      'High-fidelity Figma mockups with custom design system',
+      'Responsive frontend implementation (Webflow or custom HTML/CSS)',
+      'Photo gallery with lightbox and lazy loading',
+      'OpenTable or Resy reservation widget integration',
+      'Basic on-page SEO setup (meta tags, schema markup, sitemap.xml)',
+      'Cross-browser and mobile QA testing',
+      '2 weeks of post-launch support'
+    ],
+    timeline: [
+      { milestone: 'Discovery & Strategy', duration: 'Week 1', description: 'Kickoff call, brand audit, competitor review, sitemap approval' },
+      { milestone: 'Wireframes', duration: 'Week 2', description: 'Lo-fi wireframes for all key pages, client review and sign-off' },
+      { milestone: 'Visual Design', duration: 'Weeks 3-4', description: 'Hi-fi Figma mockups, design system, one round of revisions' },
+      { milestone: 'Development', duration: 'Weeks 5-7', description: 'Frontend build, reservation integration, content population' },
+      { milestone: 'QA & Launch', duration: 'Week 8', description: 'Testing, client review, DNS cutover, post-launch monitoring' }
+    ],
+    payment_total: '$12,000',
+    payment_schedule: [
+      { milestone: 'Project Kickoff', amount: '$4,000 (33%)', trigger: 'Due upon contract signing' },
+      { milestone: 'Design Approval', amount: '$4,000 (33%)', trigger: 'Due upon client approval of hi-fi mockups' },
+      { milestone: 'Site Launch', amount: '$4,000 (34%)', trigger: 'Due upon site going live' }
+    ],
+    assumptions: [
+      'Client provides all approved copy, logo files, and photography by end of Week 1',
+      'Client has an existing domain, hosting account, and business email setup',
+      'Reservation platform (OpenTable or Resy) is already active with an existing account',
+      'Up to two rounds of design revisions are included per milestone',
+      'Client provides feedback within 48 hours of deliverable submission to maintain the timeline'
+    ],
+    exclusions: [
+      'Copywriting, content strategy, or content creation',
+      'Custom photography or video production',
+      'Ongoing hosting, maintenance, or security updates after post-launch period',
+      'Third-party platform subscription fees (reservation system, email marketing)',
+      'Any scope not explicitly listed in this document'
+    ],
+    acceptance_criteria: 'Each milestone deliverable will be reviewed and approved by the client in writing before the next phase begins. The website is considered complete when it passes cross-browser QA testing and the client confirms all content is accurate and approved. Written sign-off is required before DNS cutover.',
+    change_order_process: 'Any work outside the agreed scope requires a written change order prior to execution. Change orders include a description of the additional work, cost impact, and timeline adjustment. Additional work is billed at $150 per hour. No out-of-scope work begins until the change order is countersigned by both parties.'
+  },
+
+  ai: {
+    project_title: 'AI Customer Inquiry Automation',
+    client: 'ProCraft Solutions',
+    overview: 'Design and build an AI-powered system that monitors incoming customer emails and DMs for ProCraft Solutions, drafts contextual replies in the company\'s brand voice, and surfaces them for owner review before sending. The system targets a reduction in average response time from 4+ hours to under 30 minutes, using a human-in-the-loop architecture built on the Claude API.',
+    scope: [
+      'Discovery session to document top 20 most common customer inquiry types',
+      'Business context document (services, pricing, tone, FAQ library)',
+      'Gmail inbox monitoring integration via Google API',
+      'Claude API prompt engineering for intent classification and response drafting',
+      'Review interface: inbox view with AI-drafted replies, one-click approve/edit/send',
+      'Response history and session analytics (volume, response time, approval rate)',
+      'Staff onboarding documentation and training session',
+      '2 weeks of post-launch monitoring and prompt refinement'
+    ],
+    timeline: [
+      { milestone: 'Discovery & Setup', duration: 'Week 1', description: 'Kickoff, inquiry audit, API credentials, environment setup' },
+      { milestone: 'Prompt Engineering', duration: 'Week 2', description: 'Draft and test AI prompts against real inquiry samples, iterate on intent classification' },
+      { milestone: 'Core Build', duration: 'Weeks 3-4', description: 'Email integration, review UI, approve/edit/send flow' },
+      { milestone: 'Dashboard & Polish', duration: 'Week 5', description: 'Analytics dashboard, UX refinements, edge case handling' },
+      { milestone: 'Testing & Launch', duration: 'Week 6', description: 'Staff training, UAT with client team, go-live with monitoring' }
+    ],
+    payment_total: '$18,000',
+    payment_schedule: [
+      { milestone: 'Project Kickoff', amount: '$6,000 (33%)', trigger: 'Due upon contract signing' },
+      { milestone: 'Core Build Complete', amount: '$6,000 (33%)', trigger: 'Due upon client approval of the review interface' },
+      { milestone: 'Launch', amount: '$6,000 (34%)', trigger: 'Due upon go-live confirmation' }
+    ],
+    assumptions: [
+      'Client provides API access to their Gmail inbox by end of Week 1',
+      'Client assigns one internal point of contact for weekly reviews and feedback',
+      'Anthropic API costs are billed separately and remain the client\'s responsibility',
+      'Initial training examples consist of at least 30 real inquiry-and-reply pairs',
+      'Client feedback turnaround during testing is within 24 hours'
+    ],
+    exclusions: [
+      'SMS, phone, or social media DM integration (Meta, Instagram)',
+      'CRM integration (Salesforce, HubSpot, or similar)',
+      'Ongoing API infrastructure or hosting costs after launch',
+      'Custom mobile application development',
+      'Any integrations or features not listed in this scope'
+    ],
+    acceptance_criteria: 'The system is accepted when it correctly classifies at least 85% of test inquiries by intent, drafts contextually appropriate replies for 80% of cases without requiring manual rewriting, and the review interface passes user acceptance testing with the client\'s designated team. Written sign-off required before go-live.',
+    change_order_process: 'Scope changes must be submitted in writing and approved by both parties before any additional work begins. Changes are billed at $175 per hour. Timeline adjustments will be communicated in writing within 48 hours of change order approval.'
+  },
+
+  photo: {
+    project_title: 'Full-Day Wedding Photography',
+    client: 'Sarah & James Thompson',
+    overview: 'Photography coverage for the full wedding day of Sarah and James Thompson, including bridal preparation, ceremony, cocktail hour, and reception. Deliverables include 400+ professionally edited images delivered via a private online gallery within 14 days of the event.',
+    scope: [
+      'Pre-wedding consultation and final shot list review',
+      'Up to 10 hours of on-site photography coverage on the event date',
+      'Two photographers for ceremony and reception coverage',
+      'Bridal preparation and getting-ready shots',
+      'Full ceremony coverage and family formal portraits',
+      'Cocktail hour candid and detail coverage',
+      'Reception coverage including first dance, speeches, and send-off',
+      '400+ professionally edited images delivered in high resolution',
+      'Private online gallery with download access for 12 months',
+      '30-image highlight set optimized for social media (16:9 and 1:1 crops)'
+    ],
+    timeline: [
+      { milestone: 'Pre-Wedding Consult', duration: '4 weeks before', description: 'Final shot list review, venue walkthrough if needed, timeline confirmation' },
+      { milestone: 'Wedding Day', duration: 'Event date', description: 'Full coverage per agreed timeline, up to 10 hours with two photographers' },
+      { milestone: 'Editing', duration: 'Days 1-12 post-event', description: 'Culling, color correction, retouching, and final selection' },
+      { milestone: 'Gallery Delivery', duration: 'Day 14 post-event', description: 'Private online gallery with full resolution downloads goes live' }
+    ],
+    payment_total: '$4,500',
+    payment_schedule: [
+      { milestone: 'Date Hold Deposit', amount: '$1,500 (33%)', trigger: 'Due upon contract signing to secure the date' },
+      { milestone: 'Pre-Wedding Balance', amount: '$1,500 (33%)', trigger: 'Due 30 days before the wedding' },
+      { milestone: 'Final Payment', amount: '$1,500 (34%)', trigger: 'Due 7 days before the wedding' }
+    ],
+    assumptions: [
+      'Venue allows photography access during all covered events without restriction',
+      'Client provides a finalized shot list and day-of timeline at least 4 weeks before the event',
+      'Travel within 60 miles of downtown is included; mileage beyond that billed at $0.67/mile',
+      'Up to 2 rounds of culling feedback included before final edit begins',
+      'An outdoor ceremony may require a covered backup in case of weather — client\'s responsibility to arrange'
+    ],
+    exclusions: [
+      'Videography or same-day edit video',
+      'Physical prints, albums, or framed products',
+      'Raw unedited files at any stage',
+      'Rehearsal dinner or day-after coverage',
+      'Overtime beyond 10 hours (available at $250/hour with advance notice)'
+    ],
+    acceptance_criteria: 'The gallery is considered delivered when the private online gallery link is sent and accessible. Client has 14 days from delivery to request up to 10 specific re-edits at no charge. Additional re-edits beyond that are available at $25 per image.',
+    change_order_process: 'Requests for additional coverage hours, a second day of shooting, or rush delivery must be agreed to in writing before the event date. Rush gallery delivery (under 7 days) is available for an additional $500. Additional coverage hours are billed at $250 per hour.'
+  }
+};
+
+// ─── Input presets ─────────────────────────────────────────
+var INPUT_PRESETS = {
+  website: {
+    desc: 'Redesign a restaurant\'s website with online reservations, a photo gallery, and mobile optimization. The client is a mid-size restaurant in San Francisco. 8-week project.',
+    client: 'The Coastal Kitchen',
+    budget: '$10,000 - $15,000',
+    timeline: '8 weeks',
+    tone: 'professional'
+  },
+  ai: {
+    desc: 'Build an AI-powered customer inquiry system for a home services company. Monitor incoming emails, classify intent, and draft replies for owner review before sending. Human-in-the-loop, not full automation.',
+    client: 'ProCraft Solutions',
+    budget: '$15,000 - $20,000',
+    timeline: '6 weeks',
+    tone: 'professional'
+  },
+  photo: {
+    desc: 'Full-day wedding photography package. Two photographers, 10 hours of coverage including prep, ceremony, and reception. 400+ edited photos delivered within 2 weeks via online gallery.',
+    client: 'Sarah & James Thompson',
+    budget: '$4,000 - $5,000',
+    timeline: 'Event date: June 14, 2026',
+    tone: 'friendly'
+  }
+};
+
+// ─── State ─────────────────────────────────────────────────
+var S = { activePreset: null };
+
+// ─── Init ──────────────────────────────────────────────────
+(function init() {
+  var saved = sessionStorage.getItem('ant_key');
+  if (saved) document.getElementById('apiKey').value = saved;
+  updateDot(saved || '');
+
+  document.getElementById('apiKey').addEventListener('input', function () {
+    sessionStorage.setItem('ant_key', this.value);
+    updateDot(this.value);
+    this.classList.toggle('valid', validKey(this.value));
+  });
+
+  document.querySelectorAll('.preset-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () { loadPreset(this.dataset.preset, this); });
+  });
+
+  document.getElementById('genBtn').addEventListener('click', doGenerate);
+  document.getElementById('btnPdf').addEventListener('click', exportPDF);
+  document.getElementById('btnMd').addEventListener('click', copyMarkdown);
+  document.getElementById('btnClear').addEventListener('click', clearSOW);
+})();
+
+// ─── API key ───────────────────────────────────────────────
+function validKey(k) { return k && (k.startsWith('sk-ant-') || k.startsWith('sk-')); }
+function updateDot(k) {
+  var live = validKey(k);
+  document.getElementById('apiDot').classList.toggle('on', live);
+  document.getElementById('demoChip').classList.toggle('live', live);
+}
+function getKey() { return (document.getElementById('apiKey').value || '').trim(); }
+
+// ─── Preset loading ─────────────────────────────────────────
+function loadPreset(key, btn) {
+  var p = INPUT_PRESETS[key];
+  if (!p) return;
+  S.activePreset = key;
+  document.querySelectorAll('.preset-btn').forEach(function (b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('projDesc').value  = p.desc;
+  document.getElementById('clientName').value = p.client;
+  document.getElementById('budget').value     = p.budget;
+  document.getElementById('timeline').value   = p.timeline;
+  document.getElementById('tone').value       = p.tone;
+}
+
+// ─── Generate ──────────────────────────────────────────────
+async function doGenerate() {
+  var key      = getKey();
+  var desc     = (document.getElementById('projDesc').value || '').trim();
+  var client   = (document.getElementById('clientName').value || '').trim();
+  var budget   = (document.getElementById('budget').value || '').trim();
+  var timeline = (document.getElementById('timeline').value || '').trim();
+  var tone     = document.getElementById('tone').value;
+  var isDemo   = !validKey(key);
+
+  if (!desc) { showToast('Describe the project first'); document.getElementById('projDesc').focus(); return; }
+
+  setLoading(true);
+
+  try {
+    var data;
+    if (isDemo) {
+      await simulateDelay();
+      data = getMockSOW(S.activePreset, client);
+    } else {
+      var prompt = buildPrompt(desc, client, budget, timeline, tone);
+      var raw    = await callAPI(key, prompt);
+      data = parseData(raw);
+    }
+    renderSOW(data, client, isDemo);
+  } catch (err) {
+    showToast(err.message || 'Error generating SOW. Try again.');
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ─── Demo ──────────────────────────────────────────────────
+function getMockSOW(presetKey, clientOverride) {
+  var data = MOCK_SOWS[presetKey] || MOCK_SOWS.website;
+  // Shallow copy, override client if user typed one
+  var copy = {};
+  for (var k in data) copy[k] = data[k];
+  if (clientOverride) copy.client = clientOverride;
+  return copy;
+}
+
+function simulateDelay() {
+  return new Promise(function (resolve) { setTimeout(resolve, 1200 + Math.random() * 800); });
+}
+
+// ─── Prompt ────────────────────────────────────────────────
+function buildPrompt(desc, client, budget, timeline, tone) {
+  var toneDesc = { professional: 'standard professional business language', friendly: 'warm and approachable agency/creative tone', formal: 'formal enterprise or legal-style language' }[tone] || 'professional';
+  return 'Generate a complete Statement of Work (SOW) for the following project.\n\n' +
+    'Project description: ' + desc + '\n' +
+    (client   ? 'Client name: '    + client   + '\n' : '') +
+    (budget   ? 'Budget range: '   + budget   + '\n' : '') +
+    (timeline ? 'Timeline: '       + timeline + '\n' : '') +
+    'Tone: ' + toneDesc + '\n\n' +
+    'Return ONLY valid JSON with this exact structure:\n' +
+    '{"project_title":"short title","client":"' + (client || 'Client Name') + '","overview":"2-3 sentence overview","scope":["deliverable 1",...6-10 items],"timeline":[{"milestone":"name","duration":"e.g. Week 1","description":"what happens"},...4-6 items],"payment_total":"$ amount","payment_schedule":[{"milestone":"name","amount":"$ and %","trigger":"when due"},...3 items],"assumptions":["item",...4-6 items],"exclusions":["item",...3-5 items],"acceptance_criteria":"paragraph","change_order_process":"paragraph"}';
+}
+
+// ─── API ───────────────────────────────────────────────────
+async function callAPI(key, prompt) {
+  var res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-calls': 'true' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 2048, messages: [{ role: 'user', content: prompt }] })
+  });
+  if (!res.ok) {
+    var err = {}; try { err = await res.json(); } catch (e) {}
+    if (res.status === 401) throw new Error('Invalid API key.');
+    if (res.status === 429) throw new Error('Rate limit. Wait a moment and try again.');
+    throw new Error((err.error && err.error.message) || ('API error ' + res.status));
+  }
+  var d = await res.json();
+  return d.content[0].text;
+}
+
+function parseData(text) {
+  var match = text.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('Could not parse response. Try again.');
+  try { return JSON.parse(match[0]); }
+  catch (e) { throw new Error('Could not parse response. Try again.'); }
+}
+
+// ─── Render SOW ────────────────────────────────────────────
+function renderSOW(data, clientOverride, isDemo) {
+  var doc = document.getElementById('sowDoc');
+  while (doc.firstChild) doc.removeChild(doc.firstChild);
+
+  doc.appendChild(buildHeader(data, clientOverride, isDemo));
+  appendTextSection(doc, '01', 'Project Overview', data.overview);
+  appendListSection(doc, '02', 'Scope of Work', data.scope);
+  appendTimelineSection(doc, '03', 'Timeline & Milestones', data.timeline);
+  appendPaymentSection(doc, '04', 'Payment Terms', data.payment_total, data.payment_schedule);
+  appendListSection(doc, '05', 'Assumptions', data.assumptions);
+  appendListSection(doc, '06', 'Exclusions', data.exclusions);
+  appendTextSection(doc, '07', 'Acceptance Criteria', data.acceptance_criteria);
+  appendTextSection(doc, '08', 'Change Order Process', data.change_order_process);
+
+  document.getElementById('placeholderArea').style.display = 'none';
+  document.getElementById('docArea').style.display = 'block';
+}
+
+function buildHeader(data, clientOverride, isDemo) {
+  var wrap = document.createElement('div');
+  wrap.className = 'doc-header';
+
+  var mark = document.createElement('div');
+  mark.className = 'doc-watermark';
+  mark.textContent = 'Statement of Work';
+
+  var title = document.createElement('div');
+  title.className = 'doc-title';
+  title.contentEditable = 'true';
+  title.textContent = data.project_title || 'Statement of Work';
+
+  var meta = document.createElement('div');
+  meta.className = 'doc-meta';
+
+  meta.appendChild(metaRow('Client', clientOverride || data.client || 'Client Name', true));
+  meta.appendChild(metaRow('Prepared by', 'FlowstateAI', true));
+  meta.appendChild(metaRow('Date', fmtDate(), false));
+  meta.appendChild(metaRow('Reference', genRef(), false));
+
+  if (isDemo) {
+    var sim = document.createElement('span');
+    sim.className = 'sim-badge';
+    sim.textContent = 'Simulated';
+    sim.style.marginTop = '14px';
+    sim.style.display = 'inline-block';
+  }
+
+  wrap.appendChild(mark);
+  wrap.appendChild(title);
+  wrap.appendChild(meta);
+  if (isDemo) wrap.appendChild(sim);
+  return wrap;
+}
+
+function metaRow(label, value, editable) {
+  var row = document.createElement('div');
+  row.className = 'meta-row';
+
+  var lbl = document.createElement('span');
+  lbl.className = 'meta-lbl';
+  lbl.textContent = label + ':';
+
+  var val = document.createElement('span');
+  val.textContent = value;
+
+  if (editable) {
+    val.className = 'meta-val';
+    val.contentEditable = 'true';
+  } else {
+    val.className = 'meta-fixed';
+  }
+
+  row.appendChild(lbl);
+  row.appendChild(val);
+  return row;
+}
+
+function makeSectionHead(num, title) {
+  var head = document.createElement('div');
+  head.className = 'sow-section-head';
+
+  var numEl = document.createElement('span');
+  numEl.className = 'sow-num';
+  numEl.textContent = num;
+
+  var titleEl = document.createElement('span');
+  titleEl.className = 'sow-section-title';
+  titleEl.textContent = title;
+
+  head.appendChild(numEl);
+  head.appendChild(titleEl);
+  return head;
+}
+
+function appendTextSection(parent, num, title, text) {
+  var section = document.createElement('div');
+  section.className = 'sow-section';
+  section.appendChild(makeSectionHead(num, title));
+
+  var body = document.createElement('div');
+  body.className = 'sow-body';
+  body.contentEditable = 'true';
+  body.textContent = text || '';
+
+  section.appendChild(body);
+  parent.appendChild(section);
+}
+
+function appendListSection(parent, num, title, items) {
+  var section = document.createElement('div');
+  section.className = 'sow-section';
+  section.appendChild(makeSectionHead(num, title));
+
+  var body = document.createElement('div');
+  body.className = 'sow-body sow-list';
+  body.contentEditable = 'true';
+
+  (items || []).forEach(function (item) {
+    var div = document.createElement('div');
+    div.className = 'list-item';
+    div.textContent = item;
+    body.appendChild(div);
+  });
+
+  section.appendChild(body);
+  parent.appendChild(section);
+}
+
+function appendTimelineSection(parent, num, title, rows) {
+  var section = document.createElement('div');
+  section.className = 'sow-section';
+  section.appendChild(makeSectionHead(num, title));
+
+  var wrap = document.createElement('div');
+  wrap.style.padding = '0 36px 22px';
+  wrap.style.overflowX = 'auto';
+
+  var table = document.createElement('table');
+  table.className = 'sow-table';
+
+  var thead = document.createElement('thead');
+  var hr = document.createElement('tr');
+  [['Milestone', 'col-milestone'], ['Duration', 'col-duration'], ['Description', '']].forEach(function (h) {
+    var th = document.createElement('th');
+    th.textContent = h[0];
+    if (h[1]) th.className = h[1];
+    hr.appendChild(th);
+  });
+  thead.appendChild(hr);
+  table.appendChild(thead);
+
+  var tbody = document.createElement('tbody');
+  (rows || []).forEach(function (row) {
+    var tr = document.createElement('tr');
+    [
+      { val: row.milestone, cls: 'col-milestone' },
+      { val: row.duration,  cls: 'col-duration' },
+      { val: row.description, cls: '' }
+    ].forEach(function (cell) {
+      var td = document.createElement('td');
+      td.contentEditable = 'true';
+      td.textContent = cell.val || '';
+      if (cell.cls) td.className = cell.cls;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+
+  wrap.appendChild(table);
+  section.appendChild(wrap);
+  parent.appendChild(section);
+}
+
+function appendPaymentSection(parent, num, title, total, schedule) {
+  var section = document.createElement('div');
+  section.className = 'sow-section';
+  section.appendChild(makeSectionHead(num, title));
+
+  var totalRow = document.createElement('div');
+  totalRow.className = 'payment-total';
+
+  var lbl = document.createElement('span');
+  lbl.className = 'total-lbl';
+  lbl.textContent = 'Project Total:';
+
+  var val = document.createElement('span');
+  val.className = 'total-val';
+  val.contentEditable = 'true';
+  val.textContent = total || 'TBD';
+
+  totalRow.appendChild(lbl);
+  totalRow.appendChild(val);
+  section.appendChild(totalRow);
+
+  var wrap = document.createElement('div');
+  wrap.style.padding = '0 36px 22px';
+  wrap.style.overflowX = 'auto';
+
+  var table = document.createElement('table');
+  table.className = 'sow-table';
+
+  var thead = document.createElement('thead');
+  var hr = document.createElement('tr');
+  [['Milestone', 'col-milestone'], ['Amount', 'col-amount'], ['Due', 'col-trigger']].forEach(function (h) {
+    var th = document.createElement('th');
+    th.textContent = h[0];
+    if (h[1]) th.className = h[1];
+    hr.appendChild(th);
+  });
+  thead.appendChild(hr);
+  table.appendChild(thead);
+
+  var tbody = document.createElement('tbody');
+  (schedule || []).forEach(function (row) {
+    var tr = document.createElement('tr');
+    [
+      { val: row.milestone, cls: 'col-milestone' },
+      { val: row.amount,    cls: 'col-amount' },
+      { val: row.trigger,   cls: 'col-trigger' }
+    ].forEach(function (cell) {
+      var td = document.createElement('td');
+      td.contentEditable = 'true';
+      td.textContent = cell.val || '';
+      if (cell.cls) td.className = cell.cls;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+
+  wrap.appendChild(table);
+  section.appendChild(wrap);
+  parent.appendChild(section);
+}
+
+// ─── Export: PDF ───────────────────────────────────────────
+function exportPDF() {
+  var el = document.getElementById('sowDoc');
+  if (!el) { showToast('Generate a SOW first'); return; }
+
+  var titleEl = el.querySelector('.doc-title');
+  var titleText = titleEl ? titleEl.textContent.trim() : 'SOW';
+  var filename = 'SOW-' + titleText.replace(/\s+/g, '-') + '-' + fmtDateShort() + '.pdf';
+
+  showToast('Generating PDF...');
+
+  html2pdf().set({
+    margin: [16, 16, 16, 16],
+    filename: filename,
+    image: { type: 'jpeg', quality: 0.97 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#111115' },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  }).from(el).save().then(function () {
+    showToast('PDF exported.');
+  });
+}
+
+// ─── Export: Markdown ──────────────────────────────────────
+function copyMarkdown() {
+  var doc = document.getElementById('sowDoc');
+  if (!doc) { showToast('Generate a SOW first'); return; }
+
+  var lines = [];
+  var titleEl = doc.querySelector('.doc-title');
+  if (titleEl) lines.push('# ' + titleEl.textContent.trim());
+  lines.push('');
+
+  var metaRows = doc.querySelectorAll('.meta-row');
+  metaRows.forEach(function (row) {
+    var lbl = row.querySelector('.meta-lbl');
+    var val = row.querySelector('.meta-val, .meta-fixed');
+    if (lbl && val) lines.push('**' + lbl.textContent.trim() + '** ' + val.textContent.trim());
+  });
+  lines.push('');
+  lines.push('---');
+
+  doc.querySelectorAll('.sow-section').forEach(function (section) {
+    var numEl    = section.querySelector('.sow-num');
+    var titleEl  = section.querySelector('.sow-section-title');
+    var bodyEl   = section.querySelector('.sow-body');
+    var totalEl  = section.querySelector('.total-val');
+    var tableEls = section.querySelectorAll('.sow-table');
+
+    if (numEl && titleEl) {
+      lines.push('');
+      lines.push('## ' + numEl.textContent.trim() + '. ' + titleEl.textContent.trim());
+      lines.push('');
+    }
+
+    if (bodyEl) {
+      if (bodyEl.classList.contains('sow-list')) {
+        bodyEl.querySelectorAll('.list-item').forEach(function (item) {
+          lines.push('- ' + item.textContent.trim());
+        });
+      } else {
+        lines.push(bodyEl.textContent.trim());
+      }
+    }
+
+    if (totalEl) {
+      lines.push('**Total:** ' + totalEl.textContent.trim());
+      lines.push('');
+    }
+
+    tableEls.forEach(function (table) {
+      var headers = Array.from(table.querySelectorAll('thead th')).map(function (th) { return th.textContent.trim(); });
+      if (headers.length) {
+        lines.push('| ' + headers.join(' | ') + ' |');
+        lines.push('| ' + headers.map(function () { return '---'; }).join(' | ') + ' |');
+      }
+      table.querySelectorAll('tbody tr').forEach(function (row) {
+        var cells = Array.from(row.querySelectorAll('td')).map(function (td) { return td.textContent.trim(); });
+        lines.push('| ' + cells.join(' | ') + ' |');
+      });
+    });
+  });
+
+  var md = lines.join('\n');
+  navigator.clipboard.writeText(md).then(function () {
+    var btn = document.getElementById('btnMd');
+    btn.classList.add('copied');
+    btn.textContent = 'Copied!';
+    setTimeout(function () { btn.classList.remove('copied'); btn.textContent = 'Copy Markdown'; }, 2200);
+  }).catch(function () { showToast('Could not copy to clipboard'); });
+}
+
+// ─── Clear ─────────────────────────────────────────────────
+function clearSOW() {
+  document.getElementById('docArea').style.display = 'none';
+  document.getElementById('placeholderArea').style.display = 'block';
+  var doc = document.getElementById('sowDoc');
+  while (doc.firstChild) doc.removeChild(doc.firstChild);
+}
+
+// ─── Loading ───────────────────────────────────────────────
+function setLoading(on) {
+  var btn   = document.getElementById('genBtn');
+  var label = document.getElementById('genLabel');
+  var icon  = document.getElementById('genIcon');
+  btn.disabled = on;
+  label.textContent = on ? 'Generating...' : 'Generate SOW';
+  if (on) {
+    var spin = document.createElement('div'); spin.className = 'spin'; spin.id = 'genIcon';
+    icon.parentNode.replaceChild(spin, icon);
+  } else {
+    var cur = document.getElementById('genIcon');
+    if (cur && cur.classList.contains('spin')) {
+      var arr = document.createElement('span'); arr.id = 'genIcon'; arr.textContent = '\u2192';
+      cur.parentNode.replaceChild(arr, cur);
+    }
+  }
+}
+
+// ─── Toast ─────────────────────────────────────────────────
+var toastTimer;
+function showToast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2800);
+}
+
+// ─── Utils ─────────────────────────────────────────────────
+function fmtDate() { return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }); }
+function fmtDateShort() { var d = new Date(); return d.getFullYear() + '' + String(d.getMonth()+1).padStart(2,'0'); }
+function genRef() { return 'SOW-' + fmtDateShort() + '-' + String(Math.floor(Math.random() * 900) + 100); }
+</script>
+</body>
+</html>
