@@ -237,6 +237,50 @@
     .top-bar-center { order: 3; width: 100%; justify-content: center; }
     .api-mini { display: none; }
   }
+
+  /* ── LIGHT MODE ── */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg-primary: #faf9f7;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f5f4f2;
+      --bg-input: #f0efed;
+      --text-primary: #1a1a1c;
+      --text-secondary: #555558;
+      --text-muted: #8a8a8e;
+      --border: rgba(0, 0, 0, 0.08);
+      --border-accent: rgba(201, 103, 71, 0.35);
+      --accent: #c96747;
+      --accent-glow: rgba(201, 103, 71, 0.12);
+      --accent-soft: rgba(201, 103, 71, 0.06);
+    }
+    body::before { display: none; }
+    nav, .top-bar { background: rgba(250, 249, 247, 0.85) !important; }
+  }
+  :root[data-theme="light"] {
+    --bg-primary: #faf9f7;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f5f4f2;
+    --bg-input: #f0efed;
+    --text-primary: #1a1a1c;
+    --text-secondary: #555558;
+    --text-muted: #8a8a8e;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-accent: rgba(201, 103, 71, 0.35);
+    --accent: #c96747;
+    --accent-glow: rgba(201, 103, 71, 0.12);
+    --accent-soft: rgba(201, 103, 71, 0.06);
+  }
+  [data-theme="light"] body::before { display: none; }
+  [data-theme="light"] nav, [data-theme="light"] .top-bar { background: rgba(250, 249, 247, 0.85) !important; }
+
+  .theme-toggle {
+    background: none; border: 1px solid var(--border); border-radius: 4px;
+    color: var(--text-muted); cursor: pointer; padding: 0.3rem 0.5rem;
+    font-size: 0.9rem; line-height: 1; transition: all 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--border-accent); color: var(--accent); }
+
 </style>
 </head>
 <body>
@@ -696,6 +740,24 @@
     toastEl.textContent = message;
     toastEl.classList.add('visible');
     setTimeout(function() { toastEl.classList.remove('visible'); }, 2500);
+  }
+
+  // Seed demo entries on first visit
+  if (entries.length === 0) {
+    var today = formatDateISO(new Date());
+    var demoEntries = [
+      { id: 1, type: 'event', content: 'Strategy call with FlowstateAI client', time: '10:00', date: today, priority: 'high' },
+      { id: 2, type: 'task', content: 'Finalize portfolio case study for MCP orchestration', date: today, priority: 'high', completed: false, time: null },
+      { id: 3, type: 'task', content: 'Review and approve wedding gallery for Sarah Mitchell', date: today, priority: 'medium', completed: true, time: null },
+      { id: 4, type: 'event', content: 'Ellie soccer practice', time: '15:00', date: today, priority: 'medium' },
+      { id: 5, type: 'note', content: 'Look into Cloudflare Workers for edge-side AI processing. Could reduce latency for the auto-responder tool.', date: today, priority: 'low', time: null },
+      { id: 6, type: 'reflection', content: 'Building in public is uncomfortable but the feedback loop is worth it. Every project shipped is proof of concept.', date: today, priority: 'medium', time: null },
+      { id: 7, type: 'goal', content: 'Ship all 6 portfolio projects by end of week', date: today, priority: 'high', progress: 85, time: null },
+      { id: 8, type: 'task', content: 'Meal prep for the week', date: today, priority: 'low', completed: false, time: null }
+    ];
+    entries = demoEntries;
+    nextEntryId = 9;
+    save();
   }
 
   render();

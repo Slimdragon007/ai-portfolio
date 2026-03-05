@@ -246,6 +246,50 @@
     .form-row { grid-template-columns: 1fr; }
     .api-bar { flex-direction: column; align-items: stretch; }
   }
+
+  /* ── LIGHT MODE ── */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg-primary: #faf9f7;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f5f4f2;
+      --bg-input: #f0efed;
+      --text-primary: #1a1a1c;
+      --text-secondary: #555558;
+      --text-muted: #8a8a8e;
+      --border: rgba(0, 0, 0, 0.08);
+      --border-accent: rgba(201, 103, 71, 0.35);
+      --accent: #c96747;
+      --accent-glow: rgba(201, 103, 71, 0.12);
+      --accent-soft: rgba(201, 103, 71, 0.06);
+    }
+    body::before { display: none; }
+    nav, .top-bar { background: rgba(250, 249, 247, 0.85) !important; }
+  }
+  :root[data-theme="light"] {
+    --bg-primary: #faf9f7;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f5f4f2;
+    --bg-input: #f0efed;
+    --text-primary: #1a1a1c;
+    --text-secondary: #555558;
+    --text-muted: #8a8a8e;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-accent: rgba(201, 103, 71, 0.35);
+    --accent: #c96747;
+    --accent-glow: rgba(201, 103, 71, 0.12);
+    --accent-soft: rgba(201, 103, 71, 0.06);
+  }
+  [data-theme="light"] body::before { display: none; }
+  [data-theme="light"] nav, [data-theme="light"] .top-bar { background: rgba(250, 249, 247, 0.85) !important; }
+
+  .theme-toggle {
+    background: none; border: 1px solid var(--border); border-radius: 4px;
+    color: var(--text-muted); cursor: pointer; padding: 0.3rem 0.5rem;
+    font-size: 0.9rem; line-height: 1; transition: all 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--border-accent); color: var(--accent); }
+
 </style>
 </head>
 <body>
@@ -256,6 +300,7 @@
     <li><a href="../../index.html#work">Work</a></li>
     <li><a href="../../index.html#contact">Contact</a></li>
   </ul>
+  <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode" aria-label="Toggle theme">&#9788;</button>
 </nav>
 
 <div class="app-container">
@@ -846,8 +891,50 @@
     setTimeout(function() { toastEl.classList.remove('visible'); }, 2500);
   }
 
+  // Seed demo data on first visit
+  if (clients.length === 0) {
+    var demoClients = [
+      { id: 1, name: 'Sarah & James Mitchell', email: 'sarah.m@email.com', type: 'wedding', date: '2026-04-18', venue: 'Desert Botanical Garden, Phoenix', source: 'instagram', notes: 'Outdoor ceremony, 150 guests. Want golden hour portraits. Second shooter needed.', stage: 'prep', createdAt: '2026-02-20T10:00:00Z', aiQuote: '', aiShotList: '', aiDeliveryEmail: '', aiContract: '', aiFollowUp: '' },
+      { id: 2, name: 'Marcus Rivera', email: 'marcus@riveralaw.com', type: 'corporate', date: '2026-03-12', venue: 'Scottsdale Quarter', source: 'referral', notes: 'Team headshots for 12 attorneys. White background. Also want a few casual group shots.', stage: 'quote', createdAt: '2026-03-01T14:00:00Z', aiQuote: '', aiShotList: '', aiDeliveryEmail: '', aiContract: '', aiFollowUp: '' },
+      { id: 3, name: 'The Patel Family', email: 'anita.patel@gmail.com', type: 'portrait', date: '2026-03-22', venue: 'Papago Park', source: 'google', notes: 'Family of 5, kids ages 3, 7, 10. Want relaxed, natural style. Matching earth tones.', stage: 'inquiry', createdAt: '2026-03-04T09:30:00Z', aiQuote: '', aiShotList: '', aiDeliveryEmail: '', aiContract: '', aiFollowUp: '' },
+      { id: 4, name: 'Elise & Tom Nakamura', email: 'elise.n@email.com', type: 'wedding', date: '2026-02-14', venue: 'The Clayton House, Scottsdale', source: 'website', notes: 'Intimate wedding, 40 guests. Vintage aesthetic. Film-look editing.', stage: 'deliver', createdAt: '2026-01-05T11:00:00Z', aiQuote: '', aiShotList: '', aiDeliveryEmail: '', aiContract: '', aiFollowUp: '' },
+      { id: 5, name: 'Copper & Sage Cafe', email: 'hello@copperandsage.com', type: 'commercial', date: '2026-03-08', venue: 'Copper & Sage Cafe, Tempe', source: 'instagram', notes: 'Menu photos, interior shots, staff portraits. For new website launch.', stage: 'contract', createdAt: '2026-02-28T16:00:00Z', aiQuote: '', aiShotList: '', aiDeliveryEmail: '', aiContract: '', aiFollowUp: '' },
+      { id: 6, name: 'David Chen', email: 'david.c@techstart.io', type: 'event', date: '2026-01-25', venue: 'Arizona Science Center', source: 'referral', notes: 'Product launch event. 200+ attendees. Need keynote coverage and networking candids.', stage: 'complete', createdAt: '2025-12-15T10:00:00Z', aiQuote: '', aiShotList: '', aiDeliveryEmail: '', aiContract: '', aiFollowUp: '' }
+    ];
+    clients = demoClients;
+    nextId = 7;
+    save();
+  }
+
   renderPipeline();
 })();
+</script>
+<script>
+  // Theme toggle
+  (function() {
+    var toggle = document.getElementById('themeToggle');
+    var root = document.documentElement;
+    var saved = localStorage.getItem('portfolio-theme');
+    if (saved) root.setAttribute('data-theme', saved);
+    function updateIcon() {
+      var isDark = root.getAttribute('data-theme') === 'dark' ||
+        (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      toggle.textContent = isDark ? '\u2600' : '\u263E';
+    }
+    updateIcon();
+    toggle.addEventListener('click', function() {
+      var current = root.getAttribute('data-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var newTheme;
+      if (!current) { newTheme = prefersDark ? 'light' : 'dark'; }
+      else if (current === 'dark') { newTheme = 'light'; }
+      else { newTheme = 'dark'; }
+      root.setAttribute('data-theme', newTheme);
+      localStorage.setItem('portfolio-theme', newTheme);
+      updateIcon();
+    });
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateIcon);
+  })();
 </script>
 </body>
 </html>

@@ -223,6 +223,50 @@
     .bge-info-grid { grid-template-columns: 1fr; }
     .api-key-section { flex-direction: column; align-items: stretch; }
   }
+
+  /* ── LIGHT MODE ── */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg-primary: #faf9f7;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f5f4f2;
+      --bg-input: #f0efed;
+      --text-primary: #1a1a1c;
+      --text-secondary: #555558;
+      --text-muted: #8a8a8e;
+      --border: rgba(0, 0, 0, 0.08);
+      --border-accent: rgba(201, 103, 71, 0.35);
+      --accent: #c96747;
+      --accent-glow: rgba(201, 103, 71, 0.12);
+      --accent-soft: rgba(201, 103, 71, 0.06);
+    }
+    body::before { display: none; }
+    nav, .top-bar { background: rgba(250, 249, 247, 0.85) !important; }
+  }
+  :root[data-theme="light"] {
+    --bg-primary: #faf9f7;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f5f4f2;
+    --bg-input: #f0efed;
+    --text-primary: #1a1a1c;
+    --text-secondary: #555558;
+    --text-muted: #8a8a8e;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-accent: rgba(201, 103, 71, 0.35);
+    --accent: #c96747;
+    --accent-glow: rgba(201, 103, 71, 0.12);
+    --accent-soft: rgba(201, 103, 71, 0.06);
+  }
+  [data-theme="light"] body::before { display: none; }
+  [data-theme="light"] nav, [data-theme="light"] .top-bar { background: rgba(250, 249, 247, 0.85) !important; }
+
+  .theme-toggle {
+    background: none; border: 1px solid var(--border); border-radius: 4px;
+    color: var(--text-muted); cursor: pointer; padding: 0.3rem 0.5rem;
+    font-size: 0.9rem; line-height: 1; transition: all 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--border-accent); color: var(--accent); }
+
 </style>
 </head>
 <body>
@@ -234,6 +278,7 @@
     <li><a href="../../index.html#philosophy">Philosophy</a></li>
     <li><a href="../../index.html#contact">Contact</a></li>
   </ul>
+  <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode" aria-label="Toggle theme">&#9788;</button>
 </nav>
 
 <div class="container">
@@ -703,6 +748,33 @@
   }
 
 })();
+</script>
+<script>
+  // Theme toggle
+  (function() {
+    var toggle = document.getElementById('themeToggle');
+    var root = document.documentElement;
+    var saved = localStorage.getItem('portfolio-theme');
+    if (saved) root.setAttribute('data-theme', saved);
+    function updateIcon() {
+      var isDark = root.getAttribute('data-theme') === 'dark' ||
+        (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      toggle.textContent = isDark ? '\u2600' : '\u263E';
+    }
+    updateIcon();
+    toggle.addEventListener('click', function() {
+      var current = root.getAttribute('data-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var newTheme;
+      if (!current) { newTheme = prefersDark ? 'light' : 'dark'; }
+      else if (current === 'dark') { newTheme = 'light'; }
+      else { newTheme = 'dark'; }
+      root.setAttribute('data-theme', newTheme);
+      localStorage.setItem('portfolio-theme', newTheme);
+      updateIcon();
+    });
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateIcon);
+  })();
 </script>
 </body>
 </html>
