@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feedback Analyzer | FlowstateAI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #FAFAF8; --card: #FFFFFF; --text-primary: #1a1a1a; --text-secondary: #6b6b6b;
+    --text-muted: #999999; --border: rgba(0,0,0,0.06); --indigo: #818cf8;
+    --indigo-bg: rgba(129,140,248,0.08); --teal: #2dd4bf; --teal-bg: rgba(45,212,191,0.1);
+    --gold: #d4a853; --green: #22c55e; --green-bg: rgba(34,197,94,0.1);
+    --red: #ef4444; --red-bg: rgba(239,68,68,0.1); --yellow: #eab308; --yellow-bg: rgba(234,179,8,0.1);
+    --shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); letter-spacing: -0.011em; line-height: 1.6; }
+  body::before { content: ''; position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, transparent, transparent 49px, #e5e5e3 49px, #e5e5e3 50px), repeating-linear-gradient(90deg, transparent, transparent 49px, #e5e5e3 49px, #e5e5e3 50px); opacity: 0.45; z-index: -1; }
+  .header { background: rgba(250,250,248,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; }
+  .back-link { color: var(--text-secondary); text-decoration: none; font-size: 14px; }
+  .back-link:hover { color: var(--indigo); }
+  .header h1 { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; }
+  .header h1 span { color: var(--gold); }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+  .section-label { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--indigo); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-bottom: 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; }
+  textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px; background: var(--bg); margin-bottom: 12px; resize: vertical; min-height: 140px; }
+  textarea:focus { outline: none; border-color: var(--indigo); }
+  .btn { display: inline-block; padding: 10px 24px; background: var(--gold); color: #fff; border: none; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn:hover { filter: brightness(1.1); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .empty { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; }
+
+  /* Results */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; box-shadow: var(--shadow); }
+  .stat .num { font-family: 'Space Mono', monospace; font-size: 28px; font-weight: 700; }
+  .stat .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+  .stat.positive .num { color: var(--green); }
+  .stat.negative .num { color: var(--red); }
+  .stat.neutral .num { color: var(--yellow); }
+  .stat.mixed .num { color: var(--indigo); }
+
+  .theme-list { list-style: none; }
+  .theme-item { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; align-items: flex-start; }
+  .theme-item:last-child { border-bottom: none; }
+  .theme-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; text-transform: uppercase; flex-shrink: 0; margin-top: 2px; }
+  .theme-badge.positive { background: var(--green-bg); color: #16a34a; }
+  .theme-badge.negative { background: var(--red-bg); color: #dc2626; }
+  .theme-badge.neutral { background: var(--yellow-bg); color: #a16207; }
+  .theme-content h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .theme-content p { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
+  .theme-content .mentions { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  .action-list { list-style: none; margin-top: 12px; }
+  .action-list li { padding: 8px 0; padding-left: 20px; position: relative; font-size: 13px; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+  .action-list li::before { content: '\2192'; position: absolute; left: 0; color: var(--indigo); font-weight: 600; }
+  .action-list li:last-child { border-bottom: none; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; background: var(--teal-bg); color: #0d9488; margin-right: 4px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="../../index.html" class="back-link">&larr; Portfolio</a>
+  <h1><span>FlowstateAI</span> Feedback Analyzer</h1>
+</div>
+
+<div class="container">
+  <div class="section-label">Customer Feedback</div>
+  <div class="card">
+    <label>Paste reviews, survey responses, or support tickets (one per line or paragraph)</label>
+    <textarea id="feedbackInput">Love the new summer menu! The grilled peach salad is incredible. Best meal I've had in Phoenix this year.
+
+Wait times have gotten worse since last month. Sat for 20 minutes before anyone took our drink order. Food was great but the service needs work.
+
+The online ordering system is confusing. I tried to place a pickup order and it kept resetting my cart. Eventually just called in instead.
+
+We hosted our anniversary dinner here and the staff made it so special. Chef Maria even came out to say hello. The lobster risotto was perfection.
+
+Parking situation is terrible. Had to park 3 blocks away on a Saturday night. Almost went somewhere else.
+
+The new cocktail menu is amazing! The spicy margarita is now my go-to. Bartender was knowledgeable and friendly.
+
+Food portions have gotten smaller but prices went up. $28 for a pasta dish that used to be $22 is hard to justify, even if the quality is there.
+
+Your gluten-free options are the best in the area. My daughter has celiac and she can actually enjoy dining out here. Thank you for taking allergies seriously.
+
+Tried the new brunch menu and it was underwhelming. Eggs were overcooked, coffee was lukewarm. Dinner service is much better.
+
+The farm-to-table concept is great but I wish you'd list which farms supply each ingredient. That transparency would set you apart even more.</textarea>
+    <button class="btn" id="analyzeBtn" onclick="analyze()">Analyze Feedback</button>
+  </div>
+
+  <div class="section-label">Analysis</div>
+  <div id="output">
+    <div class="empty">Paste customer feedback above and click "Analyze" to get sentiment breakdown, key themes, and action items.</div>
+  </div>
+</div>
+
+<script>
+const DEMO_RESULT = {
+  stats: { total: 10, positive: 5, negative: 3, neutral: 2 },
+  themes: [
+    { sentiment: "positive", title: "Food Quality", desc: "Consistent praise for menu items, especially summer menu additions. Grilled peach salad, lobster risotto, and cocktails specifically mentioned.", mentions: 5 },
+    { sentiment: "negative", title: "Service Speed", desc: "Multiple complaints about wait times and slow service. Drink orders taking 20+ minutes on busy nights.", mentions: 2 },
+    { sentiment: "negative", title: "Online Ordering UX", desc: "Cart reset bugs frustrating customers. Some abandoning digital orders and calling in instead.", mentions: 1 },
+    { sentiment: "negative", title: "Pricing Perception", desc: "Price increases noticed without corresponding value increase in portion sizes. $22 to $28 pasta example cited.", mentions: 1 },
+    { sentiment: "positive", title: "Staff and Experience", desc: "Personal touches from staff and Chef Maria specifically called out. Anniversary dinner experience highlighted.", mentions: 2 },
+    { sentiment: "positive", title: "Dietary Accommodations", desc: "Gluten-free options praised as best in the area. Families with celiac disease feel welcomed and safe.", mentions: 1 },
+    { sentiment: "neutral", title: "Parking", desc: "Parking availability on weekends is a friction point. Customers considering other restaurants due to access issues.", mentions: 1 },
+    { sentiment: "neutral", title: "Transparency Request", desc: "Customer wants farm sourcing details listed per ingredient. Sees it as a differentiator for the brand.", mentions: 1 }
+  ],
+  actions: [
+    "Audit Saturday night service staffing. Add one floor runner during peak hours (6-9 PM) to reduce wait times.",
+    "File a bug report for the online ordering cart reset issue. This is losing orders and damaging digital experience.",
+    "Add farm sourcing details to the menu (print and digital). Low cost, high differentiation.",
+    "Review portion sizes for dishes with recent price increases. Even a 10% portion bump at $28 changes the value perception.",
+    "Keep doing: personal touches from Chef Maria and staff. This is a competitive advantage, not just hospitality.",
+    "Explore valet or reserved parking partnership for weekend dinner service."
+  ]
+};
+
+function analyze() {
+  const btn = document.getElementById("analyzeBtn");
+  const output = document.getElementById("output");
+  btn.disabled = true;
+  btn.textContent = "Analyzing...";
+  output.textContent = "";
+
+  const loading = document.createElement("div");
+  loading.className = "empty";
+  loading.textContent = "AI is analyzing sentiment, extracting themes, and generating action items...";
+  output.appendChild(loading);
+
+  setTimeout(() => {
+    output.textContent = "";
+    const d = DEMO_RESULT;
+
+    // Stats
+    const statsRow = document.createElement("div");
+    statsRow.className = "stats-row";
+    [
+      { num: d.stats.total, lbl: "Total Reviews", cls: "mixed" },
+      { num: d.stats.positive, lbl: "Positive", cls: "positive" },
+      { num: d.stats.negative, lbl: "Negative", cls: "negative" },
+      { num: d.stats.neutral, lbl: "Neutral", cls: "neutral" }
+    ].forEach(s => {
+      const stat = document.createElement("div");
+      stat.className = "stat " + s.cls;
+      const numDiv = document.createElement("div");
+      numDiv.className = "num";
+      numDiv.textContent = s.num;
+      const lblDiv = document.createElement("div");
+      lblDiv.className = "lbl";
+      lblDiv.textContent = s.lbl;
+      stat.append(numDiv, lblDiv);
+      statsRow.appendChild(stat);
+    });
+    output.appendChild(statsRow);
+
+    // Themes
+    const themesLabel = document.createElement("div");
+    themesLabel.className = "section-label";
+    themesLabel.textContent = "Key Themes";
+    output.appendChild(themesLabel);
+
+    const themesCard = document.createElement("div");
+    themesCard.className = "card";
+    const themeList = document.createElement("ul");
+    themeList.className = "theme-list";
+    d.themes.forEach(t => {
+      const li = document.createElement("li");
+      li.className = "theme-item";
+      const badge = document.createElement("span");
+      badge.className = "theme-badge " + t.sentiment;
+      badge.textContent = t.sentiment;
+      const content = document.createElement("div");
+      content.className = "theme-content";
+      const h4 = document.createElement("h4");
+      h4.textContent = t.title;
+      const p = document.createElement("p");
+      p.textContent = t.desc;
+      const mentions = document.createElement("div");
+      mentions.className = "mentions";
+      mentions.textContent = t.mentions + " mention" + (t.mentions > 1 ? "s" : "");
+      content.append(h4, p, mentions);
+      li.append(badge, content);
+      themeList.appendChild(li);
+    });
+    themesCard.appendChild(themeList);
+    output.appendChild(themesCard);
+
+    // Actions
+    const actionsLabel = document.createElement("div");
+    actionsLabel.className = "section-label";
+    actionsLabel.style.marginTop = "8px";
+    actionsLabel.textContent = "Recommended Actions";
+    output.appendChild(actionsLabel);
+
+    const actionsCard = document.createElement("div");
+    actionsCard.className = "card";
+    const actionList = document.createElement("ul");
+    actionList.className = "action-list";
+    d.actions.forEach(a => {
+      const li = document.createElement("li");
+      li.textContent = a;
+      actionList.appendChild(li);
+    });
+    actionsCard.appendChild(actionList);
+    output.appendChild(actionsCard);
+
+    btn.disabled = false;
+    btn.textContent = "Analyze Feedback";
+  }, 2200);
+}
+</script>
+</body>
+</html>
