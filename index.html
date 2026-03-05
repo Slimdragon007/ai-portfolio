@@ -114,31 +114,6 @@
     z-index: 1;
   }
 
-  .hero-greeting {
-    font-size: clamp(3.5rem, 8vw, 6rem);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 1;
-    margin-bottom: 0.5rem;
-    opacity: 0;
-    animation: fadeUp 0.7s ease forwards 0.2s;
-  }
-
-  .hero-wave {
-    display: inline-block;
-    animation: fadeUp 0.7s ease forwards 0.2s, wave 1.5s ease-in-out 1s 2;
-    transform-origin: 70% 70%;
-  }
-
-  @keyframes wave {
-    0%, 100% { transform: rotate(0deg); }
-    15% { transform: rotate(14deg); }
-    30% { transform: rotate(-8deg); }
-    45% { transform: rotate(14deg); }
-    60% { transform: rotate(-4deg); }
-    75% { transform: rotate(10deg); }
-  }
-
   .hero-welcome {
     font-family: var(--font-display);
     font-size: 0.7rem;
@@ -147,7 +122,7 @@
     color: var(--accent);
     margin-bottom: 2rem;
     opacity: 0;
-    animation: fadeUp 0.7s ease forwards 0.6s;
+    animation: fadeUp 0.7s ease forwards 0.2s;
   }
 
   .hero-name {
@@ -156,7 +131,7 @@
     line-height: 1.3;
     margin-bottom: 2rem;
     opacity: 0;
-    animation: fadeUp 0.7s ease forwards 1.0s;
+    animation: fadeUp 0.7s ease forwards 0.5s;
   }
 
   .hero-name .gold { color: var(--accent-gold); }
@@ -168,7 +143,7 @@
     line-height: 1.9;
     margin-bottom: 1rem;
     opacity: 0;
-    animation: fadeUp 0.7s ease forwards 1.4s;
+    animation: fadeUp 0.7s ease forwards 0.8s;
   }
 
   .hero-story .highlight {
@@ -179,12 +154,12 @@
   .hero-tagline {
     max-width: 640px;
     font-size: clamp(1.4rem, 2.8vw, 1.8rem);
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1.4;
     margin-top: 1.5rem;
     color: var(--accent);
     opacity: 0;
-    animation: fadeUp 0.7s ease forwards 1.8s;
+    animation: fadeUp 0.7s ease forwards 1.2s;
   }
 
   .hero-meta-line {
@@ -195,7 +170,7 @@
     color: var(--text-muted);
     margin-top: 2.5rem;
     opacity: 0;
-    animation: fadeUp 0.7s ease forwards 2.2s;
+    animation: fadeUp 0.7s ease forwards 1.5s;
   }
 
   .hero-meta-line .gold { color: var(--accent-gold); }
@@ -647,7 +622,6 @@
     nav .nav-links a { font-size: 0.65rem; }
 
     .hero { padding: 7rem 1.25rem 3rem; }
-    .hero-greeting { font-size: 3rem; }
     .hero-name { font-size: 1.4rem; }
     .hero-story { font-size: 1rem; }
     .hero-tagline { font-size: 1.2rem; }
@@ -697,16 +671,15 @@
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-greeting"><span class="hero-wave">👋</span> Hi.</div>
-  <div class="hero-welcome">Welcome to FlowstateAI</div>
+  <div class="hero-welcome"><span class="gold">FlowstateAI</span></div>
   <h1 class="hero-name">
     I'm Michael Haslim, <span class="gold">Founder</span>.
   </h1>
   <p class="hero-story">
-    I grew up watching my dad fix cars. Hands deep in an engine, solving problems most people couldn't even name. That's where I learned it: <span class="highlight">understand the system, then make it work better.</span>
+    My dad fixed engines most people couldn't even diagnose. He taught me one thing: <span class="highlight">understand the system, then make it run better.</span>
   </p>
   <p class="hero-story" style="animation-delay: 1.6s;">
-    Now I build a different kind of system. AI workflows that run your business operations, so you can focus on the work that actually matters.
+    I build AI systems that run your business operations, so you can focus on the work that matters.
   </p>
   <div class="hero-tagline">
     You describe it. I build it. It flows.
@@ -753,7 +726,7 @@
 <!-- TRY IT YOURSELF -->
 <section id="demos">
   <div class="reveal">
-    <div class="section-label">Interactive</div>
+    <div class="section-label">Live Demos</div>
     <h2 class="section-title">Try It Yourself</h2>
     <p class="section-subtitle">Live AI tools running in your browser. No sign-up, no API key needed.</p>
   </div>
@@ -762,7 +735,7 @@
       <div class="try-it-icon">💬</div>
       <div class="try-it-content">
         <h3>Meta Auto-Responder</h3>
-        <p>AI drafts on-brand DM replies for Facebook and Instagram. You review before anything sends.</p>
+        <p>AI-drafted replies for business DMs. Set up your business context, paste a message, get an on-brand response.</p>
       </div>
       <span class="try-it-btn">Launch Demo &rarr;</span>
     </a>
@@ -770,7 +743,7 @@
       <div class="try-it-icon">📄</div>
       <div class="try-it-content">
         <h3>SOW Generator</h3>
-        <p>Describe a project in plain English, get a professional Statement of Work you can edit and export.</p>
+        <p>Describe your project in plain English. Get a formatted Statement of Work with deliverables, timeline, and terms.</p>
       </div>
       <span class="try-it-btn">Launch Demo &rarr;</span>
     </a>
