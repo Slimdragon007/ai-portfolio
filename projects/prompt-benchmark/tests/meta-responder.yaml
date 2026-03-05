@@ -1,0 +1,182 @@
+suite: meta-responder
+description: "Test suite for the Meta Auto-Responder prompt across pricing, availability, complaints, info, and edge cases"
+
+tests:
+  # --- Pricing Inquiries ---
+  - name: pricing_inquiry_salon
+    input:
+      message: "How much for a haircut and color?"
+      business_context:
+        name: "Studio Eleve"
+        services: "Hair styling, coloring, treatments"
+        pricing: "Cuts from $45, Color from $85"
+        tone: "friendly"
+    expected:
+      contains_any: ["$45", "$85", "pricing", "starting"]
+      intent: "pricing"
+      tone: "friendly"
+      max_words: 120
+      must_not_contain: ["I'm an AI", "language model"]
+
+  - name: pricing_inquiry_restaurant
+    input:
+      message: "Do you have a prix fixe menu? How much is it?"
+      business_context:
+        name: "Coastal Kitchen"
+        services: "Farm-to-table dining, private events, catering"
+        pricing: "Entrees $22-$38, Prix fixe $65/person, Catering from $45/head"
+        tone: "professional"
+    expected:
+      contains_any: ["$65", "prix fixe", "per person"]
+      intent: "pricing"
+      tone: "professional"
+      max_words: 100
+      must_not_contain: ["I'm an AI", "language model"]
+
+  - name: pricing_inquiry_home_services
+    input:
+      message: "What do you charge for a full house cleaning? 3 bed 2 bath"
+      business_context:
+        name: "Sparkle Clean AZ"
+        services: "Residential cleaning, deep cleaning, move-in/out cleaning"
+        pricing: "Standard clean from $150, Deep clean from $250, based on sq ft"
+        tone: "friendly"
+    expected:
+      contains_any: ["$150", "$250", "quote", "estimate", "based on"]
+      intent: "pricing"
+      tone: "friendly"
+      max_words: 120
+      must_not_contain: ["I'm an AI", "language model"]
+
+  # --- Availability Inquiries ---
+  - name: availability_hours
+    input:
+      message: "Are you open on Sundays?"
+      business_context:
+        name: "Studio Eleve"
+        services: "Hair styling, coloring, treatments"
+        hours: "Mon-Sat 9am-7pm, Closed Sundays"
+        tone: "friendly"
+    expected:
+      contains_any: ["Sunday", "closed", "Mon", "Saturday"]
+      intent: "availability"
+      tone: "friendly"
+      max_words: 80
+      must_not_contain: ["I'm an AI", "language model"]
+
+  - name: availability_booking
+    input:
+      message: "Can I book a table for 6 this Saturday at 7pm?"
+      business_context:
+        name: "Coastal Kitchen"
+        services: "Farm-to-table dining, private events"
+        hours: "Tue-Sun 5pm-10pm, Closed Mondays"
+        tone: "professional"
+    expected:
+      contains_any: ["reservation", "book", "Saturday", "available", "call"]
+      intent: "availability"
+      tone: "professional"
+      max_words: 100
+      must_not_contain: ["I'm an AI", "language model"]
+
+  - name: availability_closed_day
+    input:
+      message: "I'd like to come in Monday morning for a cleaning estimate"
+      business_context:
+        name: "Sparkle Clean AZ"
+        services: "Residential cleaning"
+        hours: "Mon-Fri 8am-5pm, Sat 9am-2pm, Closed Sundays"
+        tone: "friendly"
+    expected:
+      contains_any: ["Monday", "8am", "available", "schedule"]
+      intent: "availability"
+      tone: "friendly"
+      max_words: 80
+      must_not_contain: ["I'm an AI", "language model"]
+
+  # --- Complaint Handling ---
+  - name: complaint_wait_time
+    input:
+      message: "We waited 45 minutes for our food last night. Totally unacceptable."
+      business_context:
+        name: "Coastal Kitchen"
+        services: "Farm-to-table dining"
+        tone: "professional"
+    expected:
+      contains_any: ["sorry", "apologize", "understand", "feedback"]
+      intent: "complaint"
+      tone: "empathetic"
+      max_words: 150
+      must_not_contain: ["I'm an AI", "language model", "that's not true"]
+
+  - name: complaint_quality_issue
+    input:
+      message: "The stylist completely messed up my color. I look nothing like the reference photo."
+      business_context:
+        name: "Studio Eleve"
+        services: "Hair styling, coloring, treatments"
+        tone: "friendly"
+    expected:
+      contains_any: ["sorry", "understand", "fix", "redo", "come back", "correct"]
+      intent: "complaint"
+      tone: "empathetic"
+      max_words: 150
+      must_not_contain: ["I'm an AI", "language model", "you're wrong"]
+
+  # --- General Inquiries ---
+  - name: general_services
+    input:
+      message: "What services do you offer?"
+      business_context:
+        name: "Sparkle Clean AZ"
+        services: "Residential cleaning, deep cleaning, move-in/out cleaning, office cleaning"
+        tone: "friendly"
+    expected:
+      contains_any: ["cleaning", "residential", "deep clean", "office"]
+      intent: "info"
+      tone: "friendly"
+      max_words: 120
+      must_not_contain: ["I'm an AI", "language model"]
+
+  - name: general_location
+    input:
+      message: "Where are you located? Is there parking?"
+      business_context:
+        name: "Coastal Kitchen"
+        services: "Farm-to-table dining"
+        location: "1234 Ocean Blvd, San Diego, CA. Free parking lot on-site."
+        tone: "professional"
+    expected:
+      contains_any: ["1234", "Ocean", "San Diego", "parking"]
+      intent: "info"
+      tone: "professional"
+      max_words: 100
+      must_not_contain: ["I'm an AI", "language model"]
+
+  # --- Edge Cases ---
+  - name: edge_spam_message
+    input:
+      message: "CONGRATULATIONS!!! You've won a FREE iPhone 15! Click here to claim NOW >>> bit.ly/scam123"
+      business_context:
+        name: "Studio Eleve"
+        services: "Hair styling"
+        tone: "friendly"
+    expected:
+      contains_any: ["help", "services", "questions"]
+      intent: "deflect"
+      max_words: 60
+      must_not_contain: ["click", "iPhone", "congratulations", "I'm an AI"]
+
+  - name: edge_non_english
+    input:
+      message: "Hola, me gustaria saber los precios para un corte de pelo"
+      business_context:
+        name: "Studio Eleve"
+        services: "Hair styling, coloring, treatments"
+        pricing: "Cuts from $45, Color from $85"
+        tone: "friendly"
+    expected:
+      contains_any: ["$45", "haircut", "cut", "corte", "precio"]
+      intent: "pricing"
+      max_words: 120
+      must_not_contain: ["I'm an AI", "language model"]

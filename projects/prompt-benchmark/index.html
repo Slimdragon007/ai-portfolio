@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Benchmark Suite | FlowstateAI</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #FAFAF8; --card: #FFFFFF; --text-primary: #1a1a1a; --text-secondary: #6b6b6b;
+    --text-muted: #999999; --border: rgba(0,0,0,0.06); --indigo: #818cf8;
+    --indigo-bg: rgba(129,140,248,0.08); --teal: #2dd4bf; --teal-bg: rgba(45,212,191,0.1);
+    --gold: #d4a853; --green: #22c55e; --green-bg: rgba(34,197,94,0.1);
+    --red: #ef4444; --red-bg: rgba(239,68,68,0.1); --yellow: #eab308;
+    --shadow: 0 1px 3px rgba(0,0,0,0.04); --shadow-hover: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); letter-spacing: -0.011em; line-height: 1.6; }
+  body::before { content: ''; position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, transparent, transparent 49px, #e5e5e3 49px, #e5e5e3 50px), repeating-linear-gradient(90deg, transparent, transparent 49px, #e5e5e3 49px, #e5e5e3 50px); opacity: 0.45; z-index: -1; }
+
+  .header { background: rgba(250,250,248,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .back-link { color: var(--text-secondary); text-decoration: none; font-size: 14px; }
+  .back-link:hover { color: var(--indigo); }
+  .header h1 { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; }
+  .header h1 span { color: var(--gold); }
+  .header-sub { font-size: 13px; color: var(--text-muted); }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+  .section-label { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--indigo); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-bottom: 12px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 24px; }
+
+  /* Stats bar */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; box-shadow: var(--shadow); }
+  .stat .num { font-family: 'Space Mono', monospace; font-size: 24px; font-weight: 700; }
+  .stat .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+  .stat.best .num { color: var(--green); }
+
+  /* Chart controls */
+  .chart-controls { display: flex; gap: 8px; margin-bottom: 16px; }
+  .chart-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); font-family: 'Inter', sans-serif; font-size: 12px; cursor: pointer; color: var(--text-secondary); transition: all 0.2s; }
+  .chart-btn.active { background: var(--indigo-bg); border-color: var(--indigo); color: var(--indigo); font-weight: 600; }
+  .chart-btn:hover { border-color: var(--indigo); }
+
+  /* Table */
+  .table-controls { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+  .table-controls select { padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px; background: var(--bg); }
+  .table-controls select:focus { outline: none; border-color: var(--indigo); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); padding: 8px 12px; border-bottom: 2px solid var(--border); cursor: pointer; user-select: none; white-space: nowrap; }
+  th:hover { color: var(--indigo); }
+  th .sort-arrow { font-size: 10px; margin-left: 4px; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  tr:hover { background: var(--indigo-bg); }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+  .badge.pass { background: var(--green-bg); color: #16a34a; }
+  .badge.fail { background: var(--red-bg); color: #dc2626; }
+  .version-tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; background: var(--indigo-bg); color: #6366f1; }
+  .score-bar { display: inline-block; height: 6px; border-radius: 3px; background: var(--indigo); vertical-align: middle; margin-right: 6px; }
+  .input-preview { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); font-size: 12px; }
+
+  /* Insights */
+  .insight { padding: 16px; border-radius: 6px; background: var(--bg); border-left: 3px solid var(--indigo); margin-bottom: 12px; font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+  .insight strong { color: var(--text-primary); }
+  .insight .metric { font-family: 'Space Mono', monospace; color: var(--indigo); font-weight: 600; }
+  .reco { padding: 12px 16px; border-radius: 6px; background: var(--green-bg); font-size: 13px; color: #16a34a; font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-left">
+    <a href="../../index.html" class="back-link">&larr; Portfolio</a>
+    <div>
+      <h1><span>FlowstateAI</span> Prompt Benchmark Suite</h1>
+      <div class="header-sub">Test prompts like software. Version, score, compare, deploy.</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat"><div class="num">12</div><div class="lbl">Test Cases</div></div>
+    <div class="stat"><div class="num">3</div><div class="lbl">Versions</div></div>
+    <div class="stat best"><div class="num">92%</div><div class="lbl">Best Pass Rate</div></div>
+    <div class="stat"><div class="num">$0.09</div><div class="lbl">Total Cost</div></div>
+    <div class="stat"><div class="num">v2.0</div><div class="lbl">Recommended</div></div>
+  </div>
+
+  <!-- Version Comparison Chart -->
+  <div class="section-label">Version Comparison</div>
+  <div class="card">
+    <div class="chart-controls">
+      <button class="chart-btn active" onclick="setChartView('passRate')">Pass Rate</button>
+      <button class="chart-btn" onclick="setChartView('avgScore')">Avg Score</button>
+      <button class="chart-btn" onclick="setChartView('cost')">Cost per Run</button>
+    </div>
+    <canvas id="versionChart" height="100"></canvas>
+  </div>
+
+  <!-- Test Results Table -->
+  <div class="section-label">Test Results</div>
+  <div class="card" style="padding: 16px;">
+    <div class="table-controls">
+      <select id="versionFilter" onchange="filterTable()">
+        <option value="all">All Versions</option>
+        <option value="v1.0">v1.0</option>
+        <option value="v1.1">v1.1</option>
+        <option value="v2.0" selected>v2.0</option>
+      </select>
+      <span style="font-size:12px;color:var(--text-muted);" id="tableCount">Showing 12 results</span>
+    </div>
+    <div style="overflow-x: auto;">
+      <table id="resultsTable">
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)">Test Name <span class="sort-arrow"></span></th>
+            <th onclick="sortTable(1)">Input <span class="sort-arrow"></span></th>
+            <th onclick="sortTable(2)">Criteria <span class="sort-arrow"></span></th>
+            <th onclick="sortTable(3)">Result <span class="sort-arrow"></span></th>
+            <th onclick="sortTable(4)">Score <span class="sort-arrow"></span></th>
+            <th onclick="sortTable(5)">Version <span class="sort-arrow"></span></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Insights Panel -->
+  <div class="section-label">Insights</div>
+  <div class="card">
+    <div class="insight">
+      <strong>Pass rate improvement:</strong> v2.0 achieved <span class="metric">92%</span> pass rate, up from <span class="metric">67%</span> in v1.0, a <span class="metric">+25 point</span> improvement across 12 test cases.
+    </div>
+    <div class="insight">
+      <strong>Cost optimization:</strong> v2.0 costs <span class="metric">$0.02</span> per run vs v1.0's <span class="metric">$0.03</span>, a <span class="metric">33% reduction</span> through token optimization. v1.1 was the most expensive at <span class="metric">$0.04</span> due to longer system prompts.
+    </div>
+    <div class="insight">
+      <strong>Tone regression detected:</strong> v1.1 improved intent detection (pricing and availability tests) but <strong>regressed on tone scoring</strong> for complaint handling tests. Tone scores dropped from 75/100 to 50/100 on empathetic responses. This was <strong>corrected in v2.0</strong> (back to 85/100).
+    </div>
+    <div class="insight">
+      <strong>Remaining failures:</strong> v2.0 still fails on <span class="metric">edge_non_english</span> (non-English input handling). The prompt does not instruct the model to respond in the customer's language. This is the primary candidate for v2.1.
+    </div>
+    <div class="reco">
+      Recommendation: deploy v2.0. It has the highest pass rate and lowest cost. Track the non-English edge case for v2.1.
+    </div>
+  </div>
+</div>
+
+<script>
+// =========================================================================
+// Pre-loaded demo benchmark data
+// =========================================================================
+const TEST_CASES = [
+  { name: "pricing_inquiry_salon", input: "How much for a haircut and color?", criteria: "contains: $45/$85, intent: pricing", category: "pricing" },
+  { name: "pricing_inquiry_restaurant", input: "Do you have a prix fixe menu?", criteria: "contains: $65/prix fixe, intent: pricing", category: "pricing" },
+  { name: "pricing_inquiry_home_services", input: "What do you charge for a full house cleaning?", criteria: "contains: $150/$250, intent: pricing", category: "pricing" },
+  { name: "availability_hours", input: "Are you open on Sundays?", criteria: "contains: Sunday/closed, intent: availability", category: "availability" },
+  { name: "availability_booking", input: "Can I book a table for 6 Saturday at 7pm?", criteria: "contains: reservation/book, intent: availability", category: "availability" },
+  { name: "availability_closed_day", input: "I'd like to come in Monday morning", criteria: "contains: Monday/8am, intent: availability", category: "availability" },
+  { name: "complaint_wait_time", input: "We waited 45 minutes for our food", criteria: "contains: sorry/understand, intent: complaint, tone: empathetic", category: "complaint" },
+  { name: "complaint_quality_issue", input: "The stylist completely messed up my color", criteria: "contains: sorry/fix/redo, intent: complaint, tone: empathetic", category: "complaint" },
+  { name: "general_services", input: "What services do you offer?", criteria: "contains: cleaning/residential, intent: info", category: "info" },
+  { name: "general_location", input: "Where are you located? Is there parking?", criteria: "contains: Ocean/parking, intent: info", category: "info" },
+  { name: "edge_spam_message", input: "CONGRATULATIONS!!! You've won a FREE iPhone 15!", criteria: "intent: deflect, must_not: click/iPhone", category: "edge" },
+  { name: "edge_non_english", input: "Hola, me gustaria saber los precios", criteria: "contains: $45/corte, intent: pricing", category: "edge" }
+];
+
+// Results per version: [passed, score] for each of the 12 tests
+const VERSION_DATA = {
+  "v1.0": {
+    passRate: 67, avgScore: 62.3, cost: 0.03,
+    results: [
+      { passed: true, score: 82 }, { passed: true, score: 78 }, { passed: true, score: 75 },
+      { passed: true, score: 80 }, { passed: false, score: 48 }, { passed: true, score: 72 },
+      { passed: true, score: 75 }, { passed: false, score: 42 },
+      { passed: true, score: 85 }, { passed: false, score: 55 },
+      { passed: false, score: 35 }, { passed: false, score: 20 }
+    ]
+  },
+  "v1.1": {
+    passRate: 83, avgScore: 74.1, cost: 0.04,
+    results: [
+      { passed: true, score: 88 }, { passed: true, score: 85 }, { passed: true, score: 82 },
+      { passed: true, score: 90 }, { passed: true, score: 78 }, { passed: true, score: 80 },
+      { passed: false, score: 50 }, { passed: false, score: 45 },
+      { passed: true, score: 92 }, { passed: true, score: 82 },
+      { passed: true, score: 70 }, { passed: false, score: 28 }
+    ]
+  },
+  "v2.0": {
+    passRate: 92, avgScore: 83.5, cost: 0.02,
+    results: [
+      { passed: true, score: 92 }, { passed: true, score: 90 }, { passed: true, score: 88 },
+      { passed: true, score: 95 }, { passed: true, score: 85 }, { passed: true, score: 88 },
+      { passed: true, score: 85 }, { passed: true, score: 82 },
+      { passed: true, score: 95 }, { passed: true, score: 88 },
+      { passed: true, score: 72 }, { passed: false, score: 42 }
+    ]
+  }
+};
+
+// =========================================================================
+// Chart
+// =========================================================================
+let currentChart = null;
+let currentView = "passRate";
+
+function buildChart(view) {
+  const ctx = document.getElementById("versionChart").getContext("2d");
+  if (currentChart) currentChart.destroy();
+
+  const versions = ["v1.0", "v1.1", "v2.0"];
+  const colors = ["rgba(129,140,248,0.6)", "rgba(45,212,191,0.6)", "rgba(212,168,83,0.6)"];
+  const borderColors = ["#818cf8", "#2dd4bf", "#d4a853"];
+
+  let data, label, fmt;
+  if (view === "passRate") {
+    data = versions.map(v => VERSION_DATA[v].passRate);
+    label = "Pass Rate (%)";
+    fmt = v => v + "%";
+  } else if (view === "avgScore") {
+    data = versions.map(v => VERSION_DATA[v].avgScore);
+    label = "Avg Score";
+    fmt = v => v.toFixed(1);
+  } else {
+    data = versions.map(v => VERSION_DATA[v].cost);
+    label = "Cost per Run ($)";
+    fmt = v => "$" + v.toFixed(2);
+  }
+
+  currentChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: versions,
+      datasets: [{
+        label: label,
+        data: data,
+        backgroundColor: colors,
+        borderColor: borderColors,
+        borderWidth: 2,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => fmt(ctx.raw) } }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: view === "cost" ? 0.06 : 100,
+          grid: { color: "rgba(0,0,0,0.04)" },
+          ticks: {
+            font: { family: "'Space Mono', monospace", size: 11 },
+            callback: v => view === "cost" ? "$" + v.toFixed(2) : v + (view === "passRate" ? "%" : "")
+          }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { font: { family: "'Space Mono', monospace", size: 12, weight: "bold" } }
+        }
+      }
+    }
+  });
+}
+
+function setChartView(view) {
+  currentView = view;
+  document.querySelectorAll(".chart-btn").forEach(b => b.classList.remove("active"));
+  event.target.classList.add("active");
+  buildChart(view);
+}
+
+// =========================================================================
+// Table
+// =========================================================================
+let allRows = [];
+let sortCol = -1;
+let sortAsc = true;
+
+function buildAllRows() {
+  allRows = [];
+  for (const [version, vdata] of Object.entries(VERSION_DATA)) {
+    vdata.results.forEach((r, i) => {
+      const tc = TEST_CASES[i];
+      allRows.push({
+        name: tc.name,
+        input: tc.input,
+        criteria: tc.criteria,
+        passed: r.passed,
+        score: r.score,
+        version: version,
+      });
+    });
+  }
+}
+
+function renderTable(rows) {
+  const tbody = document.getElementById("tableBody");
+  tbody.textContent = "";
+
+  rows.forEach(r => {
+    const tr = document.createElement("tr");
+
+    const tdName = document.createElement("td");
+    tdName.style.fontWeight = "500";
+    tdName.textContent = r.name;
+
+    const tdInput = document.createElement("td");
+    const inputDiv = document.createElement("div");
+    inputDiv.className = "input-preview";
+    inputDiv.textContent = r.input;
+    inputDiv.title = r.input;
+    tdInput.appendChild(inputDiv);
+
+    const tdCriteria = document.createElement("td");
+    tdCriteria.style.cssText = "font-size:12px;color:var(--text-secondary);max-width:180px;";
+    tdCriteria.textContent = r.criteria;
+
+    const tdResult = document.createElement("td");
+    const badge = document.createElement("span");
+    badge.className = "badge " + (r.passed ? "pass" : "fail");
+    badge.textContent = r.passed ? "PASS" : "FAIL";
+    tdResult.appendChild(badge);
+
+    const tdScore = document.createElement("td");
+    const bar = document.createElement("span");
+    bar.className = "score-bar";
+    bar.style.width = Math.max(r.score * 0.6, 4) + "px";
+    const scoreText = document.createTextNode(r.score + "/100");
+    tdScore.append(bar, scoreText);
+
+    const tdVersion = document.createElement("td");
+    const vtag = document.createElement("span");
+    vtag.className = "version-tag";
+    vtag.textContent = r.version;
+    tdVersion.appendChild(vtag);
+
+    tr.append(tdName, tdInput, tdCriteria, tdResult, tdScore, tdVersion);
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("tableCount").textContent = "Showing " + rows.length + " results";
+}
+
+function filterTable() {
+  const version = document.getElementById("versionFilter").value;
+  const filtered = version === "all" ? allRows : allRows.filter(r => r.version === version);
+  renderTable(filtered);
+}
+
+function sortTable(col) {
+  if (sortCol === col) { sortAsc = !sortAsc; } else { sortCol = col; sortAsc = true; }
+
+  const keys = ["name", "input", "criteria", "passed", "score", "version"];
+  const key = keys[col];
+  const version = document.getElementById("versionFilter").value;
+  let rows = version === "all" ? [...allRows] : allRows.filter(r => r.version === version);
+
+  rows.sort((a, b) => {
+    let va = a[key], vb = b[key];
+    if (typeof va === "boolean") { va = va ? 1 : 0; vb = vb ? 1 : 0; }
+    if (typeof va === "number") return sortAsc ? va - vb : vb - va;
+    return sortAsc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+  });
+
+  renderTable(rows);
+}
+
+// =========================================================================
+// Init
+// =========================================================================
+buildChart("passRate");
+buildAllRows();
+filterTable();
+</script>
+</body>
+</html>
