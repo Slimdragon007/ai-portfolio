@@ -118,7 +118,7 @@ When Notion MCP is connected, these are the key references:
 Project Name: [title]
 Status: Active | Complete | Archived | Resume Next Session
 Type: HTML Artifact | Dashboard | Document | Script | Notion Page | Other
-Mode: FlowstateAI | Yelp | Personal
+Mode: FlowstateAI | Business | Personal
 Built On: [date]
 Claude Chat URL: [url]
 File Contents: [text]
