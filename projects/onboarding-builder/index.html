@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Onboarding Builder | FlowstateAI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #FAFAF8; --card: #FFFFFF; --text-primary: #1a1a1a; --text-secondary: #6b6b6b;
+    --text-muted: #999999; --border: rgba(0,0,0,0.06); --indigo: #818cf8;
+    --indigo-bg: rgba(129,140,248,0.08); --teal: #2dd4bf; --teal-bg: rgba(45,212,191,0.1);
+    --gold: #d4a853; --green: #22c55e; --green-bg: rgba(34,197,94,0.1);
+    --shadow: 0 1px 3px rgba(0,0,0,0.04); --shadow-hover: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); letter-spacing: -0.011em; line-height: 1.6; }
+  body::before { content: ''; position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, transparent, transparent 49px, #e5e5e3 49px, #e5e5e3 50px), repeating-linear-gradient(90deg, transparent, transparent 49px, #e5e5e3 49px, #e5e5e3 50px); opacity: 0.45; z-index: -1; }
+  .header { background: rgba(250,250,248,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; }
+  .back-link { color: var(--text-secondary); text-decoration: none; font-size: 14px; }
+  .back-link:hover { color: var(--indigo); }
+  .header h1 { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; }
+  .header h1 span { color: var(--gold); }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+  .section-label { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--indigo); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-bottom: 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; }
+  input, textarea, select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; background: var(--bg); margin-bottom: 12px; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--indigo); }
+  textarea { resize: vertical; min-height: 80px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+  .btn { display: inline-block; padding: 10px 24px; background: var(--gold); color: #fff; border: none; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn:hover { filter: brightness(1.1); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .step { position: relative; margin-bottom: 24px; }
+  .step::before { content: ''; position: absolute; left: -24px; top: 4px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--indigo); background: var(--card); }
+  .step.complete::before { background: var(--green); border-color: var(--green); }
+  .step-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .step-day { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--indigo); font-weight: 600; }
+  .step-title { font-size: 15px; font-weight: 600; }
+  .step-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .step-tasks { list-style: none; margin-top: 8px; }
+  .step-tasks li { font-size: 13px; color: var(--text-secondary); padding: 2px 0; padding-left: 16px; position: relative; }
+  .step-tasks li::before { content: '\2713'; position: absolute; left: 0; color: var(--green); font-weight: 600; }
+  .empty { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; background: var(--teal-bg); color: #0d9488; margin-right: 4px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="../../index.html" class="back-link">&larr; Portfolio</a>
+  <h1><span>FlowstateAI</span> Onboarding Builder</h1>
+</div>
+
+<div class="container">
+  <div class="section-label">New Hire Details</div>
+  <div class="card">
+    <div class="row">
+      <div>
+        <label>Employee Name</label>
+        <input id="empName" value="Sarah Chen" />
+      </div>
+      <div>
+        <label>Role</label>
+        <input id="empRole" value="Senior Frontend Developer" />
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Department</label>
+        <input id="empDept" value="Engineering" />
+      </div>
+      <div>
+        <label>Start Date</label>
+        <input id="empStart" type="date" />
+      </div>
+    </div>
+    <label>Company Name</label>
+    <input id="companyName" value="FlowstateAI" />
+    <label>Key Tools &amp; Systems</label>
+    <input id="tools" value="GitHub, Slack, Figma, Linear, Vercel" />
+    <label>Special Notes (optional)</label>
+    <textarea id="notes" placeholder="Remote employee, needs VPN setup, reports to CTO, etc.">Remote employee, Pacific time zone, reports to CTO</textarea>
+    <button class="btn" id="genBtn" onclick="generate()">Generate Onboarding Plan</button>
+  </div>
+
+  <div class="section-label">Onboarding Plan</div>
+  <div id="output">
+    <div class="empty">Fill in the details above and generate a structured 30-day onboarding plan.</div>
+  </div>
+</div>
+
+<script>
+const DEMO_PLAN = [
+  {
+    day: "Pre-Start",
+    title: "Pre-boarding Setup",
+    desc: "Get everything ready before Sarah's first day.",
+    tasks: [
+      "Send welcome email with first-day logistics and team intro",
+      "Provision GitHub account with appropriate repo access",
+      "Create Slack account and add to #engineering, #frontend, #general channels",
+      "Set up Figma seat and share design system library",
+      "Create Linear account and add to Frontend team board",
+      "Ship laptop and peripherals to home address (remote setup)",
+      "Schedule VPN credentials delivery for start date",
+      "Assign onboarding buddy (recommend: someone on the frontend team)"
+    ]
+  },
+  {
+    day: "Day 1",
+    title: "Welcome and Orientation",
+    desc: "First impressions matter. Focus on people, not paperwork.",
+    tasks: [
+      "9:00 AM: Welcome call with CTO (30 min, camera on)",
+      "9:30 AM: IT setup session, verify VPN, GitHub, Slack access",
+      "10:30 AM: Virtual office tour via Slack huddle with onboarding buddy",
+      "11:00 AM: Review company handbook and sign HR documents",
+      "1:00 PM: Team standup introduction (keep it casual)",
+      "2:00 PM: Dev environment setup walkthrough",
+      "3:00 PM: End of day, no assignments, just settle in"
+    ]
+  },
+  {
+    day: "Week 1",
+    title: "Learn the Codebase",
+    desc: "Observe, read, ask questions. No pressure to ship yet.",
+    tasks: [
+      "Pair with onboarding buddy on 2-3 sessions (1 hour each)",
+      "Read frontend architecture docs and component library guide",
+      "Review last 10 merged PRs to understand code style and review process",
+      "Complete Figma design system walkthrough with design lead",
+      "Set up local dev environment and run the full test suite",
+      "Attend all team ceremonies (standup, sprint planning, retro)",
+      "Friday: 1-on-1 with CTO to check in on first week experience"
+    ]
+  },
+  {
+    day: "Week 2",
+    title: "First Contribution",
+    desc: "Small, low-risk tasks to build confidence and ship something real.",
+    tasks: [
+      "Pick up 2-3 'good first issue' tickets from Linear board",
+      "Submit first PR with full test coverage",
+      "Participate in code review on at least 2 teammate PRs",
+      "Shadow a production deployment with the team lead",
+      "Document any gaps found in setup or onboarding docs",
+      "Friday: Demo first contribution in team show-and-tell"
+    ]
+  },
+  {
+    day: "Week 3-4",
+    title: "Ramp to Full Speed",
+    desc: "Take on real feature work with increasing autonomy.",
+    tasks: [
+      "Own a small feature end-to-end (design review through deployment)",
+      "Lead one standup or team discussion",
+      "Complete Vercel deployment training and get deploy access",
+      "Set up monitoring alerts for areas of ownership",
+      "Write or update one piece of team documentation",
+      "30-day check-in with CTO: feedback both directions, adjust plan if needed"
+    ]
+  }
+];
+
+function generate() {
+  const btn = document.getElementById("genBtn");
+  const output = document.getElementById("output");
+  btn.disabled = true;
+  btn.textContent = "Building plan...";
+  output.textContent = "";
+
+  const loading = document.createElement("div");
+  loading.className = "empty";
+  loading.textContent = "AI is building a personalized onboarding plan...";
+  output.appendChild(loading);
+
+  const empName = document.getElementById("empName").value || "New Hire";
+  const empRole = document.getElementById("empRole").value || "Team Member";
+
+  setTimeout(() => {
+    output.textContent = "";
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const headerDiv = document.createElement("div");
+    headerDiv.style.cssText = "margin-bottom: 20px;";
+    const h3 = document.createElement("h3");
+    h3.style.cssText = "font-size: 16px; font-weight: 600; margin-bottom: 4px;";
+    h3.textContent = "30-Day Onboarding Plan: " + empName;
+    const sub = document.createElement("p");
+    sub.style.cssText = "font-size: 13px; color: var(--text-secondary);";
+    sub.textContent = empRole + " | Generated by FlowstateAI";
+    headerDiv.append(h3, sub);
+    card.appendChild(headerDiv);
+
+    const timeline = document.createElement("div");
+    timeline.className = "timeline";
+
+    DEMO_PLAN.forEach(step => {
+      const stepDiv = document.createElement("div");
+      stepDiv.className = "step";
+
+      const header = document.createElement("div");
+      header.className = "step-header";
+      const daySpan = document.createElement("span");
+      daySpan.className = "step-day";
+      daySpan.textContent = step.day;
+      const titleSpan = document.createElement("span");
+      titleSpan.className = "step-title";
+      titleSpan.textContent = step.title;
+      header.append(daySpan, titleSpan);
+
+      const desc = document.createElement("div");
+      desc.className = "step-desc";
+      desc.textContent = step.desc;
+
+      const taskList = document.createElement("ul");
+      taskList.className = "step-tasks";
+      step.tasks.forEach(t => {
+        const li = document.createElement("li");
+        li.textContent = t;
+        taskList.appendChild(li);
+      });
+
+      stepDiv.append(header, desc, taskList);
+      timeline.appendChild(stepDiv);
+    });
+
+    card.appendChild(timeline);
+    output.appendChild(card);
+    btn.disabled = false;
+    btn.textContent = "Generate Onboarding Plan";
+  }, 2000);
+}
+</script>
+</body>
+</html>
