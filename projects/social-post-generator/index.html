@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Social Post Generator | FlowstateAI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #FAFAF8; --card: #FFFFFF; --text-primary: #1a1a1a; --text-secondary: #6b6b6b;
+    --text-muted: #999999; --border: rgba(0,0,0,0.06); --indigo: #818cf8;
+    --indigo-bg: rgba(129,140,248,0.08); --teal: #2dd4bf; --teal-bg: rgba(45,212,191,0.1);
+    --gold: #d4a853; --shadow: 0 1px 3px rgba(0,0,0,0.04); --shadow-hover: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); letter-spacing: -0.011em; line-height: 1.6; min-height: 100vh; }
+  body::before { content: ''; position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, transparent, transparent 49px, #e5e5e3 49px, #e5e5e3 50px), repeating-linear-gradient(90deg, transparent, transparent 49px, #e5e5e3 49px, #e5e5e3 50px); opacity: 0.45; z-index: -1; }
+  .header { background: rgba(250,250,248,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; }
+  .back-link { color: var(--text-secondary); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+  .back-link:hover { color: var(--indigo); }
+  .header h1 { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; }
+  .header h1 span { color: var(--gold); }
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+  .section-label { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--indigo); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-bottom: 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; }
+  input, textarea, select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; background: var(--bg); transition: border-color 0.2s; margin-bottom: 12px; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--indigo); }
+  textarea { resize: vertical; min-height: 80px; }
+  .btn { display: inline-block; padding: 10px 24px; background: var(--gold); color: #fff; border: none; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: filter 0.2s; }
+  .btn:hover { filter: brightness(1.1); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .output-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 24px; box-shadow: var(--shadow); }
+  .post-block { padding: 16px; border-radius: 6px; margin-bottom: 12px; background: var(--bg); border-left: 3px solid var(--indigo); }
+  .post-block h4 { font-size: 13px; font-weight: 600; color: var(--indigo); margin-bottom: 8px; }
+  .post-block p { font-size: 14px; color: var(--text-primary); line-height: 1.6; white-space: pre-line; }
+  .post-block .hashtags { font-size: 12px; color: var(--teal); margin-top: 8px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+  .empty { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; background: var(--teal-bg); color: #0d9488; margin-right: 4px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="../../index.html" class="back-link">&larr; Portfolio</a>
+  <h1><span>FlowstateAI</span> Social Post Generator</h1>
+</div>
+
+<div class="container">
+  <div class="section-label">Input</div>
+  <div class="card">
+    <label>Business Name</label>
+    <input id="bizName" placeholder="e.g. Coastal Kitchen" value="Coastal Kitchen" />
+    <label>Industry</label>
+    <input id="bizIndustry" placeholder="e.g. Restaurant" value="Farm-to-table restaurant" />
+    <div class="row">
+      <div>
+        <label>Platform</label>
+        <select id="platform">
+          <option value="instagram">Instagram</option>
+          <option value="linkedin">LinkedIn</option>
+          <option value="twitter">Twitter/X</option>
+          <option value="facebook">Facebook</option>
+        </select>
+      </div>
+      <div>
+        <label>Tone</label>
+        <select id="tone">
+          <option value="professional">Professional</option>
+          <option value="casual">Casual</option>
+          <option value="witty">Witty</option>
+          <option value="inspirational">Inspirational</option>
+        </select>
+      </div>
+    </div>
+    <label>Topic or Announcement</label>
+    <textarea id="topic" placeholder="What do you want to post about?">We just launched our new summer menu featuring locally-sourced ingredients from Arizona farms</textarea>
+    <button class="btn" id="generateBtn" onclick="generate()">Generate Posts</button>
+  </div>
+
+  <div class="section-label">Generated Posts</div>
+  <div id="output">
+    <div class="empty">Click "Generate Posts" to create platform-optimized social content.</div>
+  </div>
+</div>
+
+<script>
+const DEMO_POSTS = {
+  instagram: [
+    { label: "Carousel Opener", text: "Summer just hit different at Coastal Kitchen. \u{1F33F}\n\nOur new menu is live, and every single ingredient tells a story. Arizona-grown tomatoes from Steadfast Farm. Herbs from our rooftop garden. Peaches from Queen Creek.\n\nThis isn't just a menu update. It's a love letter to the people who grow our food.", hashtags: "#FarmToTable #ArizonaEats #CoastalKitchen #SummerMenu #LocalFirst #PhoenixFoodie" },
+    { label: "Story/Reel Caption", text: "POV: You're the first to try our new summer menu \u{1F351}\n\nSwipe to see what's fresh >>", hashtags: "#NewMenu #FoodTok #PhoenixRestaurants" },
+    { label: "Engagement Post", text: "We need your help settling a debate in the kitchen.\n\nWhich summer dish should we feature this weekend?\n\nA) Grilled peach salad with burrata\nB) Heirloom tomato gazpacho\nC) Mesquite-smoked corn ribs\n\nDrop your vote below. Winner gets added to the specials board Friday. \u{1F447}", hashtags: "#CoastalKitchen #YouDecide #SummerEats" }
+  ],
+  linkedin: [
+    { label: "Thought Leadership", text: "We just launched our summer menu at Coastal Kitchen, and I want to share why it took us 3 months instead of 3 weeks.\n\nWe visited 12 Arizona farms. Tasted 47 ingredient samples. Rejected 60% of them.\n\nBecause \"locally-sourced\" shouldn't be a marketing line. It should be a supply chain decision.\n\nHere's what we learned building relationships with the people who actually grow our food:", hashtags: "#RestaurantIndustry #FarmToTable #SupplyChain #Leadership" },
+    { label: "Announcement", text: "Excited to announce: our new summer menu at Coastal Kitchen is live.\n\nEvery dish features ingredients from Arizona farms within 100 miles of our kitchen. We partnered with 8 local growers to make it happen.\n\nIf you're in Phoenix, come taste what local actually means.", hashtags: "#PhoenixBusiness #LocalFood #RestaurantLife" }
+  ],
+  twitter: [
+    { label: "Thread Opener", text: "We just dropped our summer menu and every ingredient comes from within 100 miles of our kitchen.\n\nHere's the story behind 3 dishes that almost didn't make it \u{1F9F5}\u{1F447}", hashtags: "" },
+    { label: "Single Tweet", text: "New summer menu is live at Coastal Kitchen.\n\nArizona-grown. Chef-obsessed. Ready for you.\n\nBook a table: [link]", hashtags: "#PhoenixEats #SummerMenu" },
+    { label: "Engagement", text: "Hot take: most \"farm-to-table\" restaurants have never visited the farm.\n\nWe spent 3 months visiting ours. New menu reflects it.", hashtags: "" }
+  ],
+  facebook: [
+    { label: "Announcement", text: "Big news, Phoenix! \u{1F389}\n\nOur brand new summer menu is officially here at Coastal Kitchen, and we couldn't be more proud of what our team created.\n\nEvery dish features fresh, locally-sourced ingredients from Arizona farms. We're talking heirloom tomatoes from Steadfast Farm, herbs from our own rooftop garden, and stone fruit from Queen Creek.\n\nCome see (and taste) what summer means to us. Reservations open now!\n\n\u{1F449} Link in comments", hashtags: "#CoastalKitchen #SummerMenu #PhoenixRestaurants #FarmToTable #SupportLocal" },
+    { label: "Behind the Scenes", text: "A peek behind the curtain \u{1F3AC}\n\nLast week, Chef Maria and our team drove out to Queen Creek to hand-pick the peaches for our new grilled peach salad. This is what \"locally-sourced\" looks like at Coastal Kitchen.\n\nNew summer menu is live. Every ingredient has a story.", hashtags: "#BehindTheScenes #ChefLife #LocalFirst" }
+  ]
+};
+
+function generate() {
+  const btn = document.getElementById("generateBtn");
+  const output = document.getElementById("output");
+  btn.disabled = true;
+  btn.textContent = "Generating...";
+  output.textContent = "";
+
+  const loading = document.createElement("div");
+  loading.className = "empty";
+  loading.textContent = "AI is crafting your posts...";
+  output.appendChild(loading);
+
+  setTimeout(() => {
+    const platform = document.getElementById("platform").value;
+    const posts = DEMO_POSTS[platform] || DEMO_POSTS.instagram;
+
+    output.textContent = "";
+
+    const card = document.createElement("div");
+    card.className = "output-card";
+
+    const platformLabel = document.createElement("div");
+    platformLabel.style.cssText = "margin-bottom: 16px; display: flex; align-items: center; gap: 8px;";
+    const platformTag = document.createElement("span");
+    platformTag.className = "tag";
+    platformTag.textContent = platform.charAt(0).toUpperCase() + platform.slice(1);
+    const toneTag = document.createElement("span");
+    toneTag.className = "tag";
+    toneTag.textContent = document.getElementById("tone").value;
+    const countText = document.createElement("span");
+    countText.style.cssText = "font-size: 12px; color: var(--text-muted);";
+    countText.textContent = posts.length + " variations generated";
+    platformLabel.append(platformTag, toneTag, countText);
+    card.appendChild(platformLabel);
+
+    posts.forEach(post => {
+      const block = document.createElement("div");
+      block.className = "post-block";
+      const h4 = document.createElement("h4");
+      h4.textContent = post.label;
+      const p = document.createElement("p");
+      p.textContent = post.text;
+      block.append(h4, p);
+      if (post.hashtags) {
+        const tags = document.createElement("div");
+        tags.className = "hashtags";
+        tags.textContent = post.hashtags;
+        block.appendChild(tags);
+      }
+      card.appendChild(block);
+    });
+
+    output.appendChild(card);
+    btn.disabled = false;
+    btn.textContent = "Generate Posts";
+  }, 1800);
+}
+</script>
+</body>
+</html>
