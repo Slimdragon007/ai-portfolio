@@ -1123,6 +1123,54 @@ Prospects <span class="arrow">-></span> FlowstateAI Pipeline</div>
       <span class="case-arrow">&rarr;</span>
     </div>
 
+    <!-- CS 07 -->
+    <div class="case-card" onclick="toggleCase(this)">
+      <span class="case-number">07</span>
+      <div class="case-content">
+        <h3>Agent Pipeline</h3>
+        <p>Multi-agent orchestration system: 3 specialized AI agents qualify leads, draft proposals, and review output with retry logic and real-time streaming.</p>
+        <div class="case-tags">
+          <span class="case-tag">Multi-Agent</span>
+          <span class="case-tag">FastAPI</span>
+          <span class="case-tag">Pydantic</span>
+          <span class="case-tag">SSE</span>
+        </div>
+        <div class="case-expand-hint">Click to expand</div>
+        <div class="case-detail">
+          <div class="case-detail-grid">
+            <div class="detail-block">
+              <h4>Architecture</h4>
+              <div class="architecture-flow">Lead Input (Pydantic model)
+<span class="arrow">-></span> Qualifier Agent (ICP scoring, 0-100)
+<span class="arrow">-></span> Gate: score >= 60 or stop
+<span class="arrow">-></span> Proposal Agent (5-section draft)
+<span class="arrow">-></span> Reviewer Agent (QA + compliance)
+<span class="arrow">-></span> Retry loop (max 2 revisions)
+<span class="arrow">-></span> Deliver with full audit trail</div>
+            </div>
+            <div class="detail-block">
+              <h4>What Makes It Different</h4>
+              <ul>
+                <li>Typed data contracts between agents (Pydantic, not prose)</li>
+                <li>Quality gate with retry: reviewer feedback loops back to proposal agent</li>
+                <li>Observable state machine with SSE streaming to dashboard</li>
+                <li>Dual mode: client-side demo on GitHub Pages, live Claude API with FastAPI backend</li>
+              </ul>
+            </div>
+            <div class="detail-block">
+              <h4>Result</h4>
+              <p>3 demo leads tested end-to-end. Pipeline completes in ~5.8s with real-time visualization. Full cost and duration tracking per agent. Works standalone on any static host.</p>
+            </div>
+            <div class="detail-block">
+              <h4>Stack</h4>
+              <p>Python (FastAPI, Pydantic, aiosqlite), HTML/JS dashboard, Claude API (live mode), SQLite persistence, Server-Sent Events</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span class="case-arrow">&rarr;</span>
+    </div>
+
   </div>
 </section>
 
