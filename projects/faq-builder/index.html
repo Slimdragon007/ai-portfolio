@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ Builder | FlowstateAI</title>
+<meta name="description" content="Paste your business info, get a production-ready FAQ section in 30 seconds. Built by Michael Haslim / FlowstateAI.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #d97757;
+    --accent-glow: rgba(217, 119, 87, 0.15);
+    --accent-soft: rgba(217, 119, 87, 0.08);
+    --bg-primary: #0a0a0c;
+    --bg-card: #111115;
+    --bg-card-hover: #16161c;
+    --bg-input: #0e0e12;
+    --text-primary: #e8e6e3;
+    --text-secondary: #8a8a8e;
+    --text-muted: #5a5a5e;
+    --border: rgba(255, 255, 255, 0.06);
+    --border-accent: rgba(217, 119, 87, 0.3);
+    --success: #4ade80;
+    --danger: #f87171;
+    --danger-bg: rgba(248, 113, 113, 0.1);
+    --font-display: 'Space Mono', monospace;
+    --font-body: 'Outfit', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1.25rem 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+    backdrop-filter: blur(20px);
+    background: rgba(10, 10, 12, 0.8);
+    border-bottom: 1px solid var(--border);
+  }
+  nav .logo { font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; color: var(--accent); text-decoration: none; }
+  nav .nav-links { display: flex; gap: 2rem; list-style: none; }
+  nav .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; transition: color 0.3s ease; }
+  nav .nav-links a:hover { color: var(--accent); }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 7rem 2rem 4rem; }
+
+  .page-header { margin-bottom: 3rem; }
+  .page-label { font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.75rem; }
+  .page-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.75rem; }
+  .page-subtitle { font-size: 1.05rem; color: var(--text-secondary); max-width: 600px; }
+
+  .input-section {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 2.5rem; margin-bottom: 2rem;
+  }
+  .input-section-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+  .input-section-header h3 { font-size: 1.1rem; font-weight: 600; }
+
+  .tone-selector { display: flex; gap: 0.5rem; }
+  .tone-btn {
+    font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.4rem 0.8rem; border: 1px solid var(--border); border-radius: 3px;
+    background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.3s ease;
+  }
+  .tone-btn:hover { border-color: var(--border-accent); color: var(--text-secondary); }
+  .tone-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+  textarea {
+    width: 100%; min-height: 180px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 4px;
+    padding: 1.25rem; font-family: var(--font-body); font-size: 0.95rem; color: var(--text-primary); line-height: 1.7; resize: vertical; transition: border-color 0.3s ease;
+  }
+  textarea:focus { outline: none; border-color: var(--border-accent); }
+  textarea::placeholder { color: var(--text-muted); }
+
+  .input-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; flex-wrap: wrap; gap: 1rem; }
+  .char-count { font-family: var(--font-display); font-size: 0.65rem; color: var(--text-muted); letter-spacing: 0.05em; }
+
+  .btn-primary {
+    font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.9rem 2rem; background: var(--accent); color: var(--bg-primary); border: none; border-radius: 4px;
+    cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem;
+  }
+  .btn-primary:hover { background: #e08a6a; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    font-family: var(--font-display); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.6rem 1.2rem; background: transparent; color: var(--text-secondary); border: 1px solid var(--border);
+    border-radius: 3px; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.4rem;
+  }
+  .btn-secondary:hover { border-color: var(--border-accent); color: var(--accent); }
+
+  .btn-danger {
+    font-family: var(--font-display); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.35rem 0.6rem; background: transparent; color: var(--text-muted); border: 1px solid transparent;
+    border-radius: 3px; cursor: pointer; transition: all 0.2s ease;
+  }
+  .btn-danger:hover { color: var(--danger); border-color: var(--danger); background: var(--danger-bg); }
+
+  .loading-state { display: none; text-align: center; padding: 4rem 2rem; }
+  .loading-state.active { display: block; }
+  .spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1.5rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-family: var(--font-display); font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .faq-output { display: none; }
+  .faq-output.active { display: block; }
+
+  .output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+  .output-header h3 { font-size: 1.1rem; font-weight: 600; }
+  .output-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .faq-count { font-family: var(--font-display); font-size: 0.65rem; color: var(--text-muted); letter-spacing: 0.1em; margin-bottom: 1.5rem; }
+
+  .faq-list {
+    display: flex; flex-direction: column; gap: 1px; background: var(--border);
+    border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 2rem;
+  }
+  .faq-item { background: var(--bg-card); transition: background 0.2s ease; position: relative; }
+  .faq-item.dragging { opacity: 0.5; background: var(--bg-card-hover); }
+  .faq-item.drag-over { border-top: 2px solid var(--accent); }
+
+  .faq-item-header {
+    display: flex; align-items: flex-start; padding: 1.5rem 2rem; cursor: pointer; gap: 1rem; user-select: none;
+  }
+  .drag-handle { color: var(--text-muted); cursor: grab; font-size: 1rem; padding: 0.15rem 0.25rem; flex-shrink: 0; opacity: 0.4; transition: opacity 0.2s ease; }
+  .drag-handle:active { cursor: grabbing; }
+  .faq-item:hover .drag-handle { opacity: 0.8; }
+
+  .faq-question { flex: 1; font-size: 1rem; font-weight: 600; line-height: 1.5; color: var(--text-primary); }
+
+  .faq-item-actions { display: flex; gap: 0.25rem; flex-shrink: 0; opacity: 0; transition: opacity 0.2s ease; }
+  .faq-item:hover .faq-item-actions { opacity: 1; }
+
+  .faq-toggle { color: var(--text-muted); font-size: 1.1rem; transition: transform 0.3s ease, color 0.2s ease; flex-shrink: 0; padding: 0.15rem; }
+  .faq-item.open .faq-toggle { transform: rotate(45deg); color: var(--accent); }
+
+  .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+  .faq-item.open .faq-answer { max-height: 500px; }
+  .faq-answer-inner { padding: 0 2rem 1.5rem 3.5rem; font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7; }
+
+  .faq-question-edit, .faq-answer-edit {
+    width: 100%; background: var(--bg-input); border: 1px solid var(--border-accent); border-radius: 4px;
+    padding: 0.75rem; font-family: var(--font-body); font-size: 0.92rem; color: var(--text-primary); line-height: 1.6; resize: vertical;
+  }
+  .faq-question-edit { font-weight: 600; font-size: 1rem; }
+  .faq-question-edit:focus, .faq-answer-edit:focus { outline: none; border-color: var(--accent); }
+  .edit-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; justify-content: flex-end; }
+
+  .btn-save {
+    font-family: var(--font-display); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.35rem 0.8rem; background: var(--accent); color: var(--bg-primary); border: none; border-radius: 3px; cursor: pointer; font-weight: 700;
+  }
+  .btn-cancel {
+    font-family: var(--font-display); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.35rem 0.8rem; background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: 3px; cursor: pointer;
+  }
+
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);
+    z-index: 200; align-items: center; justify-content: center; padding: 2rem;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; width: 100%; max-width: 700px; max-height: 80vh; display: flex; flex-direction: column; }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; border-bottom: 1px solid var(--border); }
+  .modal-header h3 { font-size: 1rem; font-weight: 600; }
+  .modal-close { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; padding: 0.25rem; line-height: 1; }
+  .modal-close:hover { color: var(--text-primary); }
+  .modal-body { padding: 1.5rem 2rem; overflow-y: auto; flex: 1; }
+
+  .export-code {
+    width: 100%; min-height: 300px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 4px;
+    padding: 1rem; font-family: var(--font-display); font-size: 0.75rem; color: var(--text-secondary); line-height: 1.6; resize: vertical;
+  }
+  .export-code:focus { outline: none; border-color: var(--border-accent); }
+
+  .modal-footer { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-top: 1px solid var(--border); gap: 1rem; }
+  .copy-status { font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--success); opacity: 0; transition: opacity 0.3s ease; }
+  .copy-status.visible { opacity: 1; }
+
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px;
+    padding: 1rem 1.5rem; font-size: 0.85rem; color: var(--text-primary); z-index: 300;
+    transform: translateY(100px); opacity: 0; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.75rem;
+  }
+  .toast.visible { transform: translateY(0); opacity: 1; }
+  .toast-icon { color: var(--success); font-size: 1.1rem; }
+
+  .api-key-section {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 1.5rem 2rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  }
+  .api-key-section label { font-family: var(--font-display); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); white-space: nowrap; }
+  .api-key-input {
+    flex: 1; min-width: 200px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 4px;
+    padding: 0.5rem 0.75rem; font-family: var(--font-display); font-size: 0.8rem; color: var(--text-primary);
+  }
+  .api-key-input:focus { outline: none; border-color: var(--border-accent); }
+  .demo-badge {
+    font-family: var(--font-display); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent); padding: 0.3rem 0.6rem; border: 1px solid var(--border-accent); border-radius: 3px; white-space: nowrap;
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.25rem; }
+    nav .nav-links { gap: 1rem; }
+    nav .nav-links a { font-size: 0.7rem; }
+    .container { padding: 5.5rem 1.25rem 3rem; }
+    .input-section { padding: 1.5rem; }
+    .faq-item-header { padding: 1.25rem; }
+    .faq-answer-inner { padding: 0 1.25rem 1.25rem 2.5rem; }
+    .faq-item-actions { opacity: 1; }
+    .api-key-section { flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="../../index.html" class="logo">SLIM.SYSTEMS</a>
+  <ul class="nav-links">
+    <li><a href="../../index.html#work">Work</a></li>
+    <li><a href="../../index.html#philosophy">Philosophy</a></li>
+    <li><a href="../../index.html#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<div class="container">
+  <div class="page-header">
+    <div class="page-label">FlowstateAI Tool #3</div>
+    <h1 class="page-title">FAQ Builder</h1>
+    <p class="page-subtitle">Paste your business info. Get a production-ready FAQ section in 30 seconds. Edit, reorder, export as embeddable HTML.</p>
+  </div>
+
+  <div class="api-key-section">
+    <label>Anthropic API Key</label>
+    <input type="password" class="api-key-input" id="apiKeyInput" placeholder="sk-ant-... (optional, demo mode works without)">
+    <span class="demo-badge" id="modeBadge">Demo Mode</span>
+  </div>
+
+  <div class="input-section">
+    <div class="input-section-header">
+      <h3>Describe your business</h3>
+      <div class="tone-selector" id="toneSelector"></div>
+    </div>
+    <textarea id="businessInput" placeholder="Paste your website copy, service descriptions, pricing info, or just describe what your business does. The more context you give, the better the FAQs.
+
+Example: We're a boutique digital marketing agency in Phoenix that specializes in local SEO and Google Ads for home service companies (plumbers, HVAC, electricians). We offer monthly retainers starting at $1,500/mo. Typical client sees results in 60-90 days..."></textarea>
+    <div class="input-footer">
+      <span class="char-count" id="charCount">0 characters</span>
+      <button class="btn-primary" id="generateBtn">Generate FAQs <span>-></span></button>
+    </div>
+  </div>
+
+  <div class="loading-state" id="loadingState">
+    <div class="spinner"></div>
+    <div class="loading-text">Analyzing business context and generating FAQs...</div>
+  </div>
+
+  <div class="faq-output" id="faqOutput">
+    <div class="output-header">
+      <h3>Generated FAQs</h3>
+      <div class="output-actions" id="outputActions"></div>
+    </div>
+    <div class="faq-count" id="faqCount"></div>
+    <div class="faq-list" id="faqList"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Export</h3>
+      <button class="modal-close" id="modalCloseBtn">&times;</button>
+    </div>
+    <div class="modal-body">
+      <textarea class="export-code" id="exportCode" readonly></textarea>
+    </div>
+    <div class="modal-footer">
+      <span class="copy-status" id="copyStatus">Copied to clipboard</span>
+      <button class="btn-primary" id="copyBtn">Copy to Clipboard</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <span class="toast-icon">+</span>
+  <span id="toastMessage"></span>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ── STATE ──
+  var faqs = [];
+  var selectedTone = 'professional';
+  var dragSourceIndex = null;
+
+  // ── ELEMENTS ──
+  var businessInput = document.getElementById('businessInput');
+  var charCount = document.getElementById('charCount');
+  var generateBtn = document.getElementById('generateBtn');
+  var loadingState = document.getElementById('loadingState');
+  var faqOutput = document.getElementById('faqOutput');
+  var faqList = document.getElementById('faqList');
+  var faqCountEl = document.getElementById('faqCount');
+  var apiKeyInput = document.getElementById('apiKeyInput');
+  var modeBadge = document.getElementById('modeBadge');
+  var exportModal = document.getElementById('exportModal');
+  var exportCode = document.getElementById('exportCode');
+  var modalTitle = document.getElementById('modalTitle');
+  var copyStatus = document.getElementById('copyStatus');
+  var toastEl = document.getElementById('toast');
+  var toastMessage = document.getElementById('toastMessage');
+
+  // ── INIT TONE BUTTONS ──
+  var toneSelector = document.getElementById('toneSelector');
+  ['professional', 'friendly', 'casual'].forEach(function(tone) {
+    var btn = document.createElement('button');
+    btn.className = 'tone-btn' + (tone === 'professional' ? ' active' : '');
+    btn.dataset.tone = tone;
+    btn.textContent = tone.charAt(0).toUpperCase() + tone.slice(1);
+    btn.addEventListener('click', function() {
+      toneSelector.querySelectorAll('.tone-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      selectedTone = tone;
+    });
+    toneSelector.appendChild(btn);
+  });
+
+  // ── INIT OUTPUT ACTION BUTTONS ──
+  var outputActions = document.getElementById('outputActions');
+  [
+    { label: 'Regenerate All', handler: function() { generateFAQs(); } },
+    { label: 'Export HTML', handler: function() { openExport('Export as Embeddable HTML', generateExportHTML()); } },
+    { label: 'Export Markdown', handler: function() { openExport('Export as Markdown', generateExportMarkdown()); } }
+  ].forEach(function(action) {
+    var btn = document.createElement('button');
+    btn.className = 'btn-secondary';
+    btn.textContent = action.label;
+    btn.addEventListener('click', action.handler);
+    outputActions.appendChild(btn);
+  });
+
+  // ── EVENT LISTENERS ──
+  businessInput.addEventListener('input', function() {
+    charCount.textContent = businessInput.value.length + ' characters';
+  });
+
+  apiKeyInput.addEventListener('input', function() {
+    var hasKey = apiKeyInput.value.trim().startsWith('sk-');
+    modeBadge.textContent = hasKey ? 'Live Mode' : 'Demo Mode';
+    modeBadge.style.color = hasKey ? 'var(--success)' : 'var(--accent)';
+    modeBadge.style.borderColor = hasKey ? 'var(--success)' : 'var(--border-accent)';
+  });
+
+  generateBtn.addEventListener('click', generateFAQs);
+
+  document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+  exportModal.addEventListener('click', function(e) { if (e.target === exportModal) closeModal(); });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+  document.getElementById('copyBtn').addEventListener('click', copyExport);
+
+  document.addEventListener('dragend', function() {
+    dragSourceIndex = null;
+    faqList.querySelectorAll('.faq-item').forEach(function(item) {
+      item.classList.remove('dragging', 'drag-over');
+    });
+  });
+
+  // ── GENERATE ──
+  async function generateFAQs() {
+    var input = businessInput.value.trim();
+    if (!input) { showToast('Paste some business info first'); return; }
+
+    generateBtn.disabled = true;
+    loadingState.classList.add('active');
+    faqOutput.classList.remove('active');
+
+    var apiKey = apiKeyInput.value.trim();
+
+    try {
+      if (apiKey && apiKey.startsWith('sk-')) {
+        faqs = await generateWithAPI(input, apiKey);
+      } else {
+        faqs = await generateDemo(input);
+      }
+      renderFAQs();
+      faqOutput.classList.add('active');
+      showToast(faqs.length + ' FAQs generated');
+    } catch (err) {
+      showToast('Generation failed: ' + err.message);
+    } finally {
+      loadingState.classList.remove('active');
+      generateBtn.disabled = false;
+    }
+  }
+
+  // ── CLAUDE API ──
+  async function generateWithAPI(input, apiKey) {
+    var toneGuide = {
+      professional: 'Authoritative and clear. Use confident, direct language. No slang.',
+      friendly: 'Warm and approachable. Use conversational language. Feel like a helpful neighbor.',
+      casual: 'Relaxed and real. Short sentences. Contractions. Feel like texting a friend.'
+    };
+
+    var response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        messages: [{
+          role: 'user',
+          content: 'You are an FAQ generator for business websites. Based on the business description below, generate 10-12 frequently asked questions with answers.\n\nTone: ' + toneGuide[selectedTone] + '\n\nBusiness description:\n' + input + '\n\nGenerate questions that cover:\n- What the business does / core services\n- Pricing and payment\n- Process and timeline\n- What makes them different\n- Common concerns or objections\n- Getting started / next steps\n\nReturn ONLY a JSON array of objects with "question" and "answer" fields. No markdown, no explanation, just the JSON array.'
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      var error = await response.json();
+      throw new Error(error.error?.message || 'API request failed');
+    }
+
+    var data = await response.json();
+    var text = data.content[0].text;
+    return JSON.parse(text);
+  }
+
+  // ── DEMO MODE ──
+  async function generateDemo(input) {
+    await new Promise(function(r) { setTimeout(r, 1500 + Math.random() * 1000); });
+
+    var words = input.toLowerCase();
+    var isAgency = /agency|marketing|seo|ads|consulting/i.test(words);
+    var isRestaurant = /restaurant|food|menu|dining|chef|catering/i.test(words);
+    var isPhotography = /photo|photography|photographer|shoot|portrait|wedding/i.test(words);
+
+    var faqSet;
+
+    if (isAgency) {
+      faqSet = [
+        { question: "What services does your agency offer?", answer: "We specialize in digital marketing strategy, including SEO, paid advertising (Google Ads, Meta Ads), content marketing, and analytics reporting. Every engagement is tailored to your business goals and market." },
+        { question: "How much does it cost to work with you?", answer: "Our monthly retainers start at $1,500 and scale based on scope. We build custom packages based on your goals, market, and competitive landscape. No long-term contracts required." },
+        { question: "How long before I see results?", answer: "Most clients see measurable improvements in 60-90 days. SEO is a longer game (3-6 months for significant organic growth), while paid ads can generate leads within the first week." },
+        { question: "Do you work with businesses in my industry?", answer: "We work across multiple industries but have deep expertise in home services, professional services, and local businesses. We only take on clients where we are confident we can deliver real ROI." },
+        { question: "What makes you different from other agencies?", answer: "We focus on revenue, not vanity metrics. Every strategy ties back to leads, conversions, and actual business growth. You get a live dashboard with real-time performance data, not a PDF once a month." },
+        { question: "Do you offer social media management?", answer: "Our core focus is search and paid acquisition. If social media management is a priority, we can recommend trusted partners or discuss adding it to a custom package." },
+        { question: "How do you report on performance?", answer: "You get access to a live reporting dashboard updated in real time. We also schedule monthly strategy calls to review performance, discuss optimizations, and align on next steps." },
+        { question: "What does the onboarding process look like?", answer: "Week 1: discovery call and audit. Week 2: strategy presentation. Week 3: campaign setup and launch. You will have a dedicated point of contact throughout the entire process." },
+        { question: "Can I cancel anytime?", answer: "Yes. We operate on month-to-month agreements. No long-term contracts. We keep clients by delivering results, not locking them into agreements." },
+        { question: "How do I get started?", answer: "Book a free 30-minute strategy call. We will review your current marketing, identify quick wins, and outline what a partnership would look like. No pressure, no hard sell." }
+      ];
+    } else if (isRestaurant) {
+      faqSet = [
+        { question: "What type of cuisine do you serve?", answer: "Our menu features seasonal dishes made with locally sourced ingredients. We update the menu quarterly to reflect what is fresh and available from our partner farms and producers." },
+        { question: "Do you take reservations?", answer: "Yes. We recommend booking 2-3 days in advance for weekday dining and at least a week ahead for weekends. Walk-ins are welcome based on availability." },
+        { question: "Do you accommodate dietary restrictions?", answer: "We offer vegetarian, vegan, and gluten-free options. Let your server know about any allergies and our kitchen will adjust accordingly." },
+        { question: "Do you offer catering or private events?", answer: "We host private dining events for groups of 15-60 and offer off-site catering for corporate events, weddings, and celebrations. Contact us for a custom menu and quote." },
+        { question: "What are your hours?", answer: "Tuesday through Saturday: 5pm to 10pm. Sunday brunch: 10am to 2pm. Closed Mondays. Holiday hours are posted on our website and social media." },
+        { question: "Is there parking available?", answer: "We have a dedicated parking lot behind the restaurant and validated parking at the garage across the street. Valet is available on Friday and Saturday evenings." },
+        { question: "Do you have a kids menu?", answer: "Yes. We have a curated kids menu with smaller portions of our most popular dishes, plus a few kid-friendly classics." },
+        { question: "Can I buy gift cards?", answer: "Gift cards are available in any amount, both in-person and through our website. They never expire and can be used for dining, catering, or merchandise." },
+        { question: "Do you have a bar or cocktail program?", answer: "Our bar features craft cocktails, a curated wine list, and a rotating selection of local beers on tap. Happy hour runs Tuesday through Thursday, 5pm to 6:30pm." },
+        { question: "How do I make a large party reservation?", answer: "For groups of 8 or more, contact our events coordinator directly. We can arrange set menus, custom seating, and audio-visual equipment for presentations." }
+      ];
+    } else if (isPhotography) {
+      faqSet = [
+        { question: "What types of photography do you offer?", answer: "We specialize in portrait, wedding, and commercial photography. Every session is tailored to your vision, whether it is a family portrait, brand shoot, or full wedding coverage." },
+        { question: "How much do sessions cost?", answer: "Portrait sessions start at $350. Wedding packages begin at $2,500 and scale based on coverage hours and deliverables. Contact us for a custom quote based on your needs." },
+        { question: "How long until I receive my photos?", answer: "Portrait sessions: 2 weeks. Weddings: 4-6 weeks. You receive a private online gallery with high-resolution downloads and printing rights included." },
+        { question: "Do you travel for shoots?", answer: "Yes. We are based in the greater metro area but travel for destination weddings and commercial projects. Travel fees are quoted on a case-by-case basis." },
+        { question: "What should I wear to a portrait session?", answer: "We send a detailed style guide after booking. General rule: solid colors, layers, and textures photograph well. Avoid logos, busy patterns, and neon colors." },
+        { question: "Do you offer prints?", answer: "Yes. We offer museum-quality prints on fine art paper, canvas, and metal. All prints are produced with archival-grade materials and come with a satisfaction guarantee." },
+        { question: "How do I book a session?", answer: "Fill out the inquiry form on our website. We respond within 24 hours with availability, pricing, and next steps. A 30% retainer secures your date." },
+        { question: "Can I request specific edits or retouching?", answer: "Light retouching (skin smoothing, blemish removal) is included in every session. Advanced compositing or heavy editing is available as an add-on service." },
+        { question: "What happens if it rains on our outdoor shoot?", answer: "We monitor forecasts closely and will reschedule at no additional cost if conditions make outdoor shooting impossible. We also have indoor backup locations." },
+        { question: "Do you photograph corporate events?", answer: "Yes. We cover conferences, headshots, product launches, and corporate retreats. Volume pricing is available for recurring work." }
+      ];
+    } else {
+      faqSet = [
+        { question: "What services do you offer?", answer: "We provide a range of specialized services tailored to our clients' needs. Our core offerings include consulting, implementation, and ongoing support to help businesses achieve their goals." },
+        { question: "How much does it cost?", answer: "Pricing depends on the scope of work and your specific needs. We offer transparent pricing with no hidden fees. Contact us for a custom quote." },
+        { question: "How do I get started?", answer: "Reach out through our website or give us a call. We start with a free consultation to understand your needs, then present a clear plan with timelines and pricing." },
+        { question: "What makes you different from competitors?", answer: "We combine deep expertise with a hands-on approach. Every client gets direct access to senior team members, not junior staff. We measure success by your outcomes, not our hours billed." },
+        { question: "How long does the typical project take?", answer: "Most projects run 4-8 weeks from kickoff to completion. We provide a detailed timeline during the proposal phase so you know exactly what to expect." },
+        { question: "Do you offer ongoing support?", answer: "Yes. We offer maintenance and support packages for clients who need ongoing assistance. Many of our client relationships span years." },
+        { question: "What areas do you serve?", answer: "We serve clients locally and nationally. Many engagements are handled remotely, though we are happy to meet in person for local clients." },
+        { question: "Can I see examples of your work?", answer: "Yes. We have a portfolio of case studies and client testimonials available on our website. We can also provide references from clients in your industry." },
+        { question: "What is your cancellation policy?", answer: "We operate with flexible terms. Projects can be paused or adjusted as needed. We believe in earning your business through results, not rigid contracts." },
+        { question: "Who will I be working with?", answer: "You will have a dedicated point of contact who manages your project from start to finish. Our team structure ensures consistency and accountability." },
+        { question: "Do you offer any guarantees?", answer: "We guarantee our process and our effort. While specific outcomes depend on many factors, we stand behind our work and will make adjustments until you are satisfied." },
+        { question: "How do I contact you?", answer: "You can reach us by phone, email, or through the contact form on our website. We respond to all inquiries within one business day." }
+      ];
+    }
+
+    // Apply tone adjustments
+    if (selectedTone === 'friendly') {
+      faqSet = faqSet.map(function(faq) {
+        return {
+          question: faq.question,
+          answer: faq.answer.replace(/We are /g, "We're ").replace(/You will/g, "You'll").replace(/it is/g, "it's").replace(/do not/g, "don't")
+        };
+      });
+    } else if (selectedTone === 'casual') {
+      faqSet = faqSet.map(function(faq) {
+        return {
+          question: faq.question,
+          answer: faq.answer.replace(/We are /g, "We're ").replace(/You will/g, "You'll").replace(/it is/g, "it's").replace(/Contact us/g, "Hit us up").replace(/Absolutely/g, "Yep").replace(/do not/g, "don't")
+        };
+      });
+    }
+
+    return faqSet;
+  }
+
+  // ── RENDER ──
+  function renderFAQs() {
+    while (faqList.firstChild) faqList.removeChild(faqList.firstChild);
+    faqCountEl.textContent = faqs.length + ' questions generated';
+
+    faqs.forEach(function(faq, index) {
+      var item = document.createElement('div');
+      item.className = 'faq-item';
+      item.draggable = true;
+      item.dataset.index = index;
+
+      // Header
+      var header = document.createElement('div');
+      header.className = 'faq-item-header';
+
+      var handle = document.createElement('span');
+      handle.className = 'drag-handle';
+      handle.textContent = '::';
+      handle.draggable = true;
+      handle.title = 'Drag to reorder';
+      handle.addEventListener('dragstart', function(e) {
+        dragSourceIndex = index;
+        e.stopPropagation();
+        item.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+
+      var question = document.createElement('span');
+      question.className = 'faq-question';
+      question.id = 'q-' + index;
+      question.textContent = faq.question;
+
+      var actions = document.createElement('span');
+      actions.className = 'faq-item-actions';
+
+      var editBtn = document.createElement('button');
+      editBtn.className = 'btn-danger';
+      editBtn.textContent = 'edit';
+      editBtn.addEventListener('click', function(e) { e.stopPropagation(); editFAQ(index); });
+
+      var delBtn = document.createElement('button');
+      delBtn.className = 'btn-danger';
+      delBtn.textContent = 'del';
+      delBtn.addEventListener('click', function(e) { e.stopPropagation(); deleteFAQ(index); });
+
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+
+      var toggle = document.createElement('span');
+      toggle.className = 'faq-toggle';
+      toggle.textContent = '+';
+
+      header.appendChild(handle);
+      header.appendChild(question);
+      header.appendChild(actions);
+      header.appendChild(toggle);
+
+      header.addEventListener('click', function() { item.classList.toggle('open'); });
+
+      // Answer
+      var answer = document.createElement('div');
+      answer.className = 'faq-answer';
+      var answerInner = document.createElement('div');
+      answerInner.className = 'faq-answer-inner';
+      answerInner.id = 'a-' + index;
+      answerInner.textContent = faq.answer;
+      answer.appendChild(answerInner);
+
+      item.appendChild(header);
+      item.appendChild(answer);
+
+      // Drag events on item
+      item.addEventListener('dragover', function(e) { e.preventDefault(); item.classList.add('drag-over'); });
+      item.addEventListener('dragleave', function() { item.classList.remove('drag-over'); });
+      item.addEventListener('drop', function(e) {
+        e.preventDefault();
+        item.classList.remove('drag-over');
+        var targetIndex = parseInt(item.dataset.index);
+        if (dragSourceIndex !== null && dragSourceIndex !== targetIndex) {
+          var moved = faqs.splice(dragSourceIndex, 1)[0];
+          faqs.splice(targetIndex, 0, moved);
+          renderFAQs();
+          showToast('FAQ reordered');
+        }
+      });
+
+      faqList.appendChild(item);
+    });
+  }
+
+  // ── EDIT ──
+  function editFAQ(index) {
+    var faq = faqs[index];
+    var items = faqList.querySelectorAll('.faq-item');
+    var item = items[index];
+    item.classList.add('open');
+
+    var qEl = item.querySelector('.faq-question');
+    var qInput = document.createElement('textarea');
+    qInput.className = 'faq-question-edit';
+    qInput.value = faq.question;
+    qInput.rows = 2;
+    while (qEl.firstChild) qEl.removeChild(qEl.firstChild);
+    qEl.appendChild(qInput);
+
+    var aInner = item.querySelector('.faq-answer-inner');
+    var aInput = document.createElement('textarea');
+    aInput.className = 'faq-answer-edit';
+    aInput.value = faq.answer;
+    aInput.rows = 4;
+
+    var editActions = document.createElement('div');
+    editActions.className = 'edit-actions';
+
+    var cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn-cancel';
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.addEventListener('click', function() { renderFAQs(); });
+
+    var saveBtn = document.createElement('button');
+    saveBtn.className = 'btn-save';
+    saveBtn.textContent = 'Save';
+    saveBtn.addEventListener('click', function() {
+      faqs[index].question = qInput.value;
+      faqs[index].answer = aInput.value;
+      renderFAQs();
+      showToast('FAQ updated');
+    });
+
+    editActions.appendChild(cancelBtn);
+    editActions.appendChild(saveBtn);
+
+    while (aInner.firstChild) aInner.removeChild(aInner.firstChild);
+    aInner.appendChild(aInput);
+    aInner.appendChild(editActions);
+
+    qInput.focus();
+  }
+
+  // ── DELETE ──
+  function deleteFAQ(index) {
+    faqs.splice(index, 1);
+    renderFAQs();
+    showToast('FAQ removed');
+  }
+
+  // ── EXPORT HTML ──
+  function generateExportHTML() {
+    var lines = [];
+    lines.push('<!-- FAQ Section - Generated by FlowstateAI FAQ Builder -->');
+    lines.push('<style>');
+    lines.push('  .faq-section { max-width: 800px; margin: 2rem auto; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }');
+    lines.push('  .faq-section h2 { font-size: 1.75rem; margin-bottom: 1.5rem; color: #1a1a1a; }');
+    lines.push('  .faq-accordion { border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden; }');
+    lines.push('  .faq-accordion-item { border-bottom: 1px solid #e5e5e5; }');
+    lines.push('  .faq-accordion-item:last-child { border-bottom: none; }');
+    lines.push('  .faq-accordion-btn { width: 100%; padding: 1.25rem 1.5rem; background: #fff; border: none; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 1rem; font-weight: 600; color: #1a1a1a; transition: background 0.2s; }');
+    lines.push('  .faq-accordion-btn:hover { background: #f9f9f9; }');
+    lines.push('  .faq-accordion-btn .faq-icon { font-size: 1.25rem; color: #999; transition: transform 0.3s; }');
+    lines.push('  .faq-accordion-panel { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }');
+    lines.push('  .faq-accordion-panel-inner { padding: 0 1.5rem 1.25rem; font-size: 0.95rem; color: #555; line-height: 1.7; }');
+    lines.push('</style>');
+    lines.push('<div class="faq-section">');
+    lines.push('  <h2>Frequently Asked Questions</h2>');
+    lines.push('  <div class="faq-accordion">');
+
+    faqs.forEach(function(faq) {
+      var safeQ = faq.question.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      var safeA = faq.answer.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      lines.push('    <div class="faq-accordion-item">');
+      lines.push('      <button class="faq-accordion-btn" onclick="var p=this.nextElementSibling;p.style.maxHeight=p.style.maxHeight?null:p.scrollHeight+\'px\';">');
+      lines.push('        ' + safeQ);
+      lines.push('        <span class="faq-icon">+</span>');
+      lines.push('      </button>');
+      lines.push('      <div class="faq-accordion-panel">');
+      lines.push('        <div class="faq-accordion-panel-inner">' + safeA + '</div>');
+      lines.push('      </div>');
+      lines.push('    </div>');
+    });
+
+    lines.push('  </div>');
+    lines.push('</div>');
+    lines.push('<!-- End FAQ Section -->');
+    return lines.join('\n');
+  }
+
+  // ── EXPORT MARKDOWN ──
+  function generateExportMarkdown() {
+    var lines = ['# Frequently Asked Questions', ''];
+    faqs.forEach(function(faq) {
+      lines.push('## ' + faq.question);
+      lines.push('');
+      lines.push(faq.answer);
+      lines.push('');
+    });
+    return lines.join('\n');
+  }
+
+  // ── MODAL ──
+  function openExport(title, content) {
+    modalTitle.textContent = title;
+    exportCode.value = content;
+    exportModal.classList.add('active');
+  }
+
+  function closeModal() {
+    exportModal.classList.remove('active');
+    copyStatus.classList.remove('visible');
+  }
+
+  function copyExport() {
+    exportCode.select();
+    navigator.clipboard.writeText(exportCode.value).then(function() {
+      copyStatus.classList.add('visible');
+      setTimeout(function() { copyStatus.classList.remove('visible'); }, 2000);
+    });
+  }
+
+  // ── TOAST ──
+  function showToast(message) {
+    toastMessage.textContent = message;
+    toastEl.classList.add('visible');
+    setTimeout(function() { toastEl.classList.remove('visible'); }, 2500);
+  }
+
+})();
+</script>
+
+</body>
+</html>
