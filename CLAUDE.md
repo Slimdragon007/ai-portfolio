@@ -58,7 +58,8 @@ ai-portfolio/
 │   ├── faq-builder/             # #3: Business info -> embeddable FAQ HTML
 │   ├── photo-workflow-os/       # #4: End-to-end photography business OS (flagship)
 │   ├── ai-bullet-journal/       # #5: Chat-based planner with visual cards (flagship)
-│   └── meal-planner/            # #6: Fridge ingredients -> recipes + BGE mode
+│   ├── meal-planner/            # #6: Fridge ingredients -> recipes + BGE mode
+│   └── agent-pipeline/          # #7: Multi-agent lead qualification + proposal pipeline
 ├── setup.sh                     # Mac setup script
 ├── .nojekyll                    # Prevent Jekyll processing
 └── .gitignore
@@ -88,7 +89,7 @@ When working on this project, delegate tasks to the appropriate specialist agent
 - HTML/CSS/JS changes to index.html
 - Responsive design fixes
 - Animation and interaction work
-- Design system: Space Mono + Outfit fonts, #d97757 accent, dark theme
+- Design system: Inter + Space Mono fonts, light Anthropic theme, indigo/teal/gold accents
 
 ### Deploy tasks -> deployer agent
 - Git commit, push, branch management
@@ -150,42 +151,47 @@ Notes: [text]
 
 These are applied AI tools that solve real problems for real people. Each is a standalone project, a deployable demo, and a case study in the portfolio. Ordered by build priority.
 
-### 1. Meta Auto-Responder (meta-auto-responder) — PRIORITY BUILD
+### 1. Meta Auto-Responder (meta-auto-responder) — DONE
 **Problem**: small businesses lose leads because DM response time is 4+ hours
 **Solution**: business context + incoming DM -> AI drafts on-brand reply -> owner reviews and sends
 **Stack**: HTML/JS + Claude API (MVP), Meta Business API (production)
 **Why it's a portfolio piece**: shows FlowstateAI's value prop in miniature. Augment, don't replace.
-**FlowstateAI pitch angle**: "Response time drops from 4 hours to 10 minutes. No bots, just faster humans."
 
-### 2. SOW Generator (sow-generator)
+### 2. SOW Generator (sow-generator) — DONE
 **Problem**: writing a Statement of Work takes 1-3 hours and most people skip it
 **Solution**: describe project in plain English -> AI generates formatted SOW -> edit inline -> export PDF
 **Stack**: HTML/JS + Claude API + html2pdf.js
 **Why it's a portfolio piece**: FlowstateAI needs this internally AND it's a client demo
 
-### 3. FAQ Builder (faq-builder)
+### 3. FAQ Builder (faq-builder) — DONE
 **Problem**: every business needs FAQs, nobody writes them
 **Solution**: paste service info -> AI generates 10-15 Q&As in brand voice -> export as embeddable HTML
 **Stack**: HTML/JS + Claude API + HTML snippet export
 **Why it's a portfolio piece**: fastest time-to-value demo (30 seconds), export IS the product
 
-### 4. Photo Workflow OS (photo-workflow-os) — FLAGSHIP
+### 4. Photo Workflow OS (photo-workflow-os) — DONE, FLAGSHIP
 **Problem**: photography business operations scattered across 5-10 tools
 **Solution**: single-page app covering inquiry -> quote -> contract -> shoot prep -> delivery -> follow-up
-**Stack**: React or HTML/JS + Claude API + PDF export
+**Stack**: HTML/JS + Claude API + PDF export
 **Why it's a portfolio piece**: end-to-end product thinking, not just a tool. FlowstateAI showcase.
 
-### 5. AI Bullet Journal (ai-bullet-journal) — FLAGSHIP
+### 5. AI Bullet Journal (ai-bullet-journal) — DONE, FLAGSHIP
 **Problem**: no planner combines conversational AI input with visual BuJo-style rendering
 **Solution**: chat interface -> AI parses tasks/events/notes/reflections -> renders as visual cards
-**Stack**: React + Claude API + card-based journal layout
+**Stack**: HTML/JS + Claude API + card-based journal layout
 **Why it's a portfolio piece**: this is a product, not a utility. Shows product thinking.
 
-### 6. Meal Planner (meal-planner)
+### 6. Meal Planner (meal-planner) — DONE
 **Problem**: you have ingredients but no idea what to cook
 **Solution**: type what's in your fridge -> 3 meal options with recipes -> Big Green Egg mode for grill specs
 **Stack**: HTML/JS + Claude API
 **Why it's a portfolio piece**: universally relatable, instant demo, BGE mode is a personality touch
+
+### 7. Agent Pipeline (agent-pipeline) — DONE
+**Problem**: no portfolio piece demonstrates multi-agent orchestration end-to-end
+**Solution**: 3-agent pipeline (qualifier -> proposal drafter -> reviewer) with retry loop, SSE streaming, SQLite persistence
+**Stack**: Python/FastAPI backend + HTML/JS dashboard. Client-side demo fallback for GitHub Pages.
+**Why it's a portfolio piece**: proves real agent architecture, not just single-prompt tools. Pydantic data contracts, structured handoffs, observable state.
 
 ---
 
