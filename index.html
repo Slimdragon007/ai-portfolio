@@ -373,67 +373,92 @@
     color: var(--accent);
   }
 
-  /* ── DEMO CARDS ── */
-  .demos-grid {
+  /* ── TRY IT CARDS ── */
+  .try-it-grid {
     display: grid;
-    gap: 1px;
-    background: var(--border);
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .try-it-card {
+    background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 12px;
+    padding: 2.5rem 2rem;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    transition: all 0.4s ease;
+    position: relative;
     overflow: hidden;
   }
 
-  .demo-card {
-    background: var(--bg-card);
-    padding: 2rem 2.5rem;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 1.5rem;
-    align-items: center;
-    text-decoration: none;
-    color: inherit;
-    transition: background 0.4s ease;
+  .try-it-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--accent-glow), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
   }
 
-  .demo-card:hover {
-    background: var(--bg-card-hover);
+  .try-it-card:hover {
+    border-color: var(--border-accent);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(217, 119, 87, 0.1);
   }
 
-  .demo-card:hover .case-arrow {
-    transform: translateX(4px);
-    color: var(--accent);
+  .try-it-card:hover::before {
+    opacity: 1;
   }
 
-  .demo-number {
-    font-family: var(--font-display);
-    font-size: 0.75rem;
-    color: var(--text-muted);
+  .try-it-card:hover .try-it-btn {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
   }
 
-  .demo-info h3 {
-    font-size: 1.15rem;
+  .try-it-icon {
+    font-size: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .try-it-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .try-it-content h3 {
+    font-size: 1.3rem;
     font-weight: 600;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.5rem;
     letter-spacing: -0.01em;
   }
 
-  .demo-info p {
-    font-size: 0.88rem;
+  .try-it-content p {
+    font-size: 0.9rem;
     color: var(--text-secondary);
-    line-height: 1.6;
+    line-height: 1.7;
   }
 
-  .demo-badge {
+  .try-it-btn {
     display: inline-block;
     font-family: var(--font-display);
-    font-size: 0.55rem;
-    letter-spacing: 0.12em;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    padding: 0.2rem 0.5rem;
+    padding: 0.75rem 1.5rem;
     border: 1px solid var(--border-accent);
-    border-radius: 3px;
+    border-radius: 6px;
     color: var(--accent);
-    margin-top: 0.5rem;
+    transition: all 0.3s ease;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    margin-top: auto;
   }
 
   /* ── PHILOSOPHY ── */
@@ -583,12 +608,13 @@
 
     section { padding: 4rem 1.25rem; }
 
-    .case-card, .demo-card {
+    .try-it-grid { grid-template-columns: 1fr; }
+    .case-card {
       grid-template-columns: 1fr;
       gap: 0.75rem;
       padding: 1.75rem;
     }
-    .case-number, .demo-number { font-size: 0.65rem; }
+    .case-number { font-size: 0.65rem; }
     .case-arrow { display: none; }
 
     .case-detail-grid {
@@ -688,6 +714,35 @@
       <span class="hero-meta-label">Base</span>
       <span class="hero-meta-value">Phoenix, AZ</span>
     </div>
+  </div>
+</section>
+
+<div class="accent-line"></div>
+
+<!-- TRY IT YOURSELF -->
+<section id="demos">
+  <div class="reveal">
+    <div class="section-label">Interactive</div>
+    <h2 class="section-title">Try It Yourself</h2>
+    <p class="section-subtitle">Live AI tools running in your browser. No sign-up, no API key needed.</p>
+  </div>
+  <div class="try-it-grid reveal">
+    <a href="projects/meta-auto-responder/index.html" class="try-it-card">
+      <div class="try-it-icon">💬</div>
+      <div class="try-it-content">
+        <h3>Meta Auto-Responder</h3>
+        <p>AI drafts on-brand DM replies for Facebook and Instagram. You review before anything sends.</p>
+      </div>
+      <span class="try-it-btn">Launch Demo &rarr;</span>
+    </a>
+    <a href="projects/sow-generator/index.html" class="try-it-card">
+      <div class="try-it-icon">📄</div>
+      <div class="try-it-content">
+        <h3>SOW Generator</h3>
+        <p>Describe a project in plain English, get a professional Statement of Work you can edit and export.</p>
+      </div>
+      <span class="try-it-btn">Launch Demo &rarr;</span>
+    </a>
   </div>
 </section>
 
@@ -975,69 +1030,6 @@ Prospects <span class="arrow">-></span> FlowstateAI Pipeline</div>
       <span class="case-arrow">&rarr;</span>
     </div>
 
-  </div>
-</section>
-
-<div class="accent-line"></div>
-
-<!-- LIVE DEMOS -->
-<section id="demos">
-  <div class="reveal">
-    <div class="section-label">Try Them</div>
-    <h2 class="section-title">Live Demos</h2>
-    <p class="section-subtitle">Six applied AI tools, each solving a real problem. Every demo works in your browser with no API key required.</p>
-  </div>
-  <div class="demos-grid reveal">
-    <a href="projects/meta-auto-responder/" class="demo-card">
-      <span class="demo-number">01</span>
-      <div class="demo-info">
-        <h3>Meta Auto-Responder</h3>
-        <p>AI-drafted DM replies for Facebook and Instagram. Response time drops from 4 hours to 10 minutes.</p>
-      </div>
-      <span class="case-arrow">&rarr;</span>
-    </a>
-    <a href="projects/sow-generator/" class="demo-card">
-      <span class="demo-number">02</span>
-      <div class="demo-info">
-        <h3>SOW Generator</h3>
-        <p>Describe a project in plain English, get a professional Statement of Work. Edit inline, export PDF.</p>
-      </div>
-      <span class="case-arrow">&rarr;</span>
-    </a>
-    <a href="projects/faq-builder/" class="demo-card">
-      <span class="demo-number">03</span>
-      <div class="demo-info">
-        <h3>FAQ Builder</h3>
-        <p>Paste your business info, get a production-ready FAQ section in 30 seconds. Export as embeddable HTML.</p>
-      </div>
-      <span class="case-arrow">&rarr;</span>
-    </a>
-    <a href="projects/photo-workflow-os/" class="demo-card">
-      <span class="demo-number">04</span>
-      <div class="demo-info">
-        <h3>Photo Workflow OS</h3>
-        <p>End-to-end photography business pipeline. Inquiry to delivery in a single kanban board.</p>
-        <span class="demo-badge">Flagship</span>
-      </div>
-      <span class="case-arrow">&rarr;</span>
-    </a>
-    <a href="projects/ai-bullet-journal/" class="demo-card">
-      <span class="demo-number">05</span>
-      <div class="demo-info">
-        <h3>AI Bullet Journal</h3>
-        <p>Chat-based planner that turns natural language into visual journal cards. Tasks, events, goals, reflections.</p>
-        <span class="demo-badge">Flagship</span>
-      </div>
-      <span class="case-arrow">&rarr;</span>
-    </a>
-    <a href="projects/meal-planner/" class="demo-card">
-      <span class="demo-number">06</span>
-      <div class="demo-info">
-        <h3>Meal Planner</h3>
-        <p>Type what's in your fridge, get 3 dinner ideas with full recipes. Big Green Egg mode included.</p>
-      </div>
-      <span class="case-arrow">&rarr;</span>
-    </a>
   </div>
 </section>
 
