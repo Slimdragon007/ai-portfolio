@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice Drafter | FlowstateAI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #FAFAF8; --card: #FFFFFF; --text-primary: #1a1a1a; --text-secondary: #6b6b6b;
+    --text-muted: #999999; --border: rgba(0,0,0,0.06); --indigo: #818cf8;
+    --indigo-bg: rgba(129,140,248,0.08); --teal: #2dd4bf; --teal-bg: rgba(45,212,191,0.1);
+    --gold: #d4a853; --shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); letter-spacing: -0.011em; line-height: 1.6; }
+  body::before { content: ''; position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, transparent, transparent 49px, #e5e5e3 49px, #e5e5e3 50px), repeating-linear-gradient(90deg, transparent, transparent 49px, #e5e5e3 49px, #e5e5e3 50px); opacity: 0.45; z-index: -1; }
+  .header { background: rgba(250,250,248,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; }
+  .back-link { color: var(--text-secondary); text-decoration: none; font-size: 14px; }
+  .back-link:hover { color: var(--indigo); }
+  .header h1 { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; }
+  .header h1 span { color: var(--gold); }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 768px) { .layout { grid-template-columns: 1fr; } }
+  .section-label { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--indigo); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-bottom: 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; }
+  input, textarea, select { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px; background: var(--bg); margin-bottom: 10px; }
+  input:focus, textarea:focus { outline: none; border-color: var(--indigo); }
+  textarea { resize: vertical; min-height: 60px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn { display: inline-block; padding: 10px 24px; background: var(--gold); color: #fff; border: none; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn:hover { filter: brightness(1.1); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-sm { padding: 6px 14px; font-size: 12px; background: var(--indigo); }
+
+  /* Invoice Preview */
+  .invoice { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 32px; box-shadow: var(--shadow); font-size: 13px; }
+  .invoice-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 2px solid var(--indigo); }
+  .invoice-title { font-family: 'Space Mono', monospace; font-size: 24px; font-weight: 700; color: var(--indigo); }
+  .invoice-number { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--text-muted); }
+  .invoice-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+  .invoice-parties h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 4px; }
+  .invoice-parties p { font-size: 13px; color: var(--text-primary); line-height: 1.5; }
+  .invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+  .invoice-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .invoice-table td { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .invoice-table .amount { text-align: right; font-family: 'Space Mono', monospace; }
+  .invoice-table th.amount { text-align: right; }
+  .invoice-totals { text-align: right; margin-top: 16px; }
+  .invoice-totals .line { display: flex; justify-content: flex-end; gap: 32px; padding: 4px 0; font-size: 13px; }
+  .invoice-totals .line.total { font-weight: 700; font-size: 16px; border-top: 2px solid var(--text-primary); padding-top: 8px; margin-top: 8px; }
+  .invoice-totals .line .label { color: var(--text-secondary); }
+  .invoice-totals .line .val { font-family: 'Space Mono', monospace; min-width: 100px; }
+  .invoice-footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-muted); }
+  .empty { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; }
+
+  .line-item-row { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 8px; align-items: end; margin-bottom: 8px; }
+  .line-item-row input { margin-bottom: 0; }
+  .remove-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 8px; }
+  .remove-btn:hover { color: #ef4444; }
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="../../index.html" class="back-link">&larr; Portfolio</a>
+  <h1><span>FlowstateAI</span> Invoice Drafter</h1>
+</div>
+
+<div class="container">
+  <div class="layout">
+    <div>
+      <div class="section-label">Invoice Details</div>
+      <div class="card">
+        <div class="row">
+          <div><label>Your Business</label><input id="fromName" value="FlowstateAI" /></div>
+          <div><label>Invoice #</label><input id="invNumber" value="INV-2026-042" /></div>
+        </div>
+        <label>Your Address</label>
+        <input id="fromAddress" value="Phoenix, AZ" />
+        <label>Bill To (Client Name)</label>
+        <input id="toName" value="Coastal Kitchen" />
+        <label>Client Address</label>
+        <input id="toAddress" value="1234 Ocean Blvd, San Diego, CA 92101" />
+        <div class="row">
+          <div><label>Issue Date</label><input id="issueDate" type="date" /></div>
+          <div><label>Due Date</label><input id="dueDate" type="date" /></div>
+        </div>
+        <label>Payment Terms</label>
+        <input id="terms" value="Net 30. Payment via ACH or wire transfer." />
+      </div>
+
+      <div class="section-label">Line Items</div>
+      <div class="card" id="lineItemsCard">
+        <div class="line-item-row" style="margin-bottom:4px;">
+          <label>Description</label><label>Qty</label><label>Rate ($)</label><span></span>
+        </div>
+        <div id="lineItems"></div>
+        <button class="btn-sm btn" onclick="addLineItem()" style="margin-top:8px;">+ Add Item</button>
+      </div>
+
+      <button class="btn" onclick="generateInvoice()">Generate Invoice</button>
+    </div>
+
+    <div>
+      <div class="section-label">Invoice Preview</div>
+      <div id="output">
+        <div class="empty">Fill in details and click "Generate Invoice" to preview.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let lineItemData = [
+  { desc: "AI Order Management System, Phase 1: Discovery and POS Integration", qty: 1, rate: 9000 },
+  { desc: "AI Order Management System, Phase 2: Model Training and Routing Engine", qty: 1, rate: 15000 },
+  { desc: "Dashboard and Alerts Build", qty: 1, rate: 8000 },
+  { desc: "Staff Training (2 sessions, on-site)", qty: 2, rate: 1500 }
+];
+
+function renderLineItems() {
+  const container = document.getElementById("lineItems");
+  container.textContent = "";
+  lineItemData.forEach((item, i) => {
+    const row = document.createElement("div");
+    row.className = "line-item-row";
+
+    const descInput = document.createElement("input");
+    descInput.value = item.desc;
+    descInput.addEventListener("input", e => { lineItemData[i].desc = e.target.value; });
+
+    const qtyInput = document.createElement("input");
+    qtyInput.type = "number";
+    qtyInput.value = item.qty;
+    qtyInput.min = "1";
+    qtyInput.addEventListener("input", e => { lineItemData[i].qty = parseInt(e.target.value) || 0; });
+
+    const rateInput = document.createElement("input");
+    rateInput.type = "number";
+    rateInput.value = item.rate;
+    rateInput.addEventListener("input", e => { lineItemData[i].rate = parseFloat(e.target.value) || 0; });
+
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "remove-btn";
+    removeBtn.textContent = "\u00D7";
+    removeBtn.addEventListener("click", () => { lineItemData.splice(i, 1); renderLineItems(); });
+
+    row.append(descInput, qtyInput, rateInput, removeBtn);
+    container.appendChild(row);
+  });
+}
+
+function addLineItem() {
+  lineItemData.push({ desc: "", qty: 1, rate: 0 });
+  renderLineItems();
+}
+
+function generateInvoice() {
+  const output = document.getElementById("output");
+  output.textContent = "";
+
+  const invoice = document.createElement("div");
+  invoice.className = "invoice";
+
+  // Header
+  const header = document.createElement("div");
+  header.className = "invoice-header";
+  const titleDiv = document.createElement("div");
+  const title = document.createElement("div");
+  title.className = "invoice-title";
+  title.textContent = "INVOICE";
+  const num = document.createElement("div");
+  num.className = "invoice-number";
+  num.textContent = document.getElementById("invNumber").value;
+  titleDiv.append(title, num);
+
+  const datesDiv = document.createElement("div");
+  datesDiv.style.textAlign = "right";
+  const issueDateVal = document.getElementById("issueDate").value || new Date().toISOString().split("T")[0];
+  const dueDateVal = document.getElementById("dueDate").value || "On receipt";
+  const issueP = document.createElement("div");
+  issueP.style.cssText = "font-size:12px;color:var(--text-muted);";
+  issueP.textContent = "Issued: " + issueDateVal;
+  const dueP = document.createElement("div");
+  dueP.style.cssText = "font-size:12px;color:var(--text-muted);";
+  dueP.textContent = "Due: " + dueDateVal;
+  datesDiv.append(issueP, dueP);
+  header.append(titleDiv, datesDiv);
+  invoice.appendChild(header);
+
+  // Parties
+  const parties = document.createElement("div");
+  parties.className = "invoice-parties";
+  const fromDiv = document.createElement("div");
+  const fromH4 = document.createElement("h4");
+  fromH4.textContent = "From";
+  const fromP = document.createElement("p");
+  fromP.textContent = document.getElementById("fromName").value + "\n" + document.getElementById("fromAddress").value;
+  fromP.style.whiteSpace = "pre-line";
+  fromDiv.append(fromH4, fromP);
+
+  const toDiv = document.createElement("div");
+  const toH4 = document.createElement("h4");
+  toH4.textContent = "Bill To";
+  const toP = document.createElement("p");
+  toP.textContent = document.getElementById("toName").value + "\n" + document.getElementById("toAddress").value;
+  toP.style.whiteSpace = "pre-line";
+  toDiv.append(toH4, toP);
+  parties.append(fromDiv, toDiv);
+  invoice.appendChild(parties);
+
+  // Table
+  const table = document.createElement("table");
+  table.className = "invoice-table";
+  const thead = document.createElement("thead");
+  const headRow = document.createElement("tr");
+  ["Description", "Qty", "Rate", "Amount"].forEach((text, i) => {
+    const th = document.createElement("th");
+    th.textContent = text;
+    if (i >= 2) th.className = "amount";
+    headRow.appendChild(th);
+  });
+  thead.appendChild(headRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+  let subtotal = 0;
+  lineItemData.forEach(item => {
+    if (!item.desc) return;
+    const row = document.createElement("tr");
+    const descTd = document.createElement("td");
+    descTd.textContent = item.desc;
+    const qtyTd = document.createElement("td");
+    qtyTd.textContent = item.qty;
+    const rateTd = document.createElement("td");
+    rateTd.className = "amount";
+    rateTd.textContent = "$" + item.rate.toLocaleString();
+    const amtTd = document.createElement("td");
+    amtTd.className = "amount";
+    const amt = item.qty * item.rate;
+    subtotal += amt;
+    amtTd.textContent = "$" + amt.toLocaleString();
+    row.append(descTd, qtyTd, rateTd, amtTd);
+    tbody.appendChild(row);
+  });
+  table.appendChild(tbody);
+  invoice.appendChild(table);
+
+  // Totals
+  const totals = document.createElement("div");
+  totals.className = "invoice-totals";
+
+  function addLine(label, value, isTotal) {
+    const line = document.createElement("div");
+    line.className = "line" + (isTotal ? " total" : "");
+    const labelSpan = document.createElement("span");
+    labelSpan.className = "label";
+    labelSpan.textContent = label;
+    const valSpan = document.createElement("span");
+    valSpan.className = "val";
+    valSpan.textContent = value;
+    line.append(labelSpan, valSpan);
+    totals.appendChild(line);
+  }
+
+  addLine("Subtotal", "$" + subtotal.toLocaleString(), false);
+  addLine("Tax (0%)", "$0", false);
+  addLine("Total Due", "$" + subtotal.toLocaleString(), true);
+
+  invoice.appendChild(totals);
+
+  // Footer
+  const footer = document.createElement("div");
+  footer.className = "invoice-footer";
+  footer.textContent = document.getElementById("terms").value;
+  invoice.appendChild(footer);
+
+  output.appendChild(invoice);
+}
+
+// Init
+const today = new Date();
+document.getElementById("issueDate").value = today.toISOString().split("T")[0];
+const due = new Date(today);
+due.setDate(due.getDate() + 30);
+document.getElementById("dueDate").value = due.toISOString().split("T")[0];
+renderLineItems();
+</script>
+</body>
+</html>
