@@ -109,44 +109,79 @@
     position: relative;
   }
 
-  .hero-label {
+  .hero-greeting {
+    font-size: clamp(3.5rem, 8vw, 6rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.2s;
+  }
+
+  .hero-wave {
+    display: inline-block;
+    animation: fadeUp 0.7s ease forwards 0.2s, wave 1.5s ease-in-out 1s 2;
+    transform-origin: 70% 70%;
+  }
+
+  @keyframes wave {
+    0%, 100% { transform: rotate(0deg); }
+    15% { transform: rotate(14deg); }
+    30% { transform: rotate(-8deg); }
+    45% { transform: rotate(14deg); }
+    60% { transform: rotate(-4deg); }
+    75% { transform: rotate(10deg); }
+  }
+
+  .hero-welcome {
     font-family: var(--font-display);
     font-size: 0.7rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--accent);
-    margin-bottom: 1.5rem;
-    opacity: 0;
-    animation: fadeUp 0.8s ease forwards 0.2s;
-  }
-
-  .hero h1 {
-    font-family: var(--font-body);
-    font-size: clamp(2.8rem, 6vw, 5rem);
-    font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: -0.03em;
     margin-bottom: 2rem;
     opacity: 0;
-    animation: fadeUp 0.8s ease forwards 0.4s;
+    animation: fadeUp 0.7s ease forwards 0.6s;
   }
 
-  .hero h1 span {
-    display: block;
-    color: var(--text-muted);
-    font-weight: 300;
-    font-size: clamp(1.4rem, 3vw, 2.2rem);
-    margin-top: 0.5rem;
-  }
-
-  .hero-body {
-    max-width: 620px;
-    font-size: 1.1rem;
-    color: var(--text-secondary);
-    line-height: 1.8;
+  .hero-name {
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 2rem;
     opacity: 0;
-    animation: fadeUp 0.8s ease forwards 0.6s;
+    animation: fadeUp 0.7s ease forwards 1.0s;
   }
+
+  .hero-name .gold { color: var(--accent-gold); }
+
+  .hero-story {
+    max-width: 640px;
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    line-height: 1.9;
+    margin-bottom: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 1.4s;
+  }
+
+  .hero-story .highlight {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .hero-cta-line {
+    max-width: 640px;
+    font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+    font-weight: 600;
+    line-height: 1.4;
+    margin-top: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 1.8s;
+  }
+
+  .hero-cta-line .accent { color: var(--accent); }
 
   .hero-meta {
     display: flex;
@@ -155,7 +190,7 @@
     padding-top: 2rem;
     border-top: 1px solid var(--border);
     opacity: 0;
-    animation: fadeUp 0.8s ease forwards 0.8s;
+    animation: fadeUp 0.8s ease forwards 2.2s;
   }
 
   .hero-meta-item {
@@ -607,8 +642,11 @@
     .theme-toggle { order: 2; }
 
     .hero { padding: 7rem 1.25rem 3rem; }
+    .hero-greeting { font-size: 3rem; }
+    .hero-name { font-size: 1.4rem; }
+    .hero-story { font-size: 1rem; }
+    .hero-cta-line { font-size: 1.2rem; }
     .hero-meta { flex-direction: column; gap: 1.5rem; }
-    .hero h1 { font-size: 2rem; }
 
     section { padding: 4rem 1.25rem; }
 
@@ -701,18 +739,24 @@
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-label">AI Systems Architect</div>
-  <h1>
-    I build the layer<br>between human<br>judgment and AI.
-    <span>Not prompts. Systems.</span>
+  <div class="hero-greeting"><span class="hero-wave">👋</span> Hi.</div>
+  <div class="hero-welcome">Welcome to FlowstateAI</div>
+  <h1 class="hero-name">
+    I'm Michael Haslim, <span class="gold">Founder</span>.
   </h1>
-  <p class="hero-body">
-    Production AI orchestration across multi-agent architectures, persistent memory, MCP tool integration, and context routing. Every build in this portfolio is live and operational.
+  <p class="hero-story">
+    I grew up watching my dad fix cars. Hands deep in an engine, solving problems most people couldn't even name. That's where I learned it: <span class="highlight">understand the system, then make it work better.</span>
   </p>
+  <p class="hero-story" style="animation-delay: 1.6s;">
+    Now I build a different kind of system. AI workflows that run your business operations, so you can focus on the work that actually matters.
+  </p>
+  <div class="hero-cta-line">
+    <span class="accent">You describe it.</span> I build it. It flows.
+  </div>
   <div class="hero-meta">
     <div class="hero-meta-item">
-      <span class="hero-meta-label">Role</span>
-      <span class="hero-meta-value">Founder, <span style="color: var(--accent-gold)">FlowstateAI</span></span>
+      <span class="hero-meta-label">Company</span>
+      <span class="hero-meta-value"><span style="color: var(--accent-gold)">FlowstateAI</span></span>
     </div>
     <div class="hero-meta-item">
       <span class="hero-meta-label">Focus</span>
