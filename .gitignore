@@ -4,3 +4,7 @@ node_modules/
 *.log
 .vscode/
 .idea/
+.venv/
+__pycache__/
+*.pyc
+projects/agent-pipeline/db/*.db

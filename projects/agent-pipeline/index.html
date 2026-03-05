@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Pipeline | FlowstateAI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FAFAF8;
+    --card: #FFFFFF;
+    --text-primary: #1a1a1a;
+    --text-secondary: #6b6b6b;
+    --text-muted: #999999;
+    --border: rgba(0,0,0,0.06);
+    --indigo: #818cf8;
+    --indigo-bg: rgba(129,140,248,0.08);
+    --teal: #2dd4bf;
+    --teal-bg: rgba(45,212,191,0.1);
+    --gold: #d4a853;
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.1);
+    --red: #ef4444;
+    --red-bg: rgba(239,68,68,0.1);
+    --yellow: #eab308;
+    --yellow-bg: rgba(234,179,8,0.1);
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-hover: 0 4px 12px rgba(0,0,0,0.08);
+    --radius: 8px;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    letter-spacing: -0.011em;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 49px, #e5e5e3 49px, #e5e5e3 50px),
+      repeating-linear-gradient(90deg, transparent, transparent 49px, #e5e5e3 49px, #e5e5e3 50px);
+    opacity: 0.45;
+    z-index: -1;
+  }
+
+  .header {
+    background: rgba(250,250,248,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .back-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--indigo); }
+
+  .header h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .header h1 span { color: var(--gold); }
+
+  .mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .mode-toggle label { cursor: pointer; }
+
+  .mode-toggle input[type="text"] {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    width: 200px;
+    transition: border-color 0.2s;
+  }
+  .mode-toggle input[type="text"]:focus {
+    outline: none;
+    border-color: var(--indigo);
+  }
+
+  .mode-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .mode-badge.demo { background: var(--teal-bg); color: #0d9488; }
+  .mode-badge.live { background: var(--green-bg); color: #16a34a; }
+
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .stat-card .label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  .stat-card .value {
+    font-family: 'Space Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  .main {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 120px);
+  }
+
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+
+  .sidebar {
+    border-right: 1px solid var(--border);
+    padding: 16px;
+    overflow-y: auto;
+    max-height: calc(100vh - 120px);
+  }
+
+  .sidebar-title {
+    font-size: 11px;
+    color: var(--indigo);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .lead-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-card);
+  }
+  .lead-card:hover { box-shadow: var(--shadow-hover); }
+  .lead-card.active { border-color: var(--indigo); box-shadow: 0 0 0 2px rgba(129,140,248,0.2); }
+  .lead-card.running { border-color: var(--yellow); }
+
+  .lead-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .lead-card .lead-meta { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+  .lead-card .lead-need { font-size: 13px; color: var(--text-primary); line-height: 1.4; }
+
+  .lead-card .lead-tags {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .tag.industry { background: var(--teal-bg); color: #0d9488; }
+  .tag.budget { background: var(--indigo-bg); color: #6366f1; }
+
+  .run-btn {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px 16px;
+    background: var(--gold);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .run-btn:hover { filter: brightness(1.1); }
+  .run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .lead-status {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .lead-status.qualifying, .lead-status.proposing, .lead-status.reviewing { background: var(--yellow-bg); color: #a16207; }
+  .lead-status.qualified, .lead-status.pending_approval { background: var(--green-bg); color: #16a34a; }
+  .lead-status.disqualified, .lead-status.error { background: var(--red-bg); color: #dc2626; }
+  .lead-status.intake { background: var(--indigo-bg); color: #6366f1; }
+
+  .content {
+    padding: 24px;
+    overflow-y: auto;
+    max-height: calc(100vh - 120px);
+  }
+
+  .section-label {
+    font-size: 11px;
+    color: var(--indigo);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .pipeline-viz {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 24px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    box-shadow: var(--shadow-card);
+    overflow-x: auto;
+  }
+
+  .stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 100px;
+  }
+
+  .stage-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    transition: all 0.4s;
+  }
+
+  .stage.active .stage-icon {
+    border-color: var(--indigo);
+    background: var(--indigo-bg);
+    animation: pulse 1.5s infinite;
+  }
+  .stage.done .stage-icon { border-color: var(--green); background: var(--green-bg); }
+  .stage.error .stage-icon, .stage.skip .stage-icon { border-color: var(--red); background: var(--red-bg); }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(129,140,248,0.3); }
+    50% { box-shadow: 0 0 0 8px rgba(129,140,248,0); }
+  }
+
+  .stage-label {
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 8px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .stage.active .stage-label { color: var(--indigo); }
+  .stage.done .stage-label { color: var(--green); }
+
+  .stage-arrow {
+    width: 40px;
+    height: 2px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+  .stage-arrow.done { background: var(--green); }
+  .stage-arrow.active { background: linear-gradient(90deg, var(--green), var(--indigo)); }
+
+  .log-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    margin-bottom: 24px;
+  }
+
+  .log-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .log-header h3 { font-size: 14px; font-weight: 600; }
+
+  .log-body {
+    padding: 12px 16px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+  }
+
+  .log-entry { display: flex; gap: 8px; align-items: flex-start; }
+  .log-time { color: var(--text-muted); flex-shrink: 0; min-width: 70px; }
+
+  .log-agent {
+    font-weight: 600;
+    flex-shrink: 0;
+    min-width: 80px;
+  }
+  .log-agent.qualifier { color: #6366f1; }
+  .log-agent.proposal { color: #0d9488; }
+  .log-agent.reviewer { color: #d97706; }
+  .log-agent.system { color: var(--text-muted); }
+
+  .log-msg { color: var(--text-secondary); }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .result-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .result-card .score {
+    font-family: 'Space Mono', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--indigo);
+  }
+
+  .result-card .score-label { font-size: 12px; color: var(--text-muted); }
+
+  .icp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .icp-item { font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .check { color: var(--green); }
+  .cross { color: var(--red); }
+
+  .reasoning {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 12px;
+    line-height: 1.5;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .proposal-section { margin-bottom: 16px; }
+  .proposal-section h4 { font-size: 13px; font-weight: 600; color: var(--indigo); margin-bottom: 6px; }
+  .proposal-section p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    white-space: pre-line;
+  }
+
+  .review-issues { list-style: none; margin-top: 8px; }
+  .review-issues li {
+    font-size: 13px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .severity {
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .severity.critical { background: var(--red-bg); color: #dc2626; }
+  .severity.warning { background: var(--yellow-bg); color: #a16207; }
+  .severity.suggestion { background: var(--indigo-bg); color: #6366f1; }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--text-muted);
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+  .empty-state h3 { font-size: 16px; color: var(--text-secondary); margin-bottom: 8px; }
+  .empty-state p { font-size: 13px; }
+
+  .custom-lead-form {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .custom-lead-form h3 {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+  }
+
+  .form-row { margin-bottom: 8px; }
+  .form-row input, .form-row textarea {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    background: var(--bg);
+    transition: border-color 0.2s;
+  }
+  .form-row input:focus, .form-row textarea:focus { outline: none; border-color: var(--indigo); }
+  .form-row textarea { resize: vertical; min-height: 50px; }
+  .form-row label { font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <a href="../../index.html" class="back-link">&larr; Portfolio</a>
+    <h1><span>FlowstateAI</span> Agent Pipeline</h1>
+  </div>
+  <div class="mode-toggle">
+    <span class="mode-badge demo" id="modeBadge">DEMO</span>
+    <label>API Key:</label>
+    <input type="text" id="apiKeyInput" placeholder="sk-ant-... (optional)" />
+  </div>
+</div>
+
+<div class="stats-bar" id="statsBar">
+  <div class="stat-card">
+    <div class="label">Total Runs</div>
+    <div class="value" id="statTotal">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Approved</div>
+    <div class="value" id="statApproved">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Disqualified</div>
+    <div class="value" id="statDisqualified">0</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Avg Duration</div>
+    <div class="value" id="statDuration">0ms</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Total Cost</div>
+    <div class="value" id="statCost">$0.00</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="sidebar-title">Sample Leads</div>
+
+    <div class="lead-card" data-lead="coastal" id="leadCoastal">
+      <h3>Coastal Kitchen</h3>
+      <div class="lead-meta">Maria Chen, Restaurant Group</div>
+      <div class="lead-need">AI-powered order management and inventory forecasting for multi-location operations</div>
+      <div class="lead-tags">
+        <span class="tag industry">Restaurant</span>
+        <span class="tag budget">$20K-$50K</span>
+      </div>
+      <button class="run-btn" onclick="runLead('coastal')">Run Pipeline</button>
+    </div>
+
+    <div class="lead-card" data-lead="smith" id="leadSmith">
+      <h3>Smith &amp; Associates Law</h3>
+      <div class="lead-meta">David Smith, Managing Partner</div>
+      <div class="lead-need">Document automation for contract review and drafting in corporate practice group</div>
+      <div class="lead-tags">
+        <span class="tag industry">Legal</span>
+        <span class="tag budget">$15K-$30K</span>
+      </div>
+      <button class="run-btn" onclick="runLead('smith')">Run Pipeline</button>
+    </div>
+
+    <div class="lead-card" data-lead="jakes" id="leadJakes">
+      <h3>Jake's Garage</h3>
+      <div class="lead-meta">Jake Moreno, Owner</div>
+      <div class="lead-need">Make things easier with AI... not sure exactly what</div>
+      <div class="lead-tags">
+        <span class="tag industry">Auto Repair</span>
+        <span class="tag budget">No budget</span>
+      </div>
+      <button class="run-btn" onclick="runLead('jakes')">Run Pipeline</button>
+    </div>
+
+    <div class="sidebar-title" style="margin-top: 16px;">Custom Lead</div>
+    <div class="custom-lead-form">
+      <div class="form-row"><label>Name</label><input id="customName" placeholder="Contact name" /></div>
+      <div class="form-row"><label>Company</label><input id="customCompany" placeholder="Company name" /></div>
+      <div class="form-row"><label>Industry</label><input id="customIndustry" placeholder="e.g. Healthcare" /></div>
+      <div class="form-row"><label>Budget</label><input id="customBudget" placeholder="e.g. $10K-$25K" /></div>
+      <div class="form-row"><label>Timeline</label><input id="customTimeline" placeholder="e.g. 3-6 months" /></div>
+      <div class="form-row"><label>Need</label><textarea id="customNeed" placeholder="What do they need built?"></textarea></div>
+      <button class="run-btn" onclick="runCustomLead()">Run Custom Lead</button>
+    </div>
+  </div>
+
+  <div class="content" id="contentArea">
+    <div class="empty-state" id="emptyState">
+      <div class="icon">&#9881;</div>
+      <h3>Select a lead to run the pipeline</h3>
+      <p>Click "Run Pipeline" on any lead card to watch the multi-agent system qualify, propose, and review in real-time.</p>
+    </div>
+
+    <div id="pipelineSection" style="display:none;">
+      <div class="section-label">Pipeline Progress</div>
+      <div class="pipeline-viz" id="pipelineViz">
+        <div class="stage" id="stageIntake">
+          <div class="stage-icon">&#128229;</div>
+          <div class="stage-label">Intake</div>
+        </div>
+        <div class="stage-arrow" id="arrow1"></div>
+        <div class="stage" id="stageQualify">
+          <div class="stage-icon">&#128270;</div>
+          <div class="stage-label">Qualify</div>
+        </div>
+        <div class="stage-arrow" id="arrow2"></div>
+        <div class="stage" id="stagePropose">
+          <div class="stage-icon">&#128221;</div>
+          <div class="stage-label">Propose</div>
+        </div>
+        <div class="stage-arrow" id="arrow3"></div>
+        <div class="stage" id="stageReview">
+          <div class="stage-icon">&#9989;</div>
+          <div class="stage-label">Review</div>
+        </div>
+        <div class="stage-arrow" id="arrow4"></div>
+        <div class="stage" id="stageDeliver">
+          <div class="stage-icon">&#128640;</div>
+          <div class="stage-label">Deliver</div>
+        </div>
+      </div>
+
+      <div class="log-panel">
+        <div class="log-header">
+          <h3>Agent Log</h3>
+          <span id="logStatus" class="mode-badge demo">Waiting</span>
+        </div>
+        <div class="log-body" id="logBody"></div>
+      </div>
+
+      <div id="resultsArea"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEMO_LEADS = {
+  coastal: {
+    name: "Maria Chen",
+    company: "Coastal Kitchen",
+    industry: "Restaurant",
+    budget: "$20K-$50K",
+    timeline: "4 months",
+    need: "AI-powered order management and inventory forecasting for multi-location restaurant operations"
+  },
+  smith: {
+    name: "David Smith",
+    company: "Smith & Associates Law",
+    industry: "Legal",
+    budget: "$15K-$30K",
+    timeline: "3 months",
+    need: "Document automation for contract review and drafting in corporate practice group"
+  },
+  jakes: {
+    name: "Jake Moreno",
+    company: "Jake's Garage",
+    industry: "Auto Repair",
+    budget: "None specified",
+    timeline: "ASAP",
+    need: "Make things easier with AI"
+  }
+};
+
+let currentLead = null;
+let isRunning = false;
+const SERVER_URL = "http://localhost:8000";
+
+const apiKeyInput = document.getElementById("apiKeyInput");
+const modeBadge = document.getElementById("modeBadge");
+
+apiKeyInput.addEventListener("input", () => {
+  const hasKey = apiKeyInput.value.trim().length > 10;
+  modeBadge.textContent = hasKey ? "LIVE" : "DEMO";
+  modeBadge.className = "mode-badge " + (hasKey ? "live" : "demo");
+});
+
+// ---------------------------------------------------------------------------
+// Safe DOM helpers (avoid innerHTML with untrusted data)
+// ---------------------------------------------------------------------------
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.appendChild(document.createTextNode(str));
+  return div.textContent;
+}
+
+function addLog(agent, message) {
+  const body = document.getElementById("logBody");
+  const now = new Date();
+  const time = now.toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+
+  const entry = document.createElement("div");
+  entry.className = "log-entry";
+
+  const timeSpan = document.createElement("span");
+  timeSpan.className = "log-time";
+  timeSpan.textContent = time;
+
+  const agentSpan = document.createElement("span");
+  agentSpan.className = "log-agent " + agent;
+  agentSpan.textContent = agent;
+
+  const msgSpan = document.createElement("span");
+  msgSpan.className = "log-msg";
+  msgSpan.textContent = message;
+
+  entry.append(timeSpan, agentSpan, msgSpan);
+  body.appendChild(entry);
+  body.scrollTop = body.scrollHeight;
+}
+
+// ---------------------------------------------------------------------------
+// Pipeline runner
+// ---------------------------------------------------------------------------
+async function runLead(leadKey) {
+  if (isRunning) return;
+  const lead = DEMO_LEADS[leadKey];
+  if (!lead) return;
+  currentLead = leadKey;
+  highlightCard(leadKey);
+  await executePipeline(lead);
+}
+
+async function runCustomLead() {
+  if (isRunning) return;
+  const lead = {
+    name: document.getElementById("customName").value || "Unknown",
+    company: document.getElementById("customCompany").value || "Unknown Co",
+    industry: document.getElementById("customIndustry").value || "General",
+    budget: document.getElementById("customBudget").value || "Not specified",
+    timeline: document.getElementById("customTimeline").value || "Flexible",
+    need: document.getElementById("customNeed").value || "General AI consulting"
+  };
+  currentLead = "custom";
+  await executePipeline(lead);
+}
+
+function highlightCard(key) {
+  document.querySelectorAll(".lead-card").forEach(c => c.classList.remove("active", "running"));
+  const card = document.querySelector('[data-lead="' + key + '"]');
+  if (card) card.classList.add("active", "running");
+}
+
+async function executePipeline(lead) {
+  isRunning = true;
+  disableButtons(true);
+  resetPipeline();
+  showPipeline();
+
+  const apiKey = apiKeyInput.value.trim() || null;
+  const body = { lead, api_key: apiKey };
+
+  setStage("stageIntake", "done");
+  addLog("system", "Pipeline started for " + lead.company);
+
+  try {
+    const response = await fetch(SERVER_URL + "/pipeline/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+
+    if (!response.ok) throw new Error("Server returned " + response.status);
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n\n");
+      buffer = lines.pop();
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          const event = JSON.parse(line.slice(6));
+          handleEvent(event);
+        }
+      }
+    }
+  } catch (err) {
+    addLog("system", "Server unavailable. Running client-side demo...");
+    await runClientDemo(lead);
+  }
+
+  isRunning = false;
+  disableButtons(false);
+  if (currentLead) {
+    const card = document.querySelector('[data-lead="' + currentLead + '"]');
+    if (card) card.classList.remove("running");
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Client-side demo (fallback when server is not running)
+// ---------------------------------------------------------------------------
+
+// All demo data defined as structured objects (not user input)
+const DEMO_DATA = {
+  "Coastal Kitchen": {
+    fitScore: 85,
+    reasoning: "Strong ICP fit. Restaurant industry has proven AI ROI for order management and inventory. Budget is reasonable for a phased rollout.",
+    icp: { mm: true, uc: true, rb: true, tf: true },
+    sections: [
+      { title: "Overview", content: "FlowstateAI will design and deploy an AI-powered order management and inventory forecasting system for Coastal Kitchen's multi-location restaurant operations." },
+      { title: "Scope", content: "- POS integration layer (Toast/Square API)\n- AI order routing engine\n- Inventory forecasting model (12 months historical data)\n- Real-time waste tracking dashboard\n- Staff notification system\n- Manager approval workflows" },
+      { title: "Timeline", content: "Phase 1 (Weeks 1-4): Discovery, POS integration\nPhase 2 (Weeks 5-10): AI model training, routing engine\nPhase 3 (Weeks 11-14): Dashboard, alerts, training\nPhase 4 (Weeks 15-16): Launch, optimization" },
+      { title: "Pricing", content: "Starter (1 location): $18,000\nGrowth (2-4 locations): $35,000\nEnterprise (5+ locations): $55,000" },
+      { title: "Terms", content: "50% upfront, 25% at Phase 2, 25% at launch. Net 15 terms. 90-day support included. Source code transfers to client." }
+    ],
+    reviewIssues: [
+      { severity: "suggestion", section: "Pricing", detail: "Consider adding a monthly retainer option for ongoing model retraining." },
+      { severity: "suggestion", section: "Scope", detail: "Specify which POS systems are supported in Phase 1 vs. future phases." }
+    ]
+  },
+  "Smith & Associates Law": {
+    fitScore: 72,
+    reasoning: "Good fit with some caveats. Document automation for a mid-size law firm is a proven use case. Budget is on the lower end but workable for an initial pilot.",
+    icp: { mm: true, uc: true, rb: true, tf: true },
+    sections: [
+      { title: "Overview", content: "FlowstateAI will build an AI document automation system for Smith & Associates, focused on contract review and drafting for your corporate practice group." },
+      { title: "Scope", content: "- Document ingestion pipeline (PDF, DOCX, email)\n- AI contract review engine with clause extraction\n- First-draft generation from intake forms\n- Attorney review and approval workflow\n- DMS integration (iManage/NetDocuments)" },
+      { title: "Timeline", content: "Phase 1 (Weeks 1-3): Template audit, DMS integration\nPhase 2 (Weeks 4-8): AI model training, clause library\nPhase 3 (Weeks 9-11): Review workflow, feedback loop\nPhase 4 (Week 12): Launch, training sessions" },
+      { title: "Pricing", content: "Pilot (1 practice group): $22,000\nFirm-wide rollout: $45,000" },
+      { title: "Terms", content: "50% upfront, 50% at launch. Net 30 terms. All data on-premise or firm-approved cloud. SOC 2 documentation provided." }
+    ],
+    reviewIssues: [
+      { severity: "warning", section: "Terms", detail: "Add explicit data retention and deletion policy for compliance." },
+      { severity: "suggestion", section: "Timeline", detail: "12 weeks is tight. Consider a 2-week buffer for attorney feedback." }
+    ]
+  },
+  "Jake's Garage": {
+    fitScore: 31,
+    reasoning: "Poor ICP fit. Single-location auto shop with no defined budget and vague requirements. No clear use case that would justify AI investment at this stage.",
+    icp: { mm: false, uc: false, rb: false, tf: false }
+  }
+};
+
+async function runClientDemo(lead) {
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const data = DEMO_DATA[lead.company];
+  const fitScore = data ? data.fitScore : 55;
+  const qualified = fitScore >= 60;
+
+  // Qualify
+  setStage("stageQualify", "active");
+  setArrow("arrow1", "active");
+  addLog("qualifier", "Scoring " + lead.company + " against ICP criteria...");
+  setLogStatus("running");
+  await sleep(1500);
+
+  setStage("stageQualify", "done");
+  setArrow("arrow1", "done");
+  addLog("qualifier", "Fit score: " + fitScore + "/100. " + (qualified ? "QUALIFIED" : "DISQUALIFIED"));
+
+  if (!qualified) {
+    setStage("stagePropose", "skip");
+    setStage("stageReview", "skip");
+    setStage("stageDeliver", "skip");
+    addLog("system", "Lead disqualified. Pipeline stopped.");
+    setLogStatus("done");
+    renderResults(lead.company, data, false);
+    return;
+  }
+
+  // Propose
+  setStage("stagePropose", "active");
+  setArrow("arrow2", "active");
+  addLog("proposal", "Drafting proposal v1 for " + lead.company + "...");
+  await sleep(2500);
+  setStage("stagePropose", "done");
+  setArrow("arrow2", "done");
+  addLog("proposal", "Proposal v1 complete. 5 sections generated.");
+
+  // Review
+  setStage("stageReview", "active");
+  setArrow("arrow3", "active");
+  addLog("reviewer", "Reviewing proposal for quality and compliance...");
+  await sleep(1800);
+  setStage("stageReview", "done");
+  setArrow("arrow3", "done");
+  addLog("reviewer", "Review complete. Approved with suggestions.");
+
+  // Deliver
+  setStage("stageDeliver", "active");
+  setArrow("arrow4", "active");
+  await sleep(500);
+  setStage("stageDeliver", "done");
+  setArrow("arrow4", "done");
+  addLog("system", "Pipeline complete. Ready for approval.");
+  setLogStatus("done");
+
+  renderResults(lead.company, data, true);
+}
+
+// ---------------------------------------------------------------------------
+// Result rendering using safe DOM construction
+// ---------------------------------------------------------------------------
+function renderResults(companyName, data, qualified) {
+  const area = document.getElementById("resultsArea");
+  area.textContent = "";
+
+  if (!data) {
+    const p = document.createElement("p");
+    p.textContent = "Demo mode: custom leads require the server running with a Claude API key.";
+    p.style.cssText = "color: var(--text-muted); padding: 20px; text-align: center;";
+    area.appendChild(p);
+    return;
+  }
+
+  // Section label
+  const label = document.createElement("div");
+  label.className = "section-label";
+  label.textContent = qualified ? "Pipeline Results" : "Qualification Result";
+  area.appendChild(label);
+
+  const grid = document.createElement("div");
+  grid.className = "result-grid";
+
+  // Qualification card
+  grid.appendChild(buildQualCard(data));
+
+  // Review card (only if qualified)
+  if (qualified && data.reviewIssues) {
+    grid.appendChild(buildReviewCard(data));
+  }
+
+  area.appendChild(grid);
+
+  // Proposal (only if qualified)
+  if (qualified && data.sections) {
+    const propLabel = document.createElement("div");
+    propLabel.className = "section-label";
+    propLabel.style.marginTop = "24px";
+    propLabel.textContent = "Generated Proposal";
+    area.appendChild(propLabel);
+
+    const propCard = document.createElement("div");
+    propCard.className = "result-card";
+    data.sections.forEach(s => {
+      const sec = document.createElement("div");
+      sec.className = "proposal-section";
+      const h4 = document.createElement("h4");
+      h4.textContent = s.title;
+      const p = document.createElement("p");
+      p.textContent = s.content;
+      sec.append(h4, p);
+      propCard.appendChild(sec);
+    });
+    area.appendChild(propCard);
+  }
+}
+
+function buildQualCard(data) {
+  const card = document.createElement("div");
+  card.className = "result-card";
+
+  const h3 = document.createElement("h3");
+  h3.textContent = "\u{1F50D} Qualification";
+  card.appendChild(h3);
+
+  const score = document.createElement("div");
+  score.className = "score";
+  score.textContent = data.fitScore;
+  card.appendChild(score);
+
+  const scoreLabel = document.createElement("div");
+  scoreLabel.className = "score-label";
+  scoreLabel.textContent = "Fit Score (60+ to qualify)";
+  card.appendChild(scoreLabel);
+
+  const icpGrid = document.createElement("div");
+  icpGrid.className = "icp-grid";
+  const icpItems = [
+    [data.icp.mm, "Mid-market"],
+    [data.icp.uc, "Clear use case"],
+    [data.icp.rb, "Reasonable budget"],
+    [data.icp.tf, "Timeline fit"]
+  ];
+  icpItems.forEach(([val, text]) => {
+    const item = document.createElement("div");
+    item.className = "icp-item";
+    const icon = document.createElement("span");
+    icon.className = val ? "check" : "cross";
+    icon.textContent = val ? "\u2713" : "\u2717";
+    const txt = document.createTextNode(" " + text);
+    item.append(icon, txt);
+    icpGrid.appendChild(item);
+  });
+  card.appendChild(icpGrid);
+
+  const reasoning = document.createElement("div");
+  reasoning.className = "reasoning";
+  reasoning.textContent = data.reasoning;
+  card.appendChild(reasoning);
+
+  return card;
+}
+
+function buildReviewCard(data) {
+  const card = document.createElement("div");
+  card.className = "result-card";
+
+  const h3 = document.createElement("h3");
+  h3.textContent = "\u2705 Review";
+  card.appendChild(h3);
+
+  const statusRow = document.createElement("div");
+  statusRow.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:8px;";
+  const badge = document.createElement("span");
+  badge.className = "lead-status pending_approval";
+  badge.textContent = "Approved";
+  const count = document.createElement("span");
+  count.style.cssText = "font-size:12px;color:var(--text-muted);";
+  count.textContent = data.reviewIssues.length + " issues found";
+  statusRow.append(badge, count);
+  card.appendChild(statusRow);
+
+  const ul = document.createElement("ul");
+  ul.className = "review-issues";
+  data.reviewIssues.forEach(issue => {
+    const li = document.createElement("li");
+    const sev = document.createElement("span");
+    sev.className = "severity " + issue.severity;
+    sev.textContent = issue.severity;
+    const detail = document.createElement("span");
+    const strong = document.createElement("strong");
+    strong.textContent = issue.section + ": ";
+    detail.append(strong, document.createTextNode(issue.detail));
+    li.append(sev, detail);
+    ul.appendChild(li);
+  });
+  card.appendChild(ul);
+
+  return card;
+}
+
+// ---------------------------------------------------------------------------
+// SSE event handler (server mode)
+// ---------------------------------------------------------------------------
+function handleEvent(event) {
+  const { stage, detail } = event;
+
+  switch(stage) {
+    case "qualifying":
+      setStage("stageQualify", "active");
+      setArrow("arrow1", "active");
+      addLog("qualifier", "Scoring lead against ICP criteria...");
+      setLogStatus("running");
+      break;
+    case "qualified":
+      setStage("stageQualify", "done");
+      setArrow("arrow1", "done");
+      addLog("qualifier", "Fit score: " + (detail.output?.fit_score || "?") + "/100. QUALIFIED");
+      break;
+    case "disqualified":
+      setStage("stageQualify", "done");
+      setArrow("arrow1", "done");
+      setStage("stagePropose", "skip");
+      setStage("stageReview", "skip");
+      setStage("stageDeliver", "skip");
+      addLog("qualifier", "DISQUALIFIED: " + (detail.reason || ""));
+      setLogStatus("done");
+      break;
+    case "proposing":
+      setStage("stagePropose", "active");
+      setArrow("arrow2", "active");
+      addLog("proposal", "Drafting proposal v" + (detail.version || 1) + (detail.retry ? " (revision)" : "") + "...");
+      break;
+    case "proposed":
+      setStage("stagePropose", "done");
+      setArrow("arrow2", "done");
+      addLog("proposal", "Proposal v" + (detail.output?.version || 1) + " complete. " + (detail.output?.sections || "?") + " sections.");
+      break;
+    case "reviewing":
+      setStage("stageReview", "active");
+      setArrow("arrow3", "active");
+      addLog("reviewer", "Reviewing proposal...");
+      break;
+    case "reviewed":
+      setStage("stageReview", "done");
+      setArrow("arrow3", "done");
+      addLog("reviewer", "Review complete. " + (detail.output?.approved ? "Approved" : "Revision needed") + ".");
+      break;
+    case "revision_needed":
+      addLog("reviewer", "Revision needed (attempt " + detail.attempt + "): " + detail.feedback);
+      setStage("stagePropose", "active");
+      break;
+    case "pending_approval":
+      setStage("stageDeliver", "done");
+      setArrow("arrow4", "done");
+      addLog("system", "Pipeline complete. Duration: " + detail.total_duration_ms + "ms. Cost: $" + detail.total_cost_usd);
+      setLogStatus("done");
+      break;
+    case "complete":
+      renderServerResult(detail);
+      break;
+    case "error":
+      addLog("system", "Error in " + (detail.agent || "pipeline") + ": " + (detail.error || "unknown"));
+      setLogStatus("error");
+      break;
+  }
+}
+
+function renderServerResult(state) {
+  if (!state || !state.qualification) return;
+  const q = state.qualification;
+  const serverData = {
+    fitScore: q.fit_score,
+    reasoning: q.reasoning,
+    icp: {
+      mm: q.icp_match?.mid_market || false,
+      uc: q.icp_match?.clear_use_case || false,
+      rb: q.icp_match?.reasonable_budget || false,
+      tf: q.icp_match?.timeline_fit || false
+    },
+    sections: state.proposal?.sections || [],
+    reviewIssues: state.review?.issues || []
+  };
+  const qualified = q.qualified;
+  renderResults(state.lead_input?.company || "Unknown", serverData, qualified);
+}
+
+// ---------------------------------------------------------------------------
+// Pipeline visualization helpers
+// ---------------------------------------------------------------------------
+function resetPipeline() {
+  ["stageIntake","stageQualify","stagePropose","stageReview","stageDeliver"].forEach(id => {
+    document.getElementById(id).className = "stage";
+  });
+  ["arrow1","arrow2","arrow3","arrow4"].forEach(id => {
+    document.getElementById(id).className = "stage-arrow";
+  });
+  document.getElementById("logBody").textContent = "";
+  document.getElementById("resultsArea").textContent = "";
+  setLogStatus("waiting");
+}
+
+function showPipeline() {
+  document.getElementById("emptyState").style.display = "none";
+  document.getElementById("pipelineSection").style.display = "block";
+}
+
+function setStage(id, state) {
+  document.getElementById(id).className = "stage " + state;
+}
+
+function setArrow(id, state) {
+  document.getElementById(id).className = "stage-arrow " + state;
+}
+
+function setLogStatus(state) {
+  const el = document.getElementById("logStatus");
+  el.style.background = "";
+  el.style.color = "";
+  if (state === "running") { el.textContent = "Running"; el.className = "mode-badge live"; }
+  else if (state === "done") { el.textContent = "Complete"; el.className = "mode-badge demo"; el.style.background = "var(--green-bg)"; el.style.color = "#16a34a"; }
+  else if (state === "error") { el.textContent = "Error"; el.className = "mode-badge demo"; el.style.background = "var(--red-bg)"; el.style.color = "#dc2626"; }
+  else { el.textContent = "Waiting"; el.className = "mode-badge demo"; }
+}
+
+function disableButtons(disabled) {
+  document.querySelectorAll(".run-btn").forEach(btn => btn.disabled = disabled);
+}
+
+async function loadStats() {
+  try {
+    const res = await fetch(SERVER_URL + "/pipeline/stats");
+    if (res.ok) {
+      const s = await res.json();
+      document.getElementById("statTotal").textContent = s.total_runs;
+      document.getElementById("statApproved").textContent = s.pending_approval;
+      document.getElementById("statDisqualified").textContent = s.disqualified;
+      document.getElementById("statDuration").textContent = s.avg_duration_ms + "ms";
+      document.getElementById("statCost").textContent = "$" + s.total_cost_usd.toFixed(2);
+    }
+  } catch(e) {}
+}
+
+loadStats();
+</script>
+</body>
+</html>
