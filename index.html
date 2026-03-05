@@ -489,12 +489,18 @@
 
   /* ── RESPONSIVE ── */
   @media (max-width: 768px) {
-    nav { padding: 1rem 1.25rem; }
-    nav .nav-links { gap: 1rem; }
-    nav .nav-links a { font-size: 0.7rem; }
+    nav {
+      padding: 0.75rem 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    nav .nav-links { gap: 0.75rem; order: 3; width: 100%; justify-content: center; padding-top: 0.5rem; border-top: 1px solid var(--border); }
+    nav .nav-links a { font-size: 0.65rem; }
+    .theme-toggle { order: 2; }
 
-    .hero { padding: 6rem 1.25rem 3rem; }
+    .hero { padding: 7rem 1.25rem 3rem; }
     .hero-meta { flex-direction: column; gap: 1.5rem; }
+    .hero h1 { font-size: 2rem; }
 
     section { padding: 4rem 1.25rem; }
 
