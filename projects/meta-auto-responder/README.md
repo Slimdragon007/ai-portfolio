@@ -95,7 +95,7 @@ Return JSON:
 - Shows the "augment, don't replace" philosophy (owner reviews before sending)
 - MVP is a demo anyone can try without API setup
 - Production path shows FlowstateAI can take this from prototype to deployed product
-- Completely avoids Yelp territory (Meta, not Yelp reviews)
+- Focused on Meta platforms (Facebook and Instagram DMs)
 
 ### FlowstateAI Client Pitch
 "Your team spends 2 hours a day answering the same 10 DM questions. We build an AI layer that drafts responses in your brand voice, you approve with one click. Response time drops from 4 hours to 10 minutes. No bots, no generic replies, just faster humans."

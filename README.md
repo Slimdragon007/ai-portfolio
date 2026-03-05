@@ -8,7 +8,7 @@ This portfolio documents real builds, not concepts. Every case study links to a 
 
 ## Who I Am
 
-Michael (Slim) Haslim. Co-founder of [FlowstateAI](https://flowstateai.com). Senior Partner Account Executive at Yelp. 20+ years across sales, agency partnerships, and technology.
+Michael (Slim) Haslim. Co-founder of [FlowstateAI](https://flowstateai.com). 20+ years across sales, agency partnerships, and technology.
 
 I sit at the intersection of business strategy and AI engineering. I don't just prompt, I build production systems that compound over time.
 

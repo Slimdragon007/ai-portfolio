@@ -60,7 +60,7 @@ FlowstateAI prospects         -> FlowstateAI Pipeline in Notion
 
 ## Proof
 
-The routing logic is documented in the CLAUDE.md Library. The slash commands, confirmation gates, and tool connections are all live and used daily for Yelp prospecting, FlowstateAI pipeline management, and personal life logging.
+The routing logic is documented in the CLAUDE.md Library. The slash commands, confirmation gates, and tool connections are all live and used daily for client prospecting, FlowstateAI pipeline management, and personal life logging.
 
 ---
 

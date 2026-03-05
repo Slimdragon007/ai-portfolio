@@ -15,8 +15,8 @@ The core question: how do you make AI remember who you are, how you work, and wh
 
 ```
 CLAUDE.md master context file
-    -> Mode-specific prompts (Yelp, FlowstateAI, Personal)
-    -> Trigger phrase routing ("Yelp mode", "FlowstateAI mode", "Personal mode")
+    -> Mode-specific prompts (FlowstateAI, Business, Personal)
+    -> Trigger phrase routing ("FlowstateAI mode", "Business mode", "Personal mode")
     -> Notion-hosted prompt database (Claude Prompt OS)
     -> Session startup checklist (5-step verification)
 ```
@@ -39,7 +39,7 @@ CLAUDE.md master context file
 
 ### What Makes It Different
 
-- **Three-mode architecture**: Yelp (sales/agency), FlowstateAI (AI consulting), Personal (life management). Each mode loads different context, rules, and behavior patterns.
+- **Three-mode architecture**: FlowstateAI (AI consulting), Business (sales/agency), Personal (life management). Each mode loads different context, rules, and behavior patterns.
 - **Personality-calibrated responses**: ENFP profile mapped to communication preferences. Vision first, then concrete actions. Peer tone, not assistant tone.
 - **Self-healing context**: the mistakes log means the system gets more accurate over time without manual prompt rewrites.
 - **Session resumability**: every build gets a Resume Card with exact state, so any future session can pick up where the last one left off.

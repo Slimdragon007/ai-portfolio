@@ -29,7 +29,7 @@ Claude session
 | Project Name | Title | What was built |
 | Status | Select | Active / Complete / Archived / Resume Next Session |
 | Type | Select | HTML Artifact / Dashboard / Document / Script / Notion Page / Other |
-| Mode | Select | FlowstateAI / Yelp / Personal |
+| Mode | Select | FlowstateAI / Business / Personal |
 | Built On | Date | When the build happened |
 | Claude Chat URL | URL | Link back to the source conversation |
 | File Contents | Text | Inline storage for smaller artifacts |
@@ -46,7 +46,7 @@ Claude session
 
 - **Resume Cards**: every build generates a portable resume block. Copy it into any new Claude session and you're back in context instantly. No re-explaining, no file hunting.
 - **Cross-session continuity**: the Build Vault connects the output (the artifact) to the process (the Claude chat URL) and the state (Resume Context). Full audit trail for AI collaboration.
-- **Mode tagging**: every artifact is tagged to its domain (Yelp, FlowstateAI, Personal), making the vault searchable by professional context.
+- **Mode tagging**: every artifact is tagged to its domain (FlowstateAI, Business, Personal), making the vault searchable by professional context.
 - **Status workflow**: Active -> Resume Next Session -> Complete -> Archived. Clean lifecycle management for AI-generated work.
 
 ---
