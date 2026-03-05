@@ -288,6 +288,22 @@
     padding-top: 0.25rem;
   }
 
+  .case-expand-hint {
+    font-family: var(--font-display);
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 0.75rem;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+  }
+
+  .case-card:hover .case-expand-hint {
+    opacity: 1;
+    color: var(--accent);
+  }
+
   /* ── EXPANDED CASE STUDY ── */
   .case-detail {
     display: none;
@@ -355,6 +371,69 @@
 
   .architecture-flow .arrow {
     color: var(--accent);
+  }
+
+  /* ── DEMO CARDS ── */
+  .demos-grid {
+    display: grid;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .demo-card {
+    background: var(--bg-card);
+    padding: 2rem 2.5rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1.5rem;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.4s ease;
+  }
+
+  .demo-card:hover {
+    background: var(--bg-card-hover);
+  }
+
+  .demo-card:hover .case-arrow {
+    transform: translateX(4px);
+    color: var(--accent);
+  }
+
+  .demo-number {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .demo-info h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.01em;
+  }
+
+  .demo-info p {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .demo-badge {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-size: 0.55rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.5rem;
+    border: 1px solid var(--border-accent);
+    border-radius: 3px;
+    color: var(--accent);
+    margin-top: 0.5rem;
   }
 
   /* ── PHILOSOPHY ── */
@@ -504,12 +583,12 @@
 
     section { padding: 4rem 1.25rem; }
 
-    .case-card {
+    .case-card, .demo-card {
       grid-template-columns: 1fr;
       gap: 0.75rem;
       padding: 1.75rem;
     }
-    .case-number { font-size: 0.65rem; }
+    .case-number, .demo-number { font-size: 0.65rem; }
     .case-arrow { display: none; }
 
     .case-detail-grid {
@@ -578,6 +657,7 @@
   <div class="logo">SLIM.SYSTEMS</div>
   <ul class="nav-links">
     <li><a href="#work">Work</a></li>
+    <li><a href="#demos">Demos</a></li>
     <li><a href="#philosophy">Philosophy</a></li>
     <li><a href="#skills">Skills</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -635,6 +715,7 @@
           <span class="case-tag">MCP</span>
           <span class="case-tag">Notion</span>
         </div>
+        <div class="case-expand-hint">Click to expand</div>
         <div class="case-detail">
           <div class="case-detail-grid">
             <div class="detail-block">
@@ -679,6 +760,7 @@
           <span class="case-tag">Artifact Tracking</span>
           <span class="case-tag">Notion DB</span>
         </div>
+        <div class="case-expand-hint">Click to expand</div>
         <div class="case-detail">
           <div class="case-detail-grid">
             <div class="detail-block">
@@ -725,6 +807,7 @@
           <span class="case-tag">Intent Routing</span>
           <span class="case-tag">Apollo.io</span>
         </div>
+        <div class="case-expand-hint">Click to expand</div>
         <div class="case-detail">
           <div class="case-detail-grid">
             <div class="detail-block">
@@ -769,6 +852,7 @@ Prospects <span class="arrow">-></span> FlowstateAI Pipeline</div>
           <span class="case-tag">Responsive</span>
           <span class="case-tag">Zero Hand-Coding</span>
         </div>
+        <div class="case-expand-hint">Click to expand</div>
         <div class="case-detail">
           <div class="case-detail-grid">
             <div class="detail-block">
@@ -813,6 +897,7 @@ Prospects <span class="arrow">-></span> FlowstateAI Pipeline</div>
           <span class="case-tag">Analytics</span>
           <span class="case-tag">Enterprise Sales</span>
         </div>
+        <div class="case-expand-hint">Click to expand</div>
         <div class="case-detail">
           <div class="case-detail-grid">
             <div class="detail-block">
@@ -857,6 +942,7 @@ Prospects <span class="arrow">-></span> FlowstateAI Pipeline</div>
           <span class="case-tag">Agent Orchestration</span>
           <span class="case-tag">FlowstateAI</span>
         </div>
+        <div class="case-expand-hint">Click to expand</div>
         <div class="case-detail">
           <div class="case-detail-grid">
             <div class="detail-block">
@@ -889,6 +975,69 @@ Prospects <span class="arrow">-></span> FlowstateAI Pipeline</div>
       <span class="case-arrow">&rarr;</span>
     </div>
 
+  </div>
+</section>
+
+<div class="accent-line"></div>
+
+<!-- LIVE DEMOS -->
+<section id="demos">
+  <div class="reveal">
+    <div class="section-label">Try Them</div>
+    <h2 class="section-title">Live Demos</h2>
+    <p class="section-subtitle">Six applied AI tools, each solving a real problem. Every demo works in your browser with no API key required.</p>
+  </div>
+  <div class="demos-grid reveal">
+    <a href="projects/meta-auto-responder/" class="demo-card">
+      <span class="demo-number">01</span>
+      <div class="demo-info">
+        <h3>Meta Auto-Responder</h3>
+        <p>AI-drafted DM replies for Facebook and Instagram. Response time drops from 4 hours to 10 minutes.</p>
+      </div>
+      <span class="case-arrow">&rarr;</span>
+    </a>
+    <a href="projects/sow-generator/" class="demo-card">
+      <span class="demo-number">02</span>
+      <div class="demo-info">
+        <h3>SOW Generator</h3>
+        <p>Describe a project in plain English, get a professional Statement of Work. Edit inline, export PDF.</p>
+      </div>
+      <span class="case-arrow">&rarr;</span>
+    </a>
+    <a href="projects/faq-builder/" class="demo-card">
+      <span class="demo-number">03</span>
+      <div class="demo-info">
+        <h3>FAQ Builder</h3>
+        <p>Paste your business info, get a production-ready FAQ section in 30 seconds. Export as embeddable HTML.</p>
+      </div>
+      <span class="case-arrow">&rarr;</span>
+    </a>
+    <a href="projects/photo-workflow-os/" class="demo-card">
+      <span class="demo-number">04</span>
+      <div class="demo-info">
+        <h3>Photo Workflow OS</h3>
+        <p>End-to-end photography business pipeline. Inquiry to delivery in a single kanban board.</p>
+        <span class="demo-badge">Flagship</span>
+      </div>
+      <span class="case-arrow">&rarr;</span>
+    </a>
+    <a href="projects/ai-bullet-journal/" class="demo-card">
+      <span class="demo-number">05</span>
+      <div class="demo-info">
+        <h3>AI Bullet Journal</h3>
+        <p>Chat-based planner that turns natural language into visual journal cards. Tasks, events, goals, reflections.</p>
+        <span class="demo-badge">Flagship</span>
+      </div>
+      <span class="case-arrow">&rarr;</span>
+    </a>
+    <a href="projects/meal-planner/" class="demo-card">
+      <span class="demo-number">06</span>
+      <div class="demo-info">
+        <h3>Meal Planner</h3>
+        <p>Type what's in your fridge, get 3 dinner ideas with full recipes. Big Green Egg mode included.</p>
+      </div>
+      <span class="case-arrow">&rarr;</span>
+    </a>
   </div>
 </section>
 
@@ -961,7 +1110,7 @@ Prospects <span class="arrow">-></span> FlowstateAI Pipeline</div>
   </div>
 </section>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
   // Case study toggle
   function toggleCase(card) {
     const detail = card.querySelector('.case-detail');
@@ -978,4 +1127,27 @@ Prospects <span class="arrow">-></span> FlowstateAI Pipeline</div>
 
   // Scroll reveal
   const observer = new IntersectionObserver((entries) => {
-    ent
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Theme toggle
+  var themeToggle = document.getElementById('themeToggle');
+  var savedTheme = localStorage.getItem('portfolio-theme');
+  if (savedTheme) {
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeToggle.textContent = savedTheme === 'dark' ? '\u2600' : '\u263E';
+  }
+  themeToggle.addEventListener('click', function() {
+    var current = document.documentElement.getAttribute('data-theme');
+    var next = current === 'dark' ? 'light' : (current === 'light' ? 'dark' : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'dark' : 'light'));
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('portfolio-theme', next);
+    themeToggle.textContent = next === 'dark' ? '\u2600' : '\u263E';
+  });
+</script>
